@@ -1,19 +1,18 @@
 package com.e_commerce.entity.product;
 
+import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Category {
+public class Category extends Timestamped {
     @Id
     private Integer id;
 

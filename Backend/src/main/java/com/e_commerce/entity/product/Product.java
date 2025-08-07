@@ -1,20 +1,19 @@
 package com.e_commerce.entity.product;
 
+import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Product {
+public class Product extends Timestamped {
     @Id
     private Integer id;
 
@@ -29,12 +28,6 @@ public class Product {
 
     @Column(name = "ImgMain")
     private String imgMain;
-
-    @Column(name = "CreatedDate", nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(name = "UpdatedDate", nullable = false)
-    private LocalDateTime updatedDate;
 
     @Column(name = "PriceBase", nullable = false)
     private BigDecimal priceBase;

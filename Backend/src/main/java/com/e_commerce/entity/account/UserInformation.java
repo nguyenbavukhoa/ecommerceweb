@@ -1,18 +1,17 @@
 package com.e_commerce.entity.account;
 
 import com.e_commerce.enums.Gender;
+import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class UserInformation {
+public class UserInformation extends Timestamped {
     @Id
     private Integer id;
 

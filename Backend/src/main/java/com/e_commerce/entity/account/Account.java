@@ -1,33 +1,31 @@
 package com.e_commerce.entity.account;
 
 import com.e_commerce.enums.AccountRole;
+import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Account{
+public class Account extends Timestamped {
     @Id
     private Integer id;
+
     @NotBlank(message = "Username cannot be blank")
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(name = "Username",nullable = false, unique = true, length = 100)
     private String username;
 
     @NotBlank(message = "Password cannot be blank")
-    @Column(nullable = false, length = 800)
+    @Column(name = "Password",nullable = false, length = 800)
     private String password;
-
-    @Column(name = "CreateTime", nullable = false, updatable = false)
-    private LocalDateTime createAt;
 
     @Column(name = "Status", nullable = false)
     private Boolean status;
@@ -40,6 +38,7 @@ public class Account{
     private AccountRole role;
 
     @OneToOne
-    @JoinColumn(name = "user_information_id", nullable = false)
+    @JoinColumn(name = "UserInformationId", nullable = false)
     private UserInformation userInformation;
+
 }
