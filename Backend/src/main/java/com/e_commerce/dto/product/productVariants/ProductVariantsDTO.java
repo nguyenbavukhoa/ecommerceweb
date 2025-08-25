@@ -5,20 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productVariantsDTO {
+public class ProductVariantsDTO {
     private Integer id;
 
     private Integer productId;
 
-    private String variantName;
-
-    private String variantValue;
-
-    private Double price;
+    private BigDecimal price;
 
     private Integer stock;
 }

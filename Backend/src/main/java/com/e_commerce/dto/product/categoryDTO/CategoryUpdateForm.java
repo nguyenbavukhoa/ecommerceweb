@@ -3,12 +3,14 @@ package com.e_commerce.dto.product.categoryDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class CategoryUpdateForm {
     @NotBlank(message = "Category id cannot be blank !!")
     private Integer id;

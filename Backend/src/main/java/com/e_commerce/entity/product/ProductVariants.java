@@ -2,9 +2,7 @@ package com.e_commerce.entity.product;
 
 import com.e_commerce.enums.ProductVariantsStatus;
 import com.e_commerce.orther.Timestamped;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -35,5 +33,6 @@ public class ProductVariants extends Timestamped {
     private String imgUrl;
 
     @Column(nullable = false,name = "Status")
+    @Enumerated(EnumType.STRING)
     private ProductVariantsStatus productVariantsStatus;
 }

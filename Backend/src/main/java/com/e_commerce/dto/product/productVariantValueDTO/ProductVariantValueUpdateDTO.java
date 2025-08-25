@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productVariantValueCreateDTO {
+public class ProductVariantValueUpdateDTO {
     private Integer quantity;
 }

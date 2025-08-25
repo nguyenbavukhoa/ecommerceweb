@@ -1,14 +1,14 @@
-package com.e_commerce.dto.product.productCategoryDTO;
+package com.e_commerce.dto.product.variantOptionsDTO;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class productCategoryDTO {
-    private Integer id;
-
+@Builder
+public class VariantOptionsUpdateDTO {
     private String name;
 }

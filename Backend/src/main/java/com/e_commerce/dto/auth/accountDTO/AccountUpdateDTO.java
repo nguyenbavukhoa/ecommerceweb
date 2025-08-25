@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AccountUpdateDTO {
     @NotNull(message = "Account ID is required")
     private Integer id;

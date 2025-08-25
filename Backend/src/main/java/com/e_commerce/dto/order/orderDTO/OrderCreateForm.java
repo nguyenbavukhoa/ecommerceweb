@@ -5,6 +5,7 @@ import com.e_commerce.dto.order.orderItemsDTO.OrderItemsCreateForm;
 import com.e_commerce.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class OrderCreateForm {
     @NotNull(message = "User ID cannot be null")
     private Integer userId;

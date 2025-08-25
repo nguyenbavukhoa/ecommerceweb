@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productUpdateDTO {
+public class ProductUpdateDTO {
     private String name;
 
     private MultipartFile image;

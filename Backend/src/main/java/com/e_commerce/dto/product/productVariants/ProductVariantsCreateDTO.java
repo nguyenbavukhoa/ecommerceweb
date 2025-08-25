@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productVariantsCreateDTO {
+public class ProductVariantsCreateDTO {
     @NotNull(message = "ProductId is required")
     private Integer productId;
 
@@ -31,6 +31,7 @@ public class productVariantsCreateDTO {
 
     @NotBlank(message = "Image URL is required")
     private String imgUrl;
+
     @NotNull(message = "Product variant status is required")
     private ProductVariantsStatus productVariantsStatus;
 }

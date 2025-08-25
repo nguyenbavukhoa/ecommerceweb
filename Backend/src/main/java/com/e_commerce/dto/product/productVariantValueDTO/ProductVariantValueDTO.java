@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productVariantValueDTO {
+public class ProductVariantValueDTO {
     private Integer id;
 
     private ProductVariants variantId;

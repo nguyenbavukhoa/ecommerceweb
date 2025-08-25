@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AccountDTO {
     private Integer id;
     private String username;

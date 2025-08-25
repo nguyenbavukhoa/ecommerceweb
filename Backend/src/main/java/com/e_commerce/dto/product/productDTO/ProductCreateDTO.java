@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productCreateDTO {
+public class ProductCreateDTO {
     @NotBlank(message = "Product name is required")
     @Size(max = 1000, message = "Product name cannot exceed 1000 characters")
     private String name;

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productVariantsUpdateDTO {
+public class ProductVariantsUpdateDTO {
     private BigDecimal price;
 
     private Integer stockQuantity;
