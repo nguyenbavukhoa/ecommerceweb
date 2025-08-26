@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class CategoryUpdateForm {
-    @NotBlank(message = "Category id cannot be blank !!")
-    private Integer id;
-
     @NotBlank(message = "Category name cannot be blank !!")
     @Size(min = 3, max = 100, message = "Category name must be between 3 and 100 characters")
     private String name;

@@ -26,5 +26,5 @@ public class OrderCreateForm {
     @NotNull(message = "Total price cannot be null")
     private BigDecimal totalPrice;
 
-    List<OrderItemsCreateForm> listOrderItems;
+    private List<OrderItemsCreateForm> listOrderItems;
 }

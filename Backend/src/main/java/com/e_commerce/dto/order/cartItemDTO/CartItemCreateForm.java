@@ -3,12 +3,14 @@ package com.e_commerce.dto.order.cartItemDTO;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class CartItemCreateForm {
     @NotNull(message = "CartId cannot be null")
     private Integer cartId;
