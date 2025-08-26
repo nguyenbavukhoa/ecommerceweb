@@ -15,7 +15,7 @@ public class ProductVariantsValueMapper {
                 .build();
     }
 
-    public ProductVariantValues convertDTOToEntity(ProductVariantValueCreateDTO productVariantValueCreateDTO) {
+    public ProductVariantValues convertCreateDTOToEntity(ProductVariantValueCreateDTO productVariantValueCreateDTO) {
         return ProductVariantValues.builder()
                 .quantity(productVariantValueCreateDTO.getQuantity())
                 .build();

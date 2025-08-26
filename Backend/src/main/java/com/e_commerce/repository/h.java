@@ -1,4 +1,0 @@
-package com.e_commerce.repository;
-
-public class h {
-}
