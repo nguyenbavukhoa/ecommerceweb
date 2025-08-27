@@ -1,5 +1,6 @@
 package com.e_commerce.dto.product.productVariants;
 
+import com.e_commerce.entity.product.VariantOptions;
 import com.e_commerce.enums.ProductVariantsStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -29,9 +30,12 @@ public class ProductVariantsCreateDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal price;
 
-    @NotBlank(message = "Image URL is required")
-    private String imgUrl;
+//    @NotBlank(message = "Image URL is required")
+//    private String imgUrl;
 
     @NotNull(message = "Product variant status is required")
-    private ProductVariantsStatus productVariantsStatus;
+    private String productVariantsStatus;
+
+    @NotNull(message = "VariantOptionId is required")
+    private Integer variantOptionId;
 }

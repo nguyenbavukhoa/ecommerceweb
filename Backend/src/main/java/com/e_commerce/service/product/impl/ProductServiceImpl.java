@@ -8,6 +8,7 @@ import com.e_commerce.entity.product.Product;
 import com.e_commerce.mapper.product.ProductMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
+import com.e_commerce.service.product.ProductCategoriesService;
 import com.e_commerce.service.product.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ProductCategoriesService productCategoriesService;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -33,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO createProduct(ProductCreateDTO productCreateDTO) {
         Product product = productMapper.covertCreateDTOToEntity(productCreateDTO);
         product.setId(IdGenerator.getGenerationId());
+        product.setProductCategory(productCategoriesService.getProductCategoryEntityById(productCreateDTO.getProductCategoryId()));
         return productMapper.covertEntityToDTO(productRepository.save(product));
     }
 

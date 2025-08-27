@@ -49,7 +49,7 @@ public class ProductMapper {
     public Product covertCreateDTOToEntity(ProductCreateDTO productCreateDTO) {
         return Product.builder()
                 .name(productCreateDTO.getName())
-                .isActive(productCreateDTO.isActive())
+                .isActive(false)
                 .priceBase(productCreateDTO.getPriceBase())
                 .description(productCreateDTO.getDescription())
 //                .imgMain(productCreateDTO.getImgMain())

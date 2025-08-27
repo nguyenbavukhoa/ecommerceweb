@@ -29,8 +29,8 @@ public class ProductCreateDTO {
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
 
-    @NotNull(message = "Image is required")
-    private MultipartFile imgMain;
+//    @NotNull(message = "Image is required")
+//    private MultipartFile imgMain;
 
     @NotNull(message = "Base price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Base price must be greater than 0")

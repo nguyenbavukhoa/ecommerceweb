@@ -4,6 +4,7 @@ import com.e_commerce.dto.product.productVariants.ProductVariantsCreateDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsUpdateDTO;
 import com.e_commerce.entity.product.ProductVariants;
+import com.e_commerce.enums.ProductVariantsStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -26,8 +27,8 @@ public class ProductVariantsMapper {
                 .price(productVariantsCreateDTO.getPrice())
                 .stockQuantity(productVariantsCreateDTO.getStockQuantity())
                 .sku(productVariantsCreateDTO.getSku())
-                .imgUrl(productVariantsCreateDTO.getImgUrl())
-                .productVariantsStatus(productVariantsCreateDTO.getProductVariantsStatus())
+//                .imgUrl(productVariantsCreateDTO.getImgUrl())
+                .productVariantsStatus(ProductVariantsStatus.valueOf(productVariantsCreateDTO.getProductVariantsStatus()))
                 .build();
     }
 

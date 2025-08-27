@@ -7,7 +7,9 @@ import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.mapper.product.ProductVariantsMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductVariantRepository;
+import com.e_commerce.service.product.ProductService;
 import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.VariantOptionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class ProductVariantsServiceImpl implements ProductVariantsService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantsMapper productVariantsMapper;
+    private final ProductService productService;
+    private final VariantOptionsService variantOptionsService;
 
     @Override
     public ProductVariants getProductVariantEntityById(Integer id) {
@@ -27,6 +31,8 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
     public ProductVariantsDTO createProductVariant(ProductVariantsCreateDTO productVariantsCreateDTO) {
         ProductVariants productVariants = productVariantsMapper.covertCreateDTOToEntity(productVariantsCreateDTO);
         productVariants.setId(IdGenerator.getGenerationId());
+        productVariants.setProductId(productService.getProductEntityById(productVariantsCreateDTO.getProductId()));
+        productVariants.setVariantOption(variantOptionsService.getVariantOptionEntityById(productVariantsCreateDTO.getVariantOptionId()));
         return productVariantsMapper.covertEntityToDTO(productVariantRepository.save(productVariants));
     }
 
