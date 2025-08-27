@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -25,6 +26,8 @@ public class OrderCreateForm {
 
     @NotNull(message = "Total price cannot be null")
     private BigDecimal totalPrice;
+
+    private LocalDateTime orderTime;
 
     private List<OrderItemsCreateForm> listOrderItems;
 }

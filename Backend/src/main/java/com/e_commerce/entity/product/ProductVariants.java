@@ -17,8 +17,9 @@ public class ProductVariants extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(nullable = false,name = "ProductId")
-    private Integer productId;
+    @ManyToOne
+    @JoinColumn(nullable = false,name = "ProductId")
+    private Product productId;
 
     @Column(nullable = false,name = "SKU")
     private String sku;
@@ -35,4 +36,8 @@ public class ProductVariants extends Timestamped {
     @Column(nullable = false,name = "Status")
     @Enumerated(EnumType.STRING)
     private ProductVariantsStatus productVariantsStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "VariantOptionId", nullable = false)
+    private VariantOptions variantOption;
 }

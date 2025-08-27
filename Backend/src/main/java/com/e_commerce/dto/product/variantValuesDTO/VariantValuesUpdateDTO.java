@@ -14,5 +14,7 @@ import java.math.BigDecimal;
 public class VariantValuesUpdateDTO {
     private String value;
 
+    private int stockQuantity;
+
     private BigDecimal price;
 }

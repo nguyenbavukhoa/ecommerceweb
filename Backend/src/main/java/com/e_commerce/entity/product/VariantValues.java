@@ -22,6 +22,9 @@ public class VariantValues extends Timestamped {
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
 
+    @Column(name = "StockQuantity", nullable = false, columnDefinition = "int default 0")
+    private int stockQuantity;
+
     @ManyToOne
     @JoinColumn(name = "VariantOptionsId", nullable = false)
     private VariantOptions variantOptions;

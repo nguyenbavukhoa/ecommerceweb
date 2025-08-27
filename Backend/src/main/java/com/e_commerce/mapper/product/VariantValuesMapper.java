@@ -15,6 +15,7 @@ public class VariantValuesMapper {
                 .value(variantValues.getValue())
                 .price(variantValues.getPrice())
                 .variantOptions(variantValues.getVariantOptions())
+                .stockQuantity(variantValues.getStockQuantity())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class VariantValuesMapper {
         return VariantValues.builder()
                 .value(variantValuesCreateDTO.getValue())
                 .price(variantValuesCreateDTO.getPrice())
+                .stockQuantity(variantValuesCreateDTO.getStockQuantity())
                 .build();
     }
 
@@ -29,6 +31,7 @@ public class VariantValuesMapper {
         return VariantValues.builder()
                 .value(variantValuesUpdateDTO.getValue())
                 .price(variantValuesUpdateDTO.getPrice())
+                .stockQuantity(variantValuesUpdateDTO.getStockQuantity())
                 .build();
     }
 

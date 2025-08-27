@@ -30,10 +30,10 @@ public class Orders extends Timestamped {
     private OrderStatus orderStatus;
 
     @Column(name = "OrderTime", nullable = false)
-    private LocalDateTime orderTime = LocalDateTime.now();;
+    private LocalDateTime orderTime;
 
     private BigDecimal totalPrice;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "orderId")
     private List<OrderItems> orderItems;
 }

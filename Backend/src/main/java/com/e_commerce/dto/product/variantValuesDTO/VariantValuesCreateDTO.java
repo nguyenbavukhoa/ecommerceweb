@@ -22,6 +22,9 @@ public class VariantValuesCreateDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal price;
 
+    @NotNull(message = "StockQuantity is required")
+    private Integer stockQuantity;
+
     @NotNull(message = "VariantOptionsId is required")
     private Integer variantOptionsId;
 }

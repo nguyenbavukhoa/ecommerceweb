@@ -19,4 +19,6 @@ public class ProductVariantsDTO {
     private BigDecimal price;
 
     private Integer stock;
+
+    private String sku;
 }

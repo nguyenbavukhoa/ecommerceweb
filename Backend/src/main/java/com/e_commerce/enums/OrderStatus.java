@@ -1,9 +1,11 @@
 package com.e_commerce.enums;
 
 public enum OrderStatus {
-    PENDING_APPROVAL,
-    APPROVED,
+    PLACED,
+    CONFIRMED,
+    IN_PROGRESS,
     DELIVERING,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
+    REJECTED
 }

@@ -3,9 +3,11 @@ package com.e_commerce.mapper.order;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.entity.order.Orders;
+import com.e_commerce.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +26,10 @@ public class OrdersMapper {
 
     public Orders convertCreateDTOToEntity(OrderCreateForm orderDTO) {
         return Orders.builder()
-                .orderStatus(orderDTO.getOrderStatus())
+                .orderStatus(OrderStatus.CONFIRMED)
                 .totalPrice(orderDTO.getTotalPrice())
                 .orderItems(OrderItemMapper.convertCreateDTOListToEntityList(orderDTO.getListOrderItems()))
+                .orderTime(LocalDateTime.now())
                 .build();
     }
 
