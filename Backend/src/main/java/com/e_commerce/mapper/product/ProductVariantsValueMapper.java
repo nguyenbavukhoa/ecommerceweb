@@ -11,6 +11,9 @@ import java.util.List;
 public class ProductVariantsValueMapper {
     public ProductVariantValueDTO convertEntityToDTO(ProductVariantValues productVariantsValue) {
         return ProductVariantValueDTO.builder()
+                .id(productVariantsValue.getId())
+                .variantId(productVariantsValue.getVariantId())
+                .valueId(productVariantsValue.getValueId())
                 .quantity(productVariantsValue.getQuantity())
                 .build();
     }

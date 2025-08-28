@@ -10,6 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(
+        name = "ProductVariantValues",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"VariantId", "ValueId"})
+        }
+)
 public class ProductVariantValues extends Timestamped {
     @Id
     private Integer id;

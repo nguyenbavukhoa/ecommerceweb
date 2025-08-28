@@ -6,9 +6,10 @@ import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpda
 import com.e_commerce.entity.product.ProductVariantValues;
 import com.e_commerce.mapper.product.ProductVariantsValueMapper;
 import com.e_commerce.orther.IdGenerator;
-import com.e_commerce.repository.product.ProductVariantRepository;
 import com.e_commerce.repository.product.ProductVariantValuesRepository;
+import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.service.product.ProductVariantsValuesService;
+import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesService {
     private final ProductVariantsValueMapper productVariantsValueMapper;
     private final ProductVariantValuesRepository productVariantValuesRepository;
+    private final VariantValuesService variantValuesService;
+    private final ProductVariantsService productVariantsService;
 
     @Override
     public ProductVariantValues getProductVariantValueEntityById(Integer id) {
@@ -28,6 +31,8 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     public ProductVariantValueDTO createProductVariantValue(ProductVariantValueCreateDTO productVariantValueCreateDTO) {
         ProductVariantValues productVariantValues = productVariantsValueMapper.convertCreateDTOToEntity(productVariantValueCreateDTO);
         productVariantValues.setId(IdGenerator.getGenerationId());
+        productVariantValues.setVariantId(productVariantsService.getProductVariantEntityById(productVariantValueCreateDTO.getVariantId()));
+        productVariantValues.setValueId(variantValuesService.getVariantValueEntityById(productVariantValueCreateDTO.getValueId()));
         return productVariantsValueMapper.convertEntityToDTO(productVariantValuesRepository.save(productVariantValues));
     }
 
