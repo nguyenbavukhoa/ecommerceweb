@@ -6,8 +6,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -15,7 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Account extends Timestamped {
+public class Account extends Timestamped implements UserDetails {
     @Id
     private Integer id;
 
@@ -28,10 +33,10 @@ public class Account extends Timestamped {
     private String password;
 
     @Column(name = "Status", nullable = false)
-    private Boolean status;
+    private Boolean status = true;
 
     @Column(name = "Active", nullable = false)
-    private Boolean active = false;
+    private Boolean active = true;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Role", nullable = false)
@@ -41,4 +46,39 @@ public class Account extends Timestamped {
     @JoinColumn(name = "UserInformationId", nullable = false)
     private UserInformation userInformation;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return active;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status;
+    }
 }
