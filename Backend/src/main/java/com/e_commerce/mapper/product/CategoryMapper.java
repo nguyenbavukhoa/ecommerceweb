@@ -7,6 +7,7 @@ import com.e_commerce.entity.product.Category;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CategoryMapper {
@@ -31,6 +32,6 @@ public class CategoryMapper {
     public List<CategoryDTO> convertPageToListDTO(List<Category> categoryList) {
         return categoryList.stream()
                 .map(this::convertEntityToDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 }
