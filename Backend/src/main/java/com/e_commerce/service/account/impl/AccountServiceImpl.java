@@ -10,6 +10,7 @@ import com.e_commerce.mapper.account.AccountMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.account.AccountRepository;
 import com.e_commerce.service.account.AccountService;
+import com.e_commerce.service.account.UserInformationService;
 import com.e_commerce.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
+    private final UserInformationService userInformationService;
 
     @Transactional(readOnly = true)
     @Override
@@ -65,11 +67,15 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountMapper.convertCreateDTOToEntity(registrationForm);
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
-        return accountMapper.convertEntityToDTO(accountRepository.save(account));
+        account.setRole(AccountRole.USER);
+
+        account = accountRepository.save(account);
+        userInformationService.createUserInfo(account.getId(), registrationForm.getFullName());
+        return accountMapper.convertEntityToDTO(account);
     }
 
     @Override
-    public Account getAccountById(int accountId) {
+    public Account getAccountEntityById(int accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
     }

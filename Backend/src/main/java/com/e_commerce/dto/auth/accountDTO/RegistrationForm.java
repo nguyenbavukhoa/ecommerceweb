@@ -17,7 +17,7 @@ public class RegistrationForm {
 
     @NotBlank(message = "Display name is required")
     @Size(min = 2, max = 50, message = "Name must be 2-50 characters")
-    private String displayName;
+    private String fullName;
 
     @NotBlank(message = "Password must not be blank")
     @Size(min = 8, message = "Password must be at least 8 characters long")

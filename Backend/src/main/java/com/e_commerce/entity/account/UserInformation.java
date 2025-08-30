@@ -19,7 +19,7 @@ public class UserInformation extends Timestamped {
     private String address;
 
     @Column(name = "Fullname")
-    private String fullname;
+    private String fullName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Gender", length = 6)
@@ -28,6 +28,7 @@ public class UserInformation extends Timestamped {
     @Column(name = "PhoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
-    @OneToOne(mappedBy = "userInformation")
+    @OneToOne
+    @JoinColumn(name = "AccountId", nullable = false)
     private Account account;
 }

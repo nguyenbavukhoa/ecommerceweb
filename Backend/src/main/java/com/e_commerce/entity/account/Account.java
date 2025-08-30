@@ -29,9 +29,6 @@ public class Account extends Timestamped implements UserDetails {
     @Email(message = "Invalid email format")
     private String email;
 
-    @Column(name = "Displayname" , nullable = false, length = 150)
-    private String displayName;
-
     @NotBlank(message = "Password cannot be blank")
     @Column(name = "Password",nullable = false, length = 800)
     @Size(min = 8, message = "Password must be at least 8 characters long")
@@ -47,8 +44,7 @@ public class Account extends Timestamped implements UserDetails {
     @Column(name = "Role", nullable = false)
     private AccountRole role;
 
-    @OneToOne
-    @JoinColumn(name = "UserInformationId", nullable = false)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserInformation userInformation;
 
     @Override
