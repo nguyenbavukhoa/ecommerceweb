@@ -9,21 +9,16 @@ import com.e_commerce.repository.account.UserInformationRepository;
 import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.account.UserInformationService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserInformationServiceImpl implements UserInformationService {
     private final UserInformationMapper userInformationMapper;
     private final UserInformationRepository userInformationRepository;
 
-    @Override
-    public UserInfoDTO createUserInfo(int accountId, String fullName) {
-        UserInformation userInformation = new UserInformation();
-        userInformation.setId(IdGenerator.getGenerationId());
-        userInformation.setFullName(fullName);
-        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
-    }
 
     @Override
     public UserInfoDTO getUserInfoByAccountId(int accountId) {

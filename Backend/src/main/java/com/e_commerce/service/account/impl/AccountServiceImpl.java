@@ -5,15 +5,18 @@ import com.e_commerce.dto.auth.accountDTO.AuthenticationDTO;
 import com.e_commerce.dto.auth.accountDTO.LoginForm;
 import com.e_commerce.dto.auth.accountDTO.RegistrationForm;
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.enums.AccountRole;
 import com.e_commerce.mapper.account.AccountMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.account.AccountRepository;
+import com.e_commerce.repository.account.UserInformationRepository;
 import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.account.UserInformationService;
 import com.e_commerce.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
@@ -31,7 +33,16 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
-    private final UserInformationService userInformationService;
+    private final UserInformationRepository userInformationRepository;
+
+
+    public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper, AccountRepository accountRepository, UserInformationRepository userInformationRepository) {
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.accountMapper = accountMapper;
+        this.accountRepository = accountRepository;
+        this.userInformationRepository = userInformationRepository;
+    }
 
     @Transactional(readOnly = true)
     @Override
@@ -74,7 +85,14 @@ public class AccountServiceImpl implements AccountService {
         account.setRole(AccountRole.USER);
 
         account = accountRepository.save(account);
-        userInformationService.createUserInfo(account.getId(), registrationForm.getFullName());
+        log.info("Created new account: {}", account);
+
+        UserInformation userInformation = new UserInformation();
+        userInformation.setId(IdGenerator.getGenerationId());
+        userInformation.setAccount(account);
+        userInformation.setFullName(registrationForm.getFullName());
+        userInformationRepository.save(userInformation);
+
         return accountMapper.convertEntityToDTO(account);
     }
 

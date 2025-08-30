@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserInformationService {
-    UserInfoDTO createUserInfo(int accountId, String fullName);
 
     UserInfoDTO getUserInfoByAccountId(int accountId);
 
