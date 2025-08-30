@@ -34,6 +34,6 @@ public class Orders extends Timestamped {
 
     private BigDecimal totalPrice;
 
-    @OneToMany(mappedBy = "orderId")
+    @OneToMany(mappedBy = "order")
     private List<OrderItems> orderItems;
 }

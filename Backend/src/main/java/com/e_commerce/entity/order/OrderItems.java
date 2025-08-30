@@ -17,7 +17,7 @@ public class OrderItems extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "OrderId", nullable = false)
-    private Orders orderId;
+    private Orders order;
 
     @ManyToOne
     @JoinColumn(name = "ProductVariantsId", nullable = false)

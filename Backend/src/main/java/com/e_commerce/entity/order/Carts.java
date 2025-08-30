@@ -21,9 +21,9 @@ public class Carts extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "AccountId", nullable = false)
-    private Account userId;
+    private Account account;
 
-    @OneToMany(mappedBy = "cartId")
+    @OneToMany(mappedBy = "cart")
     List<CartItems> cartItems;
 
     @Column(name = "Note")

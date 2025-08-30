@@ -6,6 +6,8 @@ import com.e_commerce.dto.order.cartItemDTO.CartItemUpdateForm;
 import com.e_commerce.entity.order.CartItems;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface CartItemsService {
     CartItems getCartItemsById(Integer id);
@@ -14,4 +16,9 @@ public interface CartItemsService {
 
     CartItemDTO updateCartItems(Integer id, CartItemUpdateForm cartItemUpdateForm);
 
+    List<CartItemDTO> getCartItemsByAccountId(Integer accountId);
+
+    void deleteCartItems(Integer id, Integer productVariantId);
+
+    void deleteAllCartItemsByAccountId(Integer accountId);
 }

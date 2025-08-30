@@ -17,11 +17,11 @@ public class CartItems extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "CardId", nullable = false)
-    private Carts cartId;
+    private Carts cart;
 
     @ManyToOne
     @JoinColumn(name = "ProductVariantsId", nullable = false)
-    private ProductVariants productVariantsId;
+    private ProductVariants productVariant;
 
     @Column(name = "Quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
