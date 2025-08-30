@@ -3,14 +3,14 @@ package com.e_commerce.entity.account;
 import com.e_commerce.enums.AccountRole;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,14 +26,19 @@ public class Account extends Timestamped implements UserDetails {
 
     @NotBlank(message = "Username cannot be blank")
     @Column(name = "Username",nullable = false, unique = true, length = 100)
-    private String username;
+    @Email(message = "Invalid email format")
+    private String email;
+
+    @Column(name = "Displayname" , nullable = false, length = 150)
+    private String displayName;
 
     @NotBlank(message = "Password cannot be blank")
     @Column(name = "Password",nullable = false, length = 800)
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
     @Column(name = "Status", nullable = false)
-    private Boolean status = true;
+    private Boolean status = false;
 
     @Column(name = "Active", nullable = false)
     private Boolean active = true;
@@ -54,7 +59,7 @@ public class Account extends Timestamped implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 @Builder
 public class AccountDTO {
     private Integer id;
-    private String username;
+    private String email;
+    private String displayName;
     private LocalDateTime createAt;
     private Boolean status;
     private String role;

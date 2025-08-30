@@ -15,9 +15,6 @@ public class UserInformation extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Email", unique = true)
-    private String email;
-
     @Column(name = "Address")
     private String address;
 

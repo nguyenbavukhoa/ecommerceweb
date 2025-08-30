@@ -11,7 +11,8 @@ public class AccountMapper {
     public AccountDTO convertEntityToDTO(Account account) {
         return AccountDTO.builder()
                 .id(account.getId())
-                .username(account.getUsername())
+                .email(account.getUsername())
+                .displayName(account.getDisplayName())
                 .createAt(account.getCreatedAt())
                 .status(account.getStatus())
                 .role(account.getRole().name())
@@ -20,8 +21,9 @@ public class AccountMapper {
 
     public Account convertCreateDTOToEntity(RegistrationForm registrationForm) {
         return Account.builder()
-                .username(registrationForm.getUsername())
+                .email(registrationForm.getEmail())
                 .role((AccountRole.valueOf(registrationForm.getRole())))
+                .displayName(registrationForm.getDisplayName())
                 .status(false)
                 .active(true)
                 .build();

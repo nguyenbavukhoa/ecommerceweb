@@ -11,13 +11,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class RegistrationForm {
-
-    @NotBlank(message = "Username must not be blank")
+    @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    private String username;
+    private String email;
+
+    @NotBlank(message = "Display name is required")
+    @Size(min = 2, max = 50, message = "Name must be 2-50 characters")
+    private String displayName;
 
     @NotBlank(message = "Password must not be blank")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
     @NotNull(message = "Role is required")
