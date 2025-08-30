@@ -85,7 +85,7 @@ public class JwtUtil {
         }
     }
 
-    private String extractUsername(String token, boolean isAccessToken) {
+    public String extractUsername(String token, boolean isAccessToken) {
         return extractClaims(token, isAccessToken, Claims::getSubject);
     }
 

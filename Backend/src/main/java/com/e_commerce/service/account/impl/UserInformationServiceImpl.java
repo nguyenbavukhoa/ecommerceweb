@@ -16,14 +16,12 @@ import org.springframework.stereotype.Service;
 public class UserInformationServiceImpl implements UserInformationService {
     private final UserInformationMapper userInformationMapper;
     private final UserInformationRepository userInformationRepository;
-    private final AccountService accountService;
 
     @Override
     public UserInfoDTO createUserInfo(int accountId, String fullName) {
         UserInformation userInformation = new UserInformation();
         userInformation.setId(IdGenerator.getGenerationId());
         userInformation.setFullName(fullName);
-        userInformation.setAccount(accountService.getAccountEntityById(accountId));
         return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
     }
 

@@ -13,6 +13,9 @@ import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.account.UserInformationService;
 import com.e_commerce.util.JwtUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -84,5 +88,19 @@ public class AccountServiceImpl implements AccountService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Account not found with email: " + email));
+    }
+
+    @Override
+    public Account getAccountAuth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            // viet code xu ly loi o day
+        }
+
+        Account account = (Account) authentication.getPrincipal();
+
+        log.info("User principal: {}", account);
+
+        return account;
     }
 }
