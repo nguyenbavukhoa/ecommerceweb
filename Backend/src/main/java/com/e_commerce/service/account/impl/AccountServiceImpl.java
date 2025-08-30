@@ -33,15 +33,15 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
-    private final UserInformationRepository userInformationRepository;
+    private final UserInformationService userInformationService;
 
 
-    public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper, AccountRepository accountRepository, UserInformationRepository userInformationRepository) {
+    public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper, AccountRepository accountRepository, UserInformationService userInformationService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
         this.accountRepository = accountRepository;
-        this.userInformationRepository = userInformationRepository;
+        this.userInformationService = userInformationService;
     }
 
     @Transactional(readOnly = true)
@@ -87,13 +87,10 @@ public class AccountServiceImpl implements AccountService {
         account = accountRepository.save(account);
         log.info("Created new account: {}", account);
 
-        UserInformation userInformation = new UserInformation();
-        userInformation.setId(IdGenerator.getGenerationId());
-        userInformation.setAccount(account);
-        userInformation.setFullName(registrationForm.getFullName());
-        userInformationRepository.save(userInformation);
+        userInformationService.createUserInfo(account, registrationForm.getFullName());
 
-        return accountMapper.convertEntityToDTO(account);
+
+        return accountMapper.convertEntityToDTO(account, registrationForm.getFullName());
     }
 
     @Override

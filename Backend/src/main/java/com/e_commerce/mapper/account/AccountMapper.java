@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 public class AccountMapper {
     private final UserInformationMapper userInformationMapper;
 
-    public AccountDTO convertEntityToDTO(Account account) {
+    public AccountDTO convertEntityToDTO(Account account, String fullName) {
         return AccountDTO.builder()
                 .id(account.getId())
                 .email(account.getUsername())
-                .fullName(account.getUserInformation().getFullName())
+                .fullName(fullName)
                 .createAt(account.getCreatedAt())
                 .status(account.getStatus())
                 .role(account.getRole().name())

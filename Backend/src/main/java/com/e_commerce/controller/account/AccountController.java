@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,16 +21,14 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@ModelAttribute LoginForm loginForm, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@RequestBody LoginForm loginForm, HttpServletRequest request){
         AuthenticationDTO login = accountService.signIn(loginForm);
         return ResponseEntity.ok(new ApiResponse<>(true,"Login successfully" ,login ,null ,request.getRequestURI()));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AccountDTO>> register(@ModelAttribute RegistrationForm registrationForm, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AccountDTO>> register(@RequestBody RegistrationForm registrationForm, HttpServletRequest request) {
         AccountDTO register = accountService.createAccount(registrationForm);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 }
