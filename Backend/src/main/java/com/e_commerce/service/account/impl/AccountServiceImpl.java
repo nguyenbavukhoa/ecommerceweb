@@ -112,10 +112,6 @@ public class AccountServiceImpl implements AccountService {
             // viet code xu ly loi o day
         }
 
-        Account account = (Account) authentication.getPrincipal();
-
-        log.info("User principal: {}", account);
-
-        return account;
+        return  (Account) authentication.getPrincipal();
     }
 }

@@ -31,27 +31,22 @@ public class CartsServiceImpl implements CartsService {
     public CartDTO createCarts(CartCreateForm cartCreateForm) {
         Account account = accountService.getAccountEntityById(cartCreateForm.getUserId());
 
-        Optional<Carts> existingCart = cartsRepository.findByAccountId(account.getId());
-        if(existingCart.isPresent()) {
-            return cartsMapper.convertEntityToDTO(existingCart.get());
-        }
-
         Carts carts = cartsMapper.convertCreateDTOToEntity(cartCreateForm);
         carts.setId(IdGenerator.getGenerationId());
         carts.setAccount(account);
+
         return cartsMapper.convertEntityToDTO(cartsRepository.save(carts));
     }
 
     @Override
     public CartDTO getOrCreateCartForUser(Integer userId) {
-        Optional<Carts> existingCart = cartsRepository.findByAccountId(userId);
-        if(existingCart.isPresent()) {
-            return cartsMapper.convertEntityToDTO(existingCart.get());
-        }
-
-        CartCreateForm cartCreateForm = new CartCreateForm();
-        cartCreateForm.setUserId(userId);
-        return createCarts(cartCreateForm);
+        return cartsRepository.findByAccountId(userId)
+                .map(cartsMapper::convertEntityToDTO)
+                .orElseGet(() -> {
+                    CartCreateForm cartCreateForm = new CartCreateForm();
+                    cartCreateForm.setUserId(userId);
+                    return createCarts(cartCreateForm);
+                });
     }
 
 

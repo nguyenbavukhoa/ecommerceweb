@@ -4,6 +4,7 @@ import com.e_commerce.dto.order.cartDTO.CartDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemCreateForm;
 import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemUpdateForm;
+import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.product.ProductVariants;
@@ -11,6 +12,7 @@ import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.mapper.order.CartItemMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.CartItemsRepository;
+import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.product.ProductVariantsService;
@@ -30,6 +32,7 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final ProductVariantsService productVariantsService;
     private final ProductVariantsValuesService productVariantsValuesService;
     private final VariantValuesService variantValuesService;
+    private final AccountService accountService;
 
     @Override
     public CartItems getCartItemsById(Integer id) {
@@ -39,11 +42,13 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
+        Account account = accountService.getAccountAuth();
+
         if(cartItemCreateForm.getQuantity() <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
-        CartDTO cartDTO = cartsService.getOrCreateCartForUser(cartItemCreateForm.getAccountId());
+        CartDTO cartDTO = cartsService.getOrCreateCartForUser(account.getId());
         Carts carts = cartsService.getCartsEntityById(cartDTO.getId());
 
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());

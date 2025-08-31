@@ -38,6 +38,6 @@ public class ProductVariants extends Timestamped {
     private ProductVariantsStatus productVariantsStatus;
 
     @ManyToOne
-    @JoinColumn(name = "VariantOptionId", nullable = false)
+    @JoinColumn(name = "VariantOptionId")
     private VariantOptions variantOption;
 }

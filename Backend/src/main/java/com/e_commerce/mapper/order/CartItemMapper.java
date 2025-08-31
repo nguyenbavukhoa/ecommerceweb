@@ -31,7 +31,6 @@ public class CartItemMapper {
 
     public CartItemCreateForm convertEntityToCreateDTO(CartItems cartItem) {
         return CartItemCreateForm.builder()
-                .accountId(cartItem.getCart().getAccount().getId())
                 .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
                 .build();

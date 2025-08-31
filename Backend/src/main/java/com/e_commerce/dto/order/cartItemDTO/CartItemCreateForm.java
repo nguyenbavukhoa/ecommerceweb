@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CartItemCreateForm {
-    @NotNull(message = "CartId cannot be null")
-    private Integer accountId;
-
     @NotNull(message = "ProductVariantsId cannot be null")
     private Integer productVariantsId;
 

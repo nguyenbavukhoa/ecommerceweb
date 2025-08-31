@@ -21,7 +21,7 @@ public class ProductVariantValues extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "ValueId", nullable = false)
+    @JoinColumn(name = "ValueId")
     private VariantValues variantValues;
 
     @ManyToOne
