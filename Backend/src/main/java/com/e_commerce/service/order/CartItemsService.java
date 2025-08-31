@@ -12,7 +12,7 @@ import java.util.List;
 public interface CartItemsService {
     CartItems getCartItemsById(Integer id);
 
-    CartItemDTO createCartItems(CartItemCreateForm cartItemCreateForm);
+    CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm);
 
     CartItemDTO updateCartItems(Integer id, CartItemUpdateForm cartItemUpdateForm);
 

@@ -41,4 +41,18 @@ public class CartsServiceImpl implements CartsService {
         carts.setAccount(account);
         return cartsMapper.convertEntityToDTO(cartsRepository.save(carts));
     }
+
+    @Override
+    public CartDTO getOrCreateCartForUser(Integer userId) {
+        Optional<Carts> existingCart = cartsRepository.findByAccountId(userId);
+        if(existingCart.isPresent()) {
+            return cartsMapper.convertEntityToDTO(existingCart.get());
+        }
+
+        CartCreateForm cartCreateForm = new CartCreateForm();
+        cartCreateForm.setUserId(userId);
+        return createCarts(cartCreateForm);
+    }
+
+
 }

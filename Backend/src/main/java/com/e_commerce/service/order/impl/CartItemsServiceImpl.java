@@ -1,17 +1,21 @@
 package com.e_commerce.service.order.impl;
 
+import com.e_commerce.dto.order.cartDTO.CartDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemCreateForm;
 import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemUpdateForm;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.product.ProductVariants;
+import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.mapper.order.CartItemMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.CartItemsRepository;
 import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.ProductVariantsValuesService;
+import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +28,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final CartItemsRepository cartItemsRepository;
     private final CartsService cartsService;
     private final ProductVariantsService productVariantsService;
+    private final ProductVariantsValuesService productVariantsValuesService;
+    private final VariantValuesService variantValuesService;
 
     @Override
     public CartItems getCartItemsById(Integer id) {
@@ -32,27 +38,57 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public CartItemDTO createCartItems(CartItemCreateForm cartItemCreateForm) {
-        Carts carts = cartsService.getCartsEntityById(cartItemCreateForm.getCartId());
-
-        ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
-
-        CartItems existingCartItem = cartItemsRepository.findByCartIdAndProductVariantId(carts.getId(), productVariants.getId()).orElse(null);
-
-        if (existingCartItem != null) {
-            existingCartItem.setQuantity(existingCartItem.getQuantity() + cartItemCreateForm.getQuantity());
-            return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(existingCartItem));
-        }
-
+    public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
         if(cartItemCreateForm.getQuantity() <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
+
+        CartDTO cartDTO = cartsService.getOrCreateCartForUser(cartItemCreateForm.getAccountId());
+        Carts carts = cartsService.getCartsEntityById(cartDTO.getId());
+
+        ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
+
+        VariantValues variantValues = cartItemCreateForm.getVariantValuesId() != null
+                ? variantValuesService.getVariantValueEntityById(cartItemCreateForm.getVariantValuesId())
+                : null;
+
+
+        CartItems existingCartItem = cartItemsRepository.findByCartIdAndProductVariantIdAndVariantValueId(
+                carts.getId(),
+                productVariants.getId(),
+                variantValues != null ? variantValues.getId() : null
+        ).orElse(null);
+
+        int existingQuantity = existingCartItem != null ? existingCartItem.getQuantity() : 0;
+        int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
+
+        boolean available = variantValues != null
+                ? productVariantsValuesService.isVariantValueAvailable(
+                    productVariants.getId(),
+                    variantValues.getId(),
+                    totalRequestedQuantity
+            )
+                : productVariantsValuesService.checkProductVariantAvailability(
+                    productVariants.getId(),
+                    totalRequestedQuantity
+            );
+
+        if(!available) {
+            // viet lai exception
+        }
+
+        if (existingCartItem != null) {
+            existingCartItem.setQuantity(totalRequestedQuantity);
+            return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(existingCartItem));
+        }
+
 
         CartItems cartItems = cartItemMapper.convertCreateDTOToEntity(cartItemCreateForm);
         cartItems.setId(IdGenerator.getGenerationId());
         cartItems.setCart(carts);
         cartItems.setProductVariant(productVariants);
         cartItems.setQuantity(cartItemCreateForm.getQuantity());
+        cartItems.setVariantValue(variantValues);
 
         return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }
@@ -72,7 +108,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public List<CartItemDTO> getCartItemsByAccountId(Integer accountId) {
-        return cartItemMapper.convertPageToList(cartItemsRepository.findByAccountId(accountId));
+        return cartItemMapper.convertPageToList(cartItemsRepository.findByCart_Account_Id(accountId));
     }
 
     @Override
@@ -84,6 +120,6 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public void deleteAllCartItemsByAccountId(Integer accountId) {
-        cartItemsRepository.deleteAllByAccountId(accountId);
+        cartItemsRepository.deleteAllByCart_Account_Id(accountId);
     }
 }

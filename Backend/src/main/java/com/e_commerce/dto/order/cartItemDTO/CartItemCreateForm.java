@@ -13,10 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartItemCreateForm {
     @NotNull(message = "CartId cannot be null")
-    private Integer cartId;
+    private Integer accountId;
 
     @NotNull(message = "ProductVariantsId cannot be null")
     private Integer productVariantsId;
+
+    @NotNull(message = "VariantValuesId cannot be null")
+    private Integer variantValuesId;
 
     @NotNull(message = "Quantity cannot be null")
     @Min(value = 1, message = "Quantity must be at least 1")

@@ -15,4 +15,6 @@ public class CartItemDTO {
     private Integer quantity;
 
     private Integer cartId;
+
+    private Integer variantValuesId;
 }

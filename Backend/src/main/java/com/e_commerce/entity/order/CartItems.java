@@ -1,6 +1,7 @@
 package com.e_commerce.entity.order;
 
 import com.e_commerce.entity.product.ProductVariants;
+import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +23,10 @@ public class CartItems extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "ProductVariantsId", nullable = false)
     private ProductVariants productVariant;
+
+    @ManyToOne
+    @JoinColumn(name = "VariantValuesId", nullable = true)
+    private VariantValues variantValue;
 
     @Column(name = "Quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;

@@ -14,4 +14,8 @@ public interface ProductVariantsValuesService {
     ProductVariantValueDTO createProductVariantValue(ProductVariantValueCreateDTO productVariantValueCreateDTO);
 
     ProductVariantValueDTO updateProductVariantValue(ProductVariantValueUpdateDTO productVariantValueUpdateDTO, Integer id);
+
+    boolean isVariantValueAvailable(Integer variantId, Integer valueId, Integer requiredQuantity);
+
+    boolean checkProductVariantAvailability(Integer productVariantId, Integer requiredQuantity);
 }

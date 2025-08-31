@@ -11,8 +11,8 @@ import java.util.List;
 public class CartItemMapper {
     public CartItemDTO convertEntityToDTO(CartItems cartItem) {
         return CartItemDTO.builder()
-                .cartId(cartItem.getCartId().getId())
-                .productVariantsId(cartItem.getProductVariantsId().getId())
+                .cartId(cartItem.getCart().getId())
+                .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
                 .build();
     }
@@ -31,8 +31,8 @@ public class CartItemMapper {
 
     public CartItemCreateForm convertEntityToCreateDTO(CartItems cartItem) {
         return CartItemCreateForm.builder()
-                .cartId(cartItem.getCartId().getId())
-                .productVariantsId(cartItem.getProductVariantsId().getId())
+                .accountId(cartItem.getCart().getAccount().getId())
+                .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
                 .build();
     }

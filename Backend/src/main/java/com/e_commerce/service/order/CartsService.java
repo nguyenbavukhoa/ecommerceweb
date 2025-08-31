@@ -11,5 +11,5 @@ public interface CartsService {
 
     CartDTO createCarts(CartCreateForm cartCreateForm);
 
-
+    CartDTO getOrCreateCartForUser(Integer userId);
 }

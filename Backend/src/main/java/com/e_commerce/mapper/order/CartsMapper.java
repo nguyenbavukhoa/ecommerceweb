@@ -13,7 +13,7 @@ public class CartsMapper {
     public CartDTO convertEntityToDTO(Carts cart) {
         return CartDTO.builder()
                 .id(cart.getId())
-                .userId(cart.getUserId().getId())
+                .userId(cart.getAccount().getId())
                 .build();
     }
 

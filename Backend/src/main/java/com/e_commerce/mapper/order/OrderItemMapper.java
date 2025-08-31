@@ -14,7 +14,7 @@ public class OrderItemMapper {
                 .id(orderItem.getId())
                 .productVariantsId(orderItem.getProductVariantsId().getId())
                 .quantity(orderItem.getQuantity())
-                .orderId(orderItem.getOrderId().getId())
+                .orderId(orderItem.getOrder().getId())
                 .build();
     }
 
@@ -26,7 +26,7 @@ public class OrderItemMapper {
 
     public OrderItemsCreateForm convertEntityToCreateDTO(OrderItems orderItem) {
         return OrderItemsCreateForm.builder()
-                .orderId(orderItem.getOrderId().getId())
+                .orderId(orderItem.getOrder().getId())
                 .productVariantsId(orderItem.getProductVariantsId().getId())
                 .quantity(orderItem.getQuantity())
                 .build();

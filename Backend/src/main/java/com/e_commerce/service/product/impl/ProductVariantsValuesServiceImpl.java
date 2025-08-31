@@ -31,8 +31,8 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     public ProductVariantValueDTO createProductVariantValue(ProductVariantValueCreateDTO productVariantValueCreateDTO) {
         ProductVariantValues productVariantValues = productVariantsValueMapper.convertCreateDTOToEntity(productVariantValueCreateDTO);
         productVariantValues.setId(IdGenerator.getGenerationId());
-        productVariantValues.setVariantId(productVariantsService.getProductVariantEntityById(productVariantValueCreateDTO.getVariantId()));
-        productVariantValues.setValueId(variantValuesService.getVariantValueEntityById(productVariantValueCreateDTO.getValueId()));
+        productVariantValues.setProductVariants(productVariantsService.getProductVariantEntityById(productVariantValueCreateDTO.getVariantId()));
+        productVariantValues.setVariantValues(variantValuesService.getVariantValueEntityById(productVariantValueCreateDTO.getValueId()));
         return productVariantsValueMapper.convertEntityToDTO(productVariantValuesRepository.save(productVariantValues));
     }
 
@@ -43,5 +43,21 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
             existingVariantValue.setQuantity(productVariantValueUpdateDTO.getQuantity());
         }
         return null;
+    }
+
+    @Override
+    public boolean isVariantValueAvailable(Integer variantId, Integer valueId, Integer requiredQuantity) {
+        if(requiredQuantity <= 0) {
+            throw new RuntimeException("Required quantity must be greater than 0");
+        }
+        return productVariantValuesRepository.isVariantValueAvailable(variantId, valueId, requiredQuantity);
+    }
+
+    @Override
+    public boolean checkProductVariantAvailability(Integer productVariantId, Integer requiredQuantity) {
+        if(requiredQuantity <= 0) {
+            throw new RuntimeException("Required quantity must be greater than 0");
+        }
+        return productVariantValuesRepository.checkProductVariantAvailability(productVariantId, requiredQuantity);
     }
 }
