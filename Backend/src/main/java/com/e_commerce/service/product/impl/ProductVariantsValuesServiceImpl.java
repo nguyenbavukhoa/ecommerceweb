@@ -46,18 +46,12 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     }
 
     @Override
-    public boolean isVariantValueAvailable(Integer variantId, Integer valueId, Integer requiredQuantity) {
-        if(requiredQuantity <= 0) {
-            throw new RuntimeException("Required quantity must be greater than 0");
-        }
-        return productVariantValuesRepository.isVariantValueAvailable(variantId, valueId, requiredQuantity);
+    public Integer isVariantValueAvailable(Integer variantId, Integer valueId) {
+        return productVariantValuesRepository.isVariantValueAvailable(variantId, valueId);
     }
 
     @Override
-    public boolean checkProductVariantAvailability(Integer productVariantId, Integer requiredQuantity) {
-        if(requiredQuantity <= 0) {
-            throw new RuntimeException("Required quantity must be greater than 0");
-        }
-        return productVariantValuesRepository.checkProductVariantAvailability(productVariantId, requiredQuantity);
+    public Integer checkProductVariantAvailability(Integer productVariantId) {
+        return productVariantValuesRepository.checkProductVariantAvailability(productVariantId);
     }
 }

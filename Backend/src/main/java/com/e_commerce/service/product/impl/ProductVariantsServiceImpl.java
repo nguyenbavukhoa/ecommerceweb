@@ -57,4 +57,9 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
         }
         return productVariantsMapper.covertEntityToDTO(productVariantRepository.save(existingVariant));
     }
+
+    @Override
+    public Integer checkProductVariantAvailability(Integer productVariantId) {
+        return productVariantRepository.checkProductVariantAvailability(productVariantId);
+    }
 }

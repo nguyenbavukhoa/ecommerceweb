@@ -13,4 +13,6 @@ public interface ProductVariantsService {
     ProductVariantsDTO createProductVariant(ProductVariantsCreateDTO productVariantsCreateDTO);
 
     ProductVariantsDTO updateProductVariant(ProductVariantsUpdateDTO productVariantsUpdateDTO, Integer id);
+
+    Integer checkProductVariantAvailability(Integer productVariantId);
 }

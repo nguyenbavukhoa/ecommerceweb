@@ -12,8 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartCreateForm {
-    @NotNull(message = "User ID cannot be null")
-    private Integer userId;
-
     List<CartItemCreateForm> listCartItems;
 }

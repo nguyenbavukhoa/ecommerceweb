@@ -10,12 +10,14 @@ import com.e_commerce.repository.order.CartsRepository;
 import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.order.CartsService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CartsServiceImpl implements CartsService {
     private final CartsRepository cartsRepository;
     private final CartsMapper cartsMapper;
@@ -28,25 +30,22 @@ public class CartsServiceImpl implements CartsService {
     }
 
     @Override
-    public CartDTO createCarts(CartCreateForm cartCreateForm) {
-        Account account = accountService.getAccountEntityById(cartCreateForm.getUserId());
+    public Carts createCarts() {
+        Account account = accountService.getAccountAuth();
 
-        Carts carts = cartsMapper.convertCreateDTOToEntity(cartCreateForm);
+        Optional<Carts> existingCarts = cartsRepository.findByAccountId(account.getId());
+        log.info("Existing cart for account {}: {}", account.getId().toString(), existingCarts);
+        if (existingCarts.isPresent()) {
+            log.info("Cart already exists for account {}: {}", account.getId().toString(), existingCarts.get());
+            return existingCarts.get();
+        }
+
+        Carts carts = new Carts();
         carts.setId(IdGenerator.getGenerationId());
         carts.setAccount(account);
 
-        return cartsMapper.convertEntityToDTO(cartsRepository.save(carts));
-    }
-
-    @Override
-    public CartDTO getOrCreateCartForUser(Integer userId) {
-        return cartsRepository.findByAccountId(userId)
-                .map(cartsMapper::convertEntityToDTO)
-                .orElseGet(() -> {
-                    CartCreateForm cartCreateForm = new CartCreateForm();
-                    cartCreateForm.setUserId(userId);
-                    return createCarts(cartCreateForm);
-                });
+        log.info("Creating new cart for account {}: {}", account.getId().toString(), carts);
+        return cartsRepository.save(carts);
     }
 
 

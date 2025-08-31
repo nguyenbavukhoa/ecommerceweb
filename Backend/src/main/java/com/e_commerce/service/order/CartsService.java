@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 public interface CartsService {
     Carts getCartsEntityById(Integer id);
 
-    CartDTO createCarts(CartCreateForm cartCreateForm);
+    Carts createCarts();
 
-    CartDTO getOrCreateCartForUser(Integer userId);
 }

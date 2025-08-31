@@ -14,6 +14,7 @@ public class CartItemMapper {
                 .cartId(cartItem.getCart().getId())
                 .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
+                .variantValuesId(cartItem.getVariantValue() != null ? cartItem.getVariantValue().getId() : null)
                 .build();
     }
 
