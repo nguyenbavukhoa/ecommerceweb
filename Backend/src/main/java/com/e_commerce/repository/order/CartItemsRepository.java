@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
-    Optional<CartItems> deleteCartItemsById(List<Integer> id);
+    void deleteAllByIdIn(List<Integer> id);
 
 
     @Query("""

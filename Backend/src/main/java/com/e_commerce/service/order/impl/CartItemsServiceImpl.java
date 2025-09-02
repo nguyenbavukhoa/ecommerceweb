@@ -127,9 +127,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public void deleteCartItems(List<Integer> id) {
-        CartItems cartItems = cartItemsRepository.deleteCartItemsById(id)
-                .orElseThrow(() -> new CustomException(ErrorResponse.CART_ITEM_NOT_FOUND));
-        cartItemsRepository.delete(cartItems);
+       cartItemsRepository.deleteAllByIdIn(id);
     }
 
     @Override
