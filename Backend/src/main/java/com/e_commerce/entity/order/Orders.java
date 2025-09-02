@@ -23,7 +23,7 @@ public class Orders extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "AccountId", nullable = false)
-    private Account userId;
+    private Account account;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "OrderStatus", nullable = false)

@@ -48,5 +48,11 @@ public class CartsServiceImpl implements CartsService {
         return cartsRepository.save(carts);
     }
 
+    @Override
+    public Carts getCartByAccountId(Integer accountId) {
+        return cartsRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new CustomException(ErrorResponse.CART_NOT_FOUND));
+    }
+
 
 }

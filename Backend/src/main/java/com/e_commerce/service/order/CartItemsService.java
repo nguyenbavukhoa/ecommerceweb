@@ -18,7 +18,11 @@ public interface CartItemsService {
 
     List<CartItemDTO> getCartItemsByAccountId(Integer accountId);
 
-    void deleteCartItems(Integer id, Integer productVariantId);
+    void deleteCartItems(List<Integer> id);
 
     void deleteAllCartItemsByAccountId(Integer accountId);
+
+    List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId);
+
+    List<CartItems> getCartItemsByCartId(Integer cartId);
 }

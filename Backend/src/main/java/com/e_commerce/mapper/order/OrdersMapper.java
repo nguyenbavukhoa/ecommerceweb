@@ -27,7 +27,6 @@ public class OrdersMapper {
     public Orders convertCreateDTOToEntity(OrderCreateForm orderDTO) {
         return Orders.builder()
                 .orderStatus(OrderStatus.CONFIRMED)
-                .totalPrice(orderDTO.getTotalPrice())
                 .orderItems(OrderItemMapper.convertCreateDTOListToEntityList(orderDTO.getListOrderItems()))
                 .orderTime(LocalDateTime.now())
                 .build();

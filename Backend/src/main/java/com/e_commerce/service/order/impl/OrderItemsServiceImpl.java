@@ -2,20 +2,34 @@ package com.e_commerce.service.order.impl;
 
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsCreateForm;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsDTO;
+import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.OrderItems;
+import com.e_commerce.entity.order.Orders;
+import com.e_commerce.entity.product.ProductVariants;
+import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.order.OrderItemMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrderItemsRepository;
 import com.e_commerce.service.order.OrderItemsService;
+import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
 import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class OrderItemsServiceImpl implements OrderItemsService {
     private final OrderItemMapper orderItemMapper;
     private final OrderItemsRepository orderItemsRepository;
+    private final ProductVariantsService productVariantsService;
+    private final VariantValuesService variantValuesService;
 
     @Override
     public OrderItems getOrderItemsEntityById(Integer id) {
@@ -25,8 +39,58 @@ public class OrderItemsServiceImpl implements OrderItemsService {
 
     @Override
     public OrderItemsDTO createOrderItems(OrderItemsCreateForm orderItemsCreateForm) {
-        OrderItems orderItems = orderItemMapper.convertCreateDTOToEntity(orderItemsCreateForm);
-        orderItems.setId(IdGenerator.getGenerationId());
+        ProductVariants productVariants = productVariantsService.getProductVariantEntityById(orderItemsCreateForm.getProductVariantsId());
+
+        VariantValues variantValues = orderItemsCreateForm.getVariantValueId() != null
+                ? variantValuesService.getVariantValueEntityById(orderItemsCreateForm.getVariantValueId())
+                : null;
+        OrderItems orderItems = buildOrderItem(
+                productVariants,
+                variantValues,
+                orderItemsCreateForm.getQuantity(),
+                null,
+                orderItemsCreateForm.getNote()
+        );
+
         return orderItemMapper.convertEntityToDTO(orderItemsRepository.save(orderItems));
+    }
+
+    @Override
+    public List<OrderItems> createOrderItemsFromCartItem(List<CartItems> cartItems, Orders order) {
+        List<OrderItems> orderItems = new ArrayList<>();
+        for (CartItems cartItem : cartItems) {
+            OrderItems orderItem = buildOrderItem(
+                    cartItem.getProductVariant(),
+                    cartItem.getVariantValue(),
+                    cartItem.getQuantity(),
+                    order,
+                    cartItem.getNote()
+            );
+            orderItems.add(orderItem);
+        }
+
+        return orderItemsRepository.saveAll(orderItems);
+    }
+
+    private OrderItems buildOrderItem(ProductVariants productVariants, VariantValues variantValues, Integer quantity, Orders order, String note) {
+        if (productVariants.getStockQuantity() < quantity) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+        }
+
+        BigDecimal price = productVariants.getPrice();
+        if (variantValues != null) {
+            price = price.add(variantValues.getPrice());
+        }
+
+        OrderItems orderItem = new OrderItems();
+        orderItem.setId(IdGenerator.getGenerationId());
+        orderItem.setOrder(order);
+        orderItem.setProductVariant(productVariants);
+        orderItem.setVariantValue(variantValues);
+        orderItem.setUnitPrice(price);
+        orderItem.setQuantity(quantity);
+        orderItem.setNote(note);
+
+        return orderItem;
     }
 }

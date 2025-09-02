@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
-    Optional<CartItems> findByCartIdAndProductVariantId(Integer cartId, Integer productVariantId);
+    Optional<CartItems> deleteCartItemsById(List<Integer> id);
 
 
     @Query("""
@@ -31,5 +31,25 @@ public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
     List<CartItems> findByCart_Account_Id(Integer id);
 
     void deleteAllByCart_Account_Id(Integer accountId);
+
+    @Query("""
+    SELECT ci
+    FROM CartItems ci
+    WHERE ci.cart.id = :cartId
+      AND ci.id IN :cartItemIds
+      AND ci.selected = true
+""")
+    List<CartItems> findSelectedCartItemsByCartIdAndId(
+            @Param("cartId") Integer cartId,
+            @Param("cartItemIds") List<Integer> cartItemIds
+    );
+
+    @Query("""
+    SELECT ci
+    FROM CartItems ci
+    WHERE ci.cart.id = :cartId
+      AND ci.selected = true
+""")
+    List<CartItems> findAllSelectedByCartId(Integer cartId);
 
 }

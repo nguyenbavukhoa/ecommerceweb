@@ -50,8 +50,8 @@ public class CartItemController {
     }
 
     @DeleteMapping("/{cartId}/product/{productVariantId}")
-    public ResponseEntity<ApiResponse<String>> deleteCartItem(@PathVariable Integer cartId, @PathVariable Integer productVariantId, HttpServletRequest request) {
-        cartItemsService.deleteCartItems(cartId, productVariantId);
+    public ResponseEntity<ApiResponse<String>> deleteCartItem(@PathVariable List<Integer> cartId, HttpServletRequest request) {
+        cartItemsService.deleteCartItems(cartId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Delete cart item successfully", "Cart item deleted", null, request.getRequestURI()));
     }
 }

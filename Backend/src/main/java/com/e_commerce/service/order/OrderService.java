@@ -9,5 +9,7 @@ import org.springframework.stereotype.Service;
 public interface OrderService {
     Orders getOrderEntityById(Integer id);
 
-    OrderDTO createOrder(OrderCreateForm orderCreateForm);
+    Orders createOrder(OrderCreateForm orderCreateForm);
+
+    Orders createOrderFromEntireCart(String orderNote);
 }

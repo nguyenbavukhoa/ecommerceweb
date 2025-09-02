@@ -39,6 +39,7 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final ProductVariantsService productVariantsService;
     private final ProductVariantsValuesService productVariantsValuesService;
     private final VariantValuesService variantValuesService;
+    private final AccountService accountService;
 
     @Override
 
@@ -125,8 +126,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public void deleteCartItems(Integer id, Integer productVariantId) {
-        CartItems cartItems = cartItemsRepository.findByCartIdAndProductVariantId(id, productVariantId)
+    public void deleteCartItems(List<Integer> id) {
+        CartItems cartItems = cartItemsRepository.deleteCartItemsById(id)
                 .orElseThrow(() -> new CustomException(ErrorResponse.CART_ITEM_NOT_FOUND));
         cartItemsRepository.delete(cartItems);
     }
@@ -135,4 +136,25 @@ public class CartItemsServiceImpl implements CartItemsService {
     public void deleteAllCartItemsByAccountId(Integer accountId) {
         cartItemsRepository.deleteAllByCart_Account_Id(accountId);
     }
+
+    @Override
+    public List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId) {
+        Account account = accountService.getAccountAuth();
+        Carts carts = cartsService.getCartByAccountId(account.getId());
+
+        List<CartItems> cartItems = cartItemsRepository.findSelectedCartItemsByCartIdAndId(carts.getId(),cartItemId);
+
+        if(cartItems.isEmpty()) {
+            throw new CustomException(ErrorResponse.CART_ITEM_NOT_FOUND);
+        }
+        return cartItems;
+    }
+
+    @Override
+    public List<CartItems> getCartItemsByCartId(Integer cartId) {
+        Account account = accountService.getAccountAuth();
+        Carts carts = cartsService.getCartByAccountId(account.getId());
+        return cartItemsRepository.findAllSelectedByCartId(carts.getId());
+    }
+
 }

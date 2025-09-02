@@ -11,4 +11,5 @@ public interface CartsService {
 
     Carts createCarts();
 
+    Carts getCartByAccountId(Integer accountId);
 }

@@ -22,4 +22,6 @@ public class OrderItemsCreateForm {
     private Integer quantity;
 
     private String note;
+
+    private Integer variantValueId;
 }
