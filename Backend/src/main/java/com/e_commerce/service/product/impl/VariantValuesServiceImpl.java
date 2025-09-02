@@ -4,6 +4,8 @@ import com.e_commerce.dto.product.variantValuesDTO.VariantValuesCreateDTO;
 import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
 import com.e_commerce.dto.product.variantValuesDTO.VariantValuesUpdateDTO;
 import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.VariantValuesMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.VariantValuesRepository;
@@ -20,7 +22,7 @@ public class VariantValuesServiceImpl implements VariantValuesService {
     @Override
     public VariantValues getVariantValueEntityById(Integer id) {
         return variantValuesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Variant value not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.VARIANT_VALUE_NOT_FOUND));
     }
 
     @Override

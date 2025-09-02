@@ -4,6 +4,8 @@ import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCrea
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpdateDTO;
 import com.e_commerce.entity.product.ProductVariantValues;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductVariantsValueMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductVariantValuesRepository;
@@ -24,7 +26,7 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     @Override
     public ProductVariantValues getProductVariantValueEntityById(Integer id) {
         return productVariantValuesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product variant value not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_VARIANT_VALUE_NOT_FOUND));
     }
 
     @Override

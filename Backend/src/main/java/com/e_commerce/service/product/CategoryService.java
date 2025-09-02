@@ -13,4 +13,6 @@ public interface CategoryService {
     CategoryDTO createCategory(CategoryCreateForm categoryCreateForm);
 
     CategoryDTO updateCategory(CategoryUpdateForm categoryUpdateForm, Integer id);
+
+    void deleteCategory(Integer id);
 }

@@ -4,6 +4,8 @@ import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryCreateDTO;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryDTO;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryUpdateDTO;
 import com.e_commerce.entity.product.ProductCategories;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductCategoryMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductCategoryRepository;
@@ -20,7 +22,7 @@ public class ProductCategoriesServiceImpl implements ProductCategoriesService {
     @Override
     public ProductCategories getProductCategoryEntityById(Integer id) {
         return productCategoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product category not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_CATEGORY_NOT_FOUND));
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsCreateDTO;
 import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
 import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsUpdateDTO;
 import com.e_commerce.entity.product.VariantOptions;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.VariantOptionsMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.VariantOptionsRepository;
@@ -19,7 +21,7 @@ public class VariantOptionsServiceImpl implements VariantOptionsService {
     @Override
     public VariantOptions getVariantOptionEntityById(Integer id) {
         return variantOptionsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Variant option not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.VARIANT_OPTION_NOT_FOUND));
     }
 
     @Override

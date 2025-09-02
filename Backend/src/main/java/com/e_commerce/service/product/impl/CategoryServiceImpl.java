@@ -4,6 +4,8 @@ import com.e_commerce.dto.product.categoryDTO.CategoryCreateForm;
 import com.e_commerce.dto.product.categoryDTO.CategoryDTO;
 import com.e_commerce.dto.product.categoryDTO.CategoryUpdateForm;
 import com.e_commerce.entity.product.Category;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.CategoryMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.CategoryRepository;
@@ -20,11 +22,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryEntityById(Integer id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.CATEGORY_NOT_FOUND));
     }
 
     @Override
     public CategoryDTO createCategory(CategoryCreateForm categoryCreateForm) {
+        if(categoryRepository.findByName(categoryCreateForm.getCategoryName()) != null) {
+            throw new CustomException(ErrorResponse.CATEGORY_ALREADY_EXISTS);
+        }
         Category category = categoryMapper.convertCreateDTOToEntity(categoryCreateForm);
         category.setId(IdGenerator.getGenerationId());
         return categoryMapper.convertEntityToDTO(categoryRepository.save(category));
@@ -33,10 +38,24 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO updateCategory(CategoryUpdateForm categoryUpdateForm, Integer id) {
         Category existingCategory = getCategoryEntityById(id);
+
         if(categoryUpdateForm.getName() != null) {
+            if (categoryRepository.findByName(categoryUpdateForm.getName()) != null) {
+                throw new CustomException(ErrorResponse.CATEGORY_ALREADY_EXISTS);
+            }
             existingCategory.setName(categoryUpdateForm.getName());
         }
         return categoryMapper.convertEntityToDTO(categoryRepository.save(existingCategory));
-
     }
+
+    @Override
+    public void deleteCategory(Integer id) {
+        if(!categoryRepository.existsById(id)) {
+            throw new CustomException(ErrorResponse.CATEGORY_NOT_FOUND);
+        }
+        Category category = getCategoryEntityById(id);
+        categoryRepository.delete(category);
+    }
+
+
 }

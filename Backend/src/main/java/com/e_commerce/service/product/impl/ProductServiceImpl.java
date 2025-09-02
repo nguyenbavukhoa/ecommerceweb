@@ -5,6 +5,8 @@ import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductUserViewDTO;
 import com.e_commerce.entity.product.Product;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
@@ -28,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductEntityById(Integer id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_ALREADY_EXISTS));
     }
 
     @Override
@@ -57,9 +59,8 @@ public class ProductServiceImpl implements ProductService {
             existingProduct.setProductCategory(productUpdateDTO.getProductCategory());
         }
 
-        if(productUpdateDTO.getImage() != null) {
-            // Handle image update logic here
-            // For example, save the new image and update the imgMain field
+        if(productUpdateDTO.getImage() == null) {
+           throw new CustomException(ErrorResponse.PRODUCT_IMAGE_INVALID);
         }
 
         return productMapper.covertEntityToDTO(productRepository.save(existingProduct));
