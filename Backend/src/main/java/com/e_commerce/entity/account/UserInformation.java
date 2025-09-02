@@ -29,7 +29,6 @@ public class UserInformation extends Timestamped {
     private String phoneNumber;
 
     @OneToOne
-    @ToString.Exclude
     @JoinColumn(name = "AccountId", nullable = false)
     private Account account;
 }

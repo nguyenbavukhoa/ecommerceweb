@@ -31,12 +31,11 @@ public class CartsServiceImpl implements CartsService {
 
     @Override
     public Carts createCarts() {
+        
         Account account = accountService.getAccountAuth();
 
         Optional<Carts> existingCarts = cartsRepository.findByAccountId(account.getId());
-        log.info("Existing cart for account {}: {}", account.getId().toString(), existingCarts);
         if (existingCarts.isPresent()) {
-            log.info("Cart already exists for account {}: {}", account.getId().toString(), existingCarts.get());
             return existingCarts.get();
         }
 
@@ -44,7 +43,6 @@ public class CartsServiceImpl implements CartsService {
         carts.setId(IdGenerator.getGenerationId());
         carts.setAccount(account);
 
-        log.info("Creating new cart for account {}: {}", account.getId().toString(), carts);
         return cartsRepository.save(carts);
     }
 

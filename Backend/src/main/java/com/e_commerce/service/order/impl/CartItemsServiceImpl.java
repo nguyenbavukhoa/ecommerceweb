@@ -52,9 +52,6 @@ public class CartItemsServiceImpl implements CartItemsService {
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
-        log.info("Creating or retrieving cart for the user...");
-        log.info("CartItemCreateForm: {}", cartItemCreateForm);
-
         Carts carts = cartsService.createCarts();
 
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
@@ -63,13 +60,6 @@ public class CartItemsServiceImpl implements CartItemsService {
                 ? variantValuesService.getVariantValueEntityById(cartItemCreateForm.getVariantValuesId())
                 : null;
 
-        log.info("Adding to cart: Cart ID = {}, Product Variant ID = {}, Variant Value ID = {}, Quantity = {}",
-                carts.getId(),
-                productVariants.getId(),
-                variantValues != null ? variantValues.getId() : null,
-                cartItemCreateForm.getQuantity()
-        );
-        log.info("Existing variant Values: {}", variantValues);
 
         Optional<CartItems> existingCartItem = cartItemsRepository.findByCartIdAndProductVariantIdAndVariantValueId(
                 carts.getId(),
@@ -77,18 +67,15 @@ public class CartItemsServiceImpl implements CartItemsService {
                 variantValues != null ? variantValues.getId() : null
         );
 
-        log.info("Existing Cart Item: {}", existingCartItem);
 
         int existingQuantity = existingCartItem.map(CartItems::getQuantity).orElse(0);
         int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
 
-        log.info("productVariants = {},variantValues = {}", productVariants.getId(),variantValues.getId());
 
         int existingVariantValueQuantity = (variantValues != null)
                 ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
                 : productVariants.getStockQuantity();
 
-        log.info("Existing Variant Value Quantity: {}", existingVariantValueQuantity);
 
         int availableQuantity = (variantValues != null)
                 ? productVariantsValuesService.isVariantValueAvailable(
@@ -99,14 +86,6 @@ public class CartItemsServiceImpl implements CartItemsService {
                 productVariants.getId()
         );
 
-        log.info("availableQuantity calculated: {}", availableQuantity);
-
-        log.info("Available Quantity: {}, Existing Quantity: {}, Requested Quantity: {}, Total Requested Quantity: {}",
-                availableQuantity,
-                existingQuantity,
-                cartItemCreateForm.getQuantity(),
-                totalRequestedQuantity
-        );
         if(availableQuantity < totalRequestedQuantity || availableQuantity <= 0) {
             log.error("Sản phẩm không đủ hàng. Còn lại: {}, yêu cầu: {}",
                     availableQuantity,

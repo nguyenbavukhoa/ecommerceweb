@@ -85,7 +85,6 @@ public class AccountServiceImpl implements AccountService {
         account.setRole(AccountRole.USER);
 
         account = accountRepository.save(account);
-        log.info("Created new account: {}", account);
 
         userInformationService.createUserInfo(account, registrationForm.getFullName());
 
