@@ -14,7 +14,5 @@ public interface AccountService extends UserDetailsService {
 
     AccountDTO createAccount(RegistrationForm registrationForm);
 
-    Account getAccountEntityById(int accountId);
-
     Account getAccountAuth();
 }

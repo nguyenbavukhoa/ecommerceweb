@@ -7,6 +7,8 @@ import com.e_commerce.dto.auth.accountDTO.RegistrationForm;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.enums.AccountRole;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.account.AccountMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.account.AccountRepository;
@@ -48,18 +50,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AuthenticationDTO signIn(LoginForm loginForm) {
         Account account = accountRepository.findByEmail(loginForm.getEmail())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
 
-        if(account.isAccountNonLocked() && !account.isEnabled()){
-            // viet code xu ly loi o day
+        if(account.isEnabled()){
+            throw new CustomException(ErrorResponse.ACCOUNT_DISABLED);
         }
 
-        if(account.getRole().name().equals("ADMIN")){
-            // viet code xu ly loi o day
+        if(!account.isAccountNonLocked()){
+            throw new CustomException(ErrorResponse.ACCOUNT_LOCKED);
         }
 
-        if (passwordEncoder.matches(loginForm.getPassword(), account.getPassword())) {
-            // xu ly loi o day
+        if (!passwordEncoder.matches(loginForm.getPassword(), account.getPassword())) {
+            throw new CustomException(ErrorResponse.ACCOUNT_PASSWORD_MISMATCH);
         }
 
         String jwtToken = jwtUtil.generateToken(account);
@@ -75,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDTO createAccount(RegistrationForm registrationForm) {
         if (accountRepository.existsByEmail(registrationForm.getEmail())) {
-            // viet code xu ly loi o day
+            throw new CustomException(ErrorResponse.ACCOUNT_ALREADY_EXISTS);
         }
         // tao xac thuc email o day
 
@@ -88,27 +90,20 @@ public class AccountServiceImpl implements AccountService {
 
         userInformationService.createUserInfo(account, registrationForm.getFullName());
 
-
         return accountMapper.convertEntityToDTO(account, registrationForm.getFullName());
-    }
-
-    @Override
-    public Account getAccountEntityById(int accountId) {
-        return accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return accountRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Account not found with email: " + email));
+                .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
     }
 
     @Override
     public Account getAccountAuth() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            // viet code xu ly loi o day
+            throw new CustomException(ErrorResponse.UNAUTHORIZED);
         }
 
         return  (Account) authentication.getPrincipal();
