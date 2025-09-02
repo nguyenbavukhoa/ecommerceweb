@@ -36,4 +36,6 @@ public class Orders extends Timestamped {
 
     @OneToMany(mappedBy = "order")
     private List<OrderItems> orderItems;
+
+    private String note;
 }

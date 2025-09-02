@@ -17,7 +17,7 @@ public class CartItems extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "CardId", nullable = false)
+    @JoinColumn(name = "CartId", nullable = false)
     private Carts cart;
 
     @ManyToOne
@@ -30,4 +30,10 @@ public class CartItems extends Timestamped {
 
     @Column(name = "Quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
+
+    @Column(name = "Note")
+    private String note;
+
+    @Column(name = "Selected", nullable = false, columnDefinition = "boolean default false")
+    private boolean selected;
 }

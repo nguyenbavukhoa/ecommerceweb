@@ -25,7 +25,4 @@ public class Carts extends Timestamped {
 
     @OneToMany(mappedBy = "cart")
     List<CartItems> cartItems;
-
-    @Column(name = "Note")
-    private String note;
 }

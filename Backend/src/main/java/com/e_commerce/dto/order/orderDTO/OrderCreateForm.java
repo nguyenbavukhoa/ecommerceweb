@@ -3,6 +3,7 @@ package com.e_commerce.dto.order.orderDTO;
 
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsCreateForm;
 import com.e_commerce.enums.OrderStatus;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,10 +25,6 @@ public class OrderCreateForm {
     @NotNull(message = "Order status cannot be null")
     private OrderStatus orderStatus;
 
-    @NotNull(message = "Total price cannot be null")
-    private BigDecimal totalPrice;
-
-    private LocalDateTime orderTime;
-
+    @NotEmpty(message = "Order must have at least one item")
     private List<OrderItemsCreateForm> listOrderItems;
 }

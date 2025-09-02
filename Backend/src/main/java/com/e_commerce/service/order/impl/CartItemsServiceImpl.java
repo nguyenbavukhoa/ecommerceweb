@@ -99,6 +99,8 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setProductVariant(productVariants);
         cartItems.setQuantity(cartItemCreateForm.getQuantity());
         cartItems.setVariantValue(variantValues);
+        cartItems.setSelected(false);
+        cartItems.setNote(cartItemCreateForm.getNote());
 
 
         return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
