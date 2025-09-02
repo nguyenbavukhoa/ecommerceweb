@@ -10,6 +10,8 @@ import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.product.ProductVariantValues;
 import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.order.CartItemMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.CartItemsRepository;
@@ -42,14 +44,14 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     public CartItems getCartItemsById(Integer id) {
         return cartItemsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CartItems not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.CART_ITEM_NOT_FOUND));
     }
 
     @Override
     public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
 
         if(cartItemCreateForm.getQuantity() <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
+            throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
         }
 
         Carts carts = cartsService.createCarts();
@@ -71,12 +73,6 @@ public class CartItemsServiceImpl implements CartItemsService {
         int existingQuantity = existingCartItem.map(CartItems::getQuantity).orElse(0);
         int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
 
-
-        int existingVariantValueQuantity = (variantValues != null)
-                ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
-                : productVariants.getStockQuantity();
-
-
         int availableQuantity = (variantValues != null)
                 ? productVariantsValuesService.isVariantValueAvailable(
                 productVariants.getId(),
@@ -87,11 +83,8 @@ public class CartItemsServiceImpl implements CartItemsService {
         );
 
         if(availableQuantity < totalRequestedQuantity || availableQuantity <= 0) {
-            log.error("Sản phẩm không đủ hàng. Còn lại: {}, yêu cầu: {}",
-                    availableQuantity,
-                    totalRequestedQuantity);
-            throw new RuntimeException(HttpStatus.BAD_REQUEST.toString() + " - Sản phẩm không đủ hàng. Còn lại: " + availableQuantity + ", yêu cầu: " + totalRequestedQuantity);
-            // viet lai exception
+            String stockInfo = "Available: " + availableQuantity + ", Requested: " + totalRequestedQuantity;
+            throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
         }
 
         if (existingCartItem.isPresent()) {
@@ -116,7 +109,7 @@ public class CartItemsServiceImpl implements CartItemsService {
         CartItems existingCartItems = getCartItemsById(id);
         if(cartItemUpdateForm.getQuantity() != null) {
             if(cartItemUpdateForm.getQuantity() <= 0) {
-                throw new RuntimeException("Quantity must be greater than 0");
+                throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
             }
             existingCartItems.setQuantity(cartItemUpdateForm.getQuantity());
         }
@@ -132,7 +125,7 @@ public class CartItemsServiceImpl implements CartItemsService {
     @Override
     public void deleteCartItems(Integer id, Integer productVariantId) {
         CartItems cartItems = cartItemsRepository.findByCartIdAndProductVariantId(id, productVariantId)
-                .orElseThrow(() -> new RuntimeException("CartItems not found with cart id: " + id + " and product variant id: " + productVariantId));
+                .orElseThrow(() -> new CustomException(ErrorResponse.CART_ITEM_NOT_FOUND));
         cartItemsRepository.delete(cartItems);
     }
 

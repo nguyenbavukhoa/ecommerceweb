@@ -76,6 +76,38 @@ public enum ErrorResponse {
     PRODUCT_VARIANT_VALUE_QUANTITY_INVALID(4203, "Invalid product variant value quantity", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_VALUE_DUPLICATE_COMBINATION(4204, "Duplicate variant value combination", HttpStatus.CONFLICT),
 
+    // Cart Errors
+    CART_NOT_FOUND(5001, "Cart not found", HttpStatus.NOT_FOUND),
+    CART_ALREADY_EXISTS(5002, "Cart already exists for this account", HttpStatus.CONFLICT),
+    CART_EMPTY(5003, "Cart is empty", HttpStatus.BAD_REQUEST),
+    CART_ACCESS_DENIED(5004, "Access denied to cart", HttpStatus.FORBIDDEN),
+    CART_NOTE_INVALID(5005, "Invalid cart note", HttpStatus.BAD_REQUEST),
+
+    // Cart Items Errors
+    CART_ITEM_NOT_FOUND(5101, "Cart item not found", HttpStatus.NOT_FOUND),
+    CART_ITEM_ALREADY_EXISTS(5102, "Cart item already exists", HttpStatus.CONFLICT),
+    CART_ITEM_QUANTITY_INVALID(5103, "Invalid cart item quantity", HttpStatus.BAD_REQUEST),
+    CART_ITEM_QUANTITY_EXCEEDS_STOCK(5104, "Cart item quantity exceeds available stock . Available: %d, Requested: %d", HttpStatus.CONFLICT),
+    CART_ITEM_PRODUCT_UNAVAILABLE(5105, "Product variant is unavailable", HttpStatus.BAD_REQUEST),
+
+    // Order Errors
+    ORDER_NOT_FOUND(6001, "Order not found", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_EXISTS(6002, "Order already exists", HttpStatus.CONFLICT),
+    ORDER_STATUS_INVALID(6003, "Invalid order status", HttpStatus.BAD_REQUEST),
+    ORDER_CANNOT_BE_MODIFIED(6004, "Order cannot be modified", HttpStatus.CONFLICT),
+    ORDER_CANNOT_BE_CANCELLED(6005, "Order cannot be cancelled", HttpStatus.CONFLICT),
+    ORDER_TOTAL_PRICE_INVALID(6006, "Invalid order total price", HttpStatus.BAD_REQUEST),
+    ORDER_ACCESS_DENIED(6007, "Access denied to order", HttpStatus.FORBIDDEN),
+    ORDER_TIME_INVALID(6008, "Invalid order time", HttpStatus.BAD_REQUEST),
+
+    // Order Items Errors
+    ORDER_ITEM_NOT_FOUND(6101, "Order item not found", HttpStatus.NOT_FOUND),
+    ORDER_ITEM_ALREADY_EXISTS(6102, "Order item already exists", HttpStatus.CONFLICT),
+    ORDER_ITEM_QUANTITY_INVALID(6103, "Invalid order item quantity", HttpStatus.BAD_REQUEST),
+    ORDER_ITEM_QUANTITY_EXCEEDS_STOCK(6104, "Order item quantity exceeds available stock", HttpStatus.CONFLICT),
+    ORDER_ITEM_PRODUCT_UNAVAILABLE(6105, "Product variant is unavailable for order", HttpStatus.BAD_REQUEST),
+    ORDER_ITEM_CANNOT_BE_MODIFIED(6106, "Order item cannot be modified", HttpStatus.CONFLICT),
+
     ;
     private final int code;
     private final String message;

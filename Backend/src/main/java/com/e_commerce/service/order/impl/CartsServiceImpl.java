@@ -4,6 +4,8 @@ import com.e_commerce.dto.order.cartDTO.CartCreateForm;
 import com.e_commerce.dto.order.cartDTO.CartDTO;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.Carts;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.order.CartsMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.CartsRepository;
@@ -26,7 +28,7 @@ public class CartsServiceImpl implements CartsService {
     @Override
     public Carts getCartsEntityById(Integer id) {
         return cartsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Carts not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.CART_NOT_FOUND));
     }
 
     @Override
