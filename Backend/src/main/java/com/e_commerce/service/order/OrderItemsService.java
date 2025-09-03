@@ -16,4 +16,6 @@ public interface OrderItemsService {
     OrderItemsDTO createOrderItems(OrderItemsCreateForm orderItemsCreateForm);
 
     List<OrderItems> createOrderItemsFromCartItem(List<CartItems> cartItems, Orders order);
+
+    void validateCartItemsStock(List<CartItems> cartItems);
 }

@@ -16,16 +16,16 @@ public class VariantValues extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Value")
+    @Column(name = "value")
     private String value;
 
-    @Column(name = "Price", nullable = false)
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    @Column(name = "StockQuantity", nullable = false, columnDefinition = "int default 0")
+    @Column(name = "stock_quantity", nullable = false, columnDefinition = "int default 0")
     private int stockQuantity;
 
     @ManyToOne
-    @JoinColumn(name = "VariantOptionsId", nullable = false)
+    @JoinColumn(name = "variant_options_id", nullable = false)
     private VariantOptions variantOptions;
 }

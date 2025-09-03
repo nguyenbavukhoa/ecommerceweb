@@ -16,6 +16,6 @@ public class Category extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Name")
+    @Column(name = "name")
     private String name;
 }

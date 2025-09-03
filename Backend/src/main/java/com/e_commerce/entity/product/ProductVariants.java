@@ -18,26 +18,26 @@ public class ProductVariants extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(nullable = false,name = "ProductId")
+    @JoinColumn(nullable = false,name = "product_id")
     private Product productId;
 
-    @Column(nullable = false,name = "SKU")
+    @Column(nullable = false,name = "sku")
     private String sku;
 
-    @Column(nullable = false,name = "StockQuantity")
+    @Column(nullable = false,name = "stock_quantity")
     private Integer stockQuantity;
 
-    @Column(nullable = false,name = "Price")
+    @Column(nullable = false,name = "price")
     private BigDecimal price;
 
-    @Column(name = "ImgURL")
+    @Column(name = "img_url")
     private String imgUrl;
 
-    @Column(nullable = false,name = "Status")
+    @Column(nullable = false,name = "status")
     @Enumerated(EnumType.STRING)
     private ProductVariantsStatus productVariantsStatus;
 
     @ManyToOne
-    @JoinColumn(name = "VariantOptionId")
+    @JoinColumn(name = "variant_option_id")
     private VariantOptions variantOption;
 }

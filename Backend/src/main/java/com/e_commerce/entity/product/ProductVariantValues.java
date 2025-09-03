@@ -11,9 +11,9 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(
-        name = "ProductVariantValues",
+        name = "product_variant_values",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"VariantId", "ValueId"})
+                @UniqueConstraint(columnNames = {"variant_id", "value_id"})
         }
 )
 public class ProductVariantValues extends Timestamped {
@@ -21,13 +21,13 @@ public class ProductVariantValues extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "ValueId")
+    @JoinColumn(name = "value_id")
     private VariantValues variantValues;
 
     @ManyToOne
-    @JoinColumn(name = "VariantId", nullable = false)
+    @JoinColumn(name = "variant_id", nullable = false)
     private ProductVariants productVariants;
 
-    @Column(name = "Quantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 }

@@ -75,6 +75,7 @@ public enum ErrorResponse {
     PRODUCT_VARIANT_VALUE_ALREADY_EXISTS(4202, "Product variant value already exists", HttpStatus.CONFLICT),
     PRODUCT_VARIANT_VALUE_QUANTITY_INVALID(4203, "Invalid product variant value quantity", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_VALUE_DUPLICATE_COMBINATION(4204, "Duplicate variant value combination", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_VALUE_OUT_OF_STOCK(4205, "Product variant or variant value is out of stock", HttpStatus.CONFLICT),
 
     // Cart Errors
     CART_NOT_FOUND(5001, "Cart not found", HttpStatus.NOT_FOUND),

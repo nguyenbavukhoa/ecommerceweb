@@ -14,10 +14,10 @@ public class VariantOptions extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Name")
+    @Column(name = "name")
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "ProductCategoriesId", nullable = false)
+    @JoinColumn(name = "product_categories_id", nullable = false)
     private ProductCategories productCategories;
 }

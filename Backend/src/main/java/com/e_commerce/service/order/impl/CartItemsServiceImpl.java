@@ -79,7 +79,7 @@ public class CartItemsServiceImpl implements CartItemsService {
                 productVariants.getId(),
                 variantValues.getId()
         )
-                : productVariantsValuesService.checkProductVariantAvailability(
+                : productVariantsService.checkProductVariantAvailability(
                 productVariants.getId()
         );
 

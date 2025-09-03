@@ -64,4 +64,12 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
     public Integer checkProductVariantAvailability(Integer productVariantId) {
         return productVariantRepository.checkProductVariantAvailability(productVariantId);
     }
+
+    @Override
+    public void decreaseStock(Integer productVariantId, Integer quantity) {
+        int result = productVariantRepository.decreaseStock(productVariantId, quantity);
+        if (result == 0) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+        }
+    }
 }

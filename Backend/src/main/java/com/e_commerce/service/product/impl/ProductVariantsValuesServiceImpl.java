@@ -53,7 +53,10 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     }
 
     @Override
-    public Integer checkProductVariantAvailability(Integer productVariantId) {
-        return productVariantValuesRepository.checkProductVariantAvailability(productVariantId);
+    public void decreaseStock(Integer productVariantId, Integer variantValueId, Integer quantity) {
+        int result = productVariantValuesRepository.decreaseStock(productVariantId, variantValueId, quantity);
+        if (result == 0) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_VALUE_OUT_OF_STOCK);
+        }
     }
 }
