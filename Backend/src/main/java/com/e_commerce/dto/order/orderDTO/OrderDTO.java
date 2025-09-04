@@ -22,4 +22,6 @@ public class OrderDTO {
 
     @JsonFormat(pattern = "HH:mm:ss dd/MM/yyyy")
     private LocalDateTime orderTime;
+
+    private String note;
 }

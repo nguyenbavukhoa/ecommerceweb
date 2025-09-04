@@ -30,7 +30,7 @@ public class CustomException extends RuntimeException {
 
     public CustomException(List<ErrorResponse> errors, String additionalDetail) {
         super(errors.stream()
-                .map(e -> e.getMessage() + (additionalDetail != null ? " (ID: " + additionalDetail + ")" : ""))
+                .map(e -> e.getMessage() + (additionalDetail != null ? " (" + additionalDetail + ")" : ""))
                 .collect(Collectors.joining(", ")));
         this.errors = errors;
         this.additionalDetail = additionalDetail;
@@ -43,7 +43,7 @@ public class CustomException extends RuntimeException {
 
     public List<String> getErrorMessagesWithId() {
         return errors.stream()
-                .map(e -> e.getMessage() + (additionalDetail != null ? " (ID: " + additionalDetail + ")" : ""))
+                .map(e -> e.getMessage() + (additionalDetail != null ? " (" + additionalDetail + ")" : ""))
                 .collect(Collectors.toList());
     }
 

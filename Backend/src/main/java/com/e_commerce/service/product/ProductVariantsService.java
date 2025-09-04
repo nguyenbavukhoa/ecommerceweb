@@ -15,4 +15,6 @@ public interface ProductVariantsService {
     ProductVariantsDTO updateProductVariant(ProductVariantsUpdateDTO productVariantsUpdateDTO, Integer id);
 
     Integer checkProductVariantAvailability(Integer productVariantId);
+
+    void decreaseStock(Integer productVariantId, Integer quantity);
 }

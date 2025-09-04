@@ -17,5 +17,5 @@ public interface ProductVariantsValuesService {
 
     Integer isVariantValueAvailable(Integer variantId, Integer valueId);
 
-    Integer checkProductVariantAvailability(Integer productVariantId);
+    void decreaseStock(Integer productVariantId, Integer variantValueId, Integer quantity);
 }

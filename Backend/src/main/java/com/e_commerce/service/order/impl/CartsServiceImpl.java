@@ -1,7 +1,5 @@
 package com.e_commerce.service.order.impl;
 
-import com.e_commerce.dto.order.cartDTO.CartCreateForm;
-import com.e_commerce.dto.order.cartDTO.CartDTO;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.exceptions.CustomException;
@@ -50,8 +48,10 @@ public class CartsServiceImpl implements CartsService {
 
     @Override
     public Carts getCartByAccountId(Integer accountId) {
+        log.info("Fetching cart for account ID: {}", accountId);
         return cartsRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new CustomException(ErrorResponse.CART_NOT_FOUND));
+
     }
 
 

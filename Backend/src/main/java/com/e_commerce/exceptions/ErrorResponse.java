@@ -46,6 +46,7 @@ public enum ErrorResponse {
     PRODUCT_INACTIVE(3005, "Product is inactive", HttpStatus.BAD_REQUEST),
     PRODUCT_DESCRIPTION_INVALID(3006, "Invalid product description", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_INVALID(3007, "Invalid product image", HttpStatus.BAD_REQUEST),
+    PRODUCT_STATUS_INVALID(3008, "Invalid product status", HttpStatus.BAD_REQUEST),
 
     // Product Variants Errors
     PRODUCT_VARIANT_NOT_FOUND(3101, "Product variant not found", HttpStatus.NOT_FOUND),
@@ -75,6 +76,7 @@ public enum ErrorResponse {
     PRODUCT_VARIANT_VALUE_ALREADY_EXISTS(4202, "Product variant value already exists", HttpStatus.CONFLICT),
     PRODUCT_VARIANT_VALUE_QUANTITY_INVALID(4203, "Invalid product variant value quantity", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_VALUE_DUPLICATE_COMBINATION(4204, "Duplicate variant value combination", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_VALUE_OUT_OF_STOCK(4205, "Product variant or variant value is out of stock", HttpStatus.CONFLICT),
 
     // Cart Errors
     CART_NOT_FOUND(5001, "Cart not found", HttpStatus.NOT_FOUND),
@@ -87,7 +89,7 @@ public enum ErrorResponse {
     CART_ITEM_NOT_FOUND(5101, "Cart item not found", HttpStatus.NOT_FOUND),
     CART_ITEM_ALREADY_EXISTS(5102, "Cart item already exists", HttpStatus.CONFLICT),
     CART_ITEM_QUANTITY_INVALID(5103, "Invalid cart item quantity", HttpStatus.BAD_REQUEST),
-    CART_ITEM_QUANTITY_EXCEEDS_STOCK(5104, "Cart item quantity exceeds available stock . Available: %d, Requested: %d", HttpStatus.CONFLICT),
+    CART_ITEM_QUANTITY_EXCEEDS_STOCK(5104, "Cart item quantity exceeds available stock .", HttpStatus.CONFLICT),
     CART_ITEM_PRODUCT_UNAVAILABLE(5105, "Product variant is unavailable", HttpStatus.BAD_REQUEST),
 
     // Order Errors

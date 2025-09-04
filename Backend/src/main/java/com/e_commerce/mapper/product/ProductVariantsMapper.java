@@ -15,7 +15,7 @@ public class ProductVariantsMapper {
     public ProductVariantsDTO covertEntityToDTO(ProductVariants productVariants) {
         return ProductVariantsDTO.builder()
                 .id(productVariants.getId())
-                .productId(productVariants.getProductId().getId())
+                .productId(productVariants.getProduct().getId())
                 .sku(productVariants.getSku())
                 .price(productVariants.getPrice())
                 .stock(productVariants.getStockQuantity())

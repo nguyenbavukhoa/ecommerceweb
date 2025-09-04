@@ -14,6 +14,7 @@ import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrderItemsRepository;
 import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.ProductVariantsValuesService;
 import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
 import org.hibernate.query.Order;
@@ -30,6 +31,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     private final OrderItemsRepository orderItemsRepository;
     private final ProductVariantsService productVariantsService;
     private final VariantValuesService variantValuesService;
+    private final ProductVariantsValuesService productVariantsValuesService;
 
     @Override
     public OrderItems getOrderItemsEntityById(Integer id) {
@@ -72,9 +74,25 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         return orderItemsRepository.saveAll(orderItems);
     }
 
+    @Override
+    public void validateCartItemsStock(List<CartItems> cartItems) {
+        for (CartItems cartItem : cartItems) {
+            ProductVariants productVariant = cartItem.getProductVariant();
+            if (productVariant.getStockQuantity() < cartItem.getQuantity()) {
+                throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+            }
+
+        }
+    }
+
     private OrderItems buildOrderItem(ProductVariants productVariants, VariantValues variantValues, Integer quantity, Orders order, String note) {
-        if (productVariants.getStockQuantity() < quantity) {
-            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+        int availableQuantity = (variantValues != null)
+                ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
+                : productVariantsService.checkProductVariantAvailability(productVariants.getId());
+
+        if (availableQuantity < quantity) {
+            String stockInfo = "Available: " + availableQuantity + ", Requested: " + quantity;
+            throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
         }
 
         BigDecimal price = productVariants.getPrice();

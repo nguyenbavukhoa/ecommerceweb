@@ -14,10 +14,10 @@ public class ProductCategories extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Name")
+    @Column(name = "name")
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "CategoryId",nullable = false)
+    @JoinColumn(name = "category_id",nullable = false)
     private Category categoryId;
 }

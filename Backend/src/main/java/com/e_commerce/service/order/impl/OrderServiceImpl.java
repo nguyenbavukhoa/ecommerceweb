@@ -17,14 +17,20 @@ import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.order.OrderService;
+import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.ProductVariantsValuesService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
     private final OrdersMapper ordersMapper;
     private final OrdersRepository ordersRepository;
@@ -32,6 +38,8 @@ public class OrderServiceImpl implements OrderService {
     private final CartsService cartsService;
     private final CartItemsService cartItemsService;
     private final OrderItemsService orderItemsService;
+    private final ProductVariantsService productVariantsService;
+    private final ProductVariantsValuesService productVariantsValuesService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -40,37 +48,61 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Orders createOrder(OrderCreateForm orderCreateForm) {
+    @Transactional
+    public OrderDTO createOrder(OrderCreateForm orderCreateForm) {
+        log.info("Creating order with form: {}", orderCreateForm);
         Account account = accountService.getAccountAuth();
 
         Carts carts = cartsService.getCartByAccountId(account.getId());
+        log.info("Cart for Account ID {}: {}", account.getId(), carts);
 
+        log.info("Cart ID: {}", carts.getId());
         List<CartItems> selectedCartItems  = cartItemsService.getCartItemsByCartId(carts.getId());
+
+        log.info("Selected Cart Items: {}", selectedCartItems.stream()
+                .map(ci -> "CartItem{id=" + ci.getId() + ", productVariantId=" + ci.getProductVariant().getId() + ", quantity=" + ci.getQuantity() + "}")
+                .collect(Collectors.joining(", ")));
+
 
         if (selectedCartItems  == null || selectedCartItems .isEmpty()) {
             throw new CustomException(ErrorResponse.CART_EMPTY);
         }
 
-        // Check số lượng tồn kho của từng sản phẩm trong giỏ hàng đã chọn
-
         // Tính toán tổng tiền những sản phẩm trong giỏ hàng đã chọn
+        BigDecimal total = BigDecimal.ZERO;
+        for (CartItems cartItem : selectedCartItems ) {
+            BigDecimal itemPrice = cartItem.getProductVariant().getPrice();
 
+            if (cartItem.getVariantValue() != null) {
+                itemPrice = itemPrice.add(cartItem.getVariantValue().getPrice());
+            }
+            total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        }
 
 
         Orders order = ordersMapper.convertCreateDTOToEntity(orderCreateForm);
         order.setId(IdGenerator.getGenerationId());
         order.setAccount(account);
+        order.setTotalPrice(total);
+        order.setNote(orderCreateForm.getNote());
         order = ordersRepository.save(order);
 
-        // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo
+        // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)
         orderItemsService.createOrderItemsFromCartItem(selectedCartItems, order);
 
         // Cập nhật số lượng tồn kho của từng sản phẩm trong giỏ hàng đã chọn
+        for (CartItems cartItem : selectedCartItems) {
+            productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
+
+            if (cartItem.getVariantValue() != null) {
+                productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getVariantValue().getId(), cartItem.getQuantity());
+            }
+        }
 
         // Xóa các CartItems đã chọn khỏi giỏ hàng
         cartItemsService.deleteCartItems(selectedCartItems.stream().map(CartItems::getId).collect(Collectors.toList()));
 
-        return order;
+        return ordersMapper.convertEntityToDTO(order);
     }
 
     @Override

@@ -22,14 +22,14 @@ public class Orders extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "AccountId", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "OrderStatus", nullable = false)
+    @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus;
 
-    @Column(name = "OrderTime", nullable = false)
+    @Column(name = "order_time", nullable = false)
     private LocalDateTime orderTime;
 
     private BigDecimal totalPrice;

@@ -17,19 +17,19 @@ public class Product extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "IsActive", nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @Column(name = "Name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "Description")
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "ImgMain")
+    @Column(name = "img_main")
     private String imgMain;
 
-    @Column(name = "PriceBase", nullable = false)
+    @Column(name = "price_base", nullable = false)
     private BigDecimal priceBase;
 
     @ManyToOne

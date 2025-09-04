@@ -33,7 +33,7 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
     public ProductVariantsDTO createProductVariant(ProductVariantsCreateDTO productVariantsCreateDTO) {
         ProductVariants productVariants = productVariantsMapper.covertCreateDTOToEntity(productVariantsCreateDTO);
         productVariants.setId(IdGenerator.getGenerationId());
-        productVariants.setProductId(productService.getProductEntityById(productVariantsCreateDTO.getProductId()));
+        productVariants.setProduct(productService.getProductEntityById(productVariantsCreateDTO.getProductId()));
         productVariants.setVariantOption(variantOptionsService.getVariantOptionEntityById(productVariantsCreateDTO.getVariantOptionId()));
         return productVariantsMapper.covertEntityToDTO(productVariantRepository.save(productVariants));
     }
@@ -62,6 +62,21 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
 
     @Override
     public Integer checkProductVariantAvailability(Integer productVariantId) {
-        return productVariantRepository.checkProductVariantAvailability(productVariantId);
+        Integer availableQty = productVariantRepository.checkProductVariantAvailability(productVariantId);
+        if (availableQty == null) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_NOT_FOUND);
+        }
+        if (availableQty <= 0) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+        }
+        return availableQty;
+    }
+
+    @Override
+    public void decreaseStock(Integer productVariantId, Integer quantity) {
+        int result = productVariantRepository.decreaseStock(productVariantId, quantity);
+        if (result == 0) {
+            throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
+        }
     }
 }
