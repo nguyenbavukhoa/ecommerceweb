@@ -19,7 +19,7 @@ public class ProductVariants extends Timestamped {
 
     @ManyToOne
     @JoinColumn(nullable = false,name = "product_id")
-    private Product productId;
+    private Product product;
 
     @Column(nullable = false,name = "sku")
     private String sku;

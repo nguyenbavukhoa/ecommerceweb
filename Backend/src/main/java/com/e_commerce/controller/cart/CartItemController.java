@@ -6,6 +6,7 @@ import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemUpdateForm;
 import com.e_commerce.service.order.CartItemsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class CartItemController {
     private final CartItemsService cartItemsService;
 
     @PostMapping("/addCart")
-    public ResponseEntity<ApiResponse<CartItemDTO>> addToCart(@RequestBody CartItemCreateForm cartItemCreateForm, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<CartItemDTO>> addToCart(@Valid @RequestBody CartItemCreateForm cartItemCreateForm, HttpServletRequest request){
         log.info("Received add to cart request: {}", cartItemCreateForm);
         CartItemDTO cartItemDTO = cartItemsService.addToCart(cartItemCreateForm);
         log.info("CartItemDTO: {}", cartItemDTO);

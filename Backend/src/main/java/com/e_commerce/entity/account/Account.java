@@ -45,6 +45,7 @@ public class Account extends Timestamped implements UserDetails {
     private AccountRole role;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private UserInformation userInformation;
 
     @Override

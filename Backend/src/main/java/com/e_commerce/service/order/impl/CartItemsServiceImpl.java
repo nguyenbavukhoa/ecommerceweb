@@ -50,12 +50,15 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
+        log.info("Adding to cart: {}", cartItemCreateForm.getQuantity());
 
         if(cartItemCreateForm.getQuantity() <= 0) {
+            log.info("Invalid quantity: {}", cartItemCreateForm.getQuantity());
             throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
         }
 
         Carts carts = cartsService.createCarts();
+        log.info("Cart ID: {}", carts.getId());
 
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
 
@@ -70,9 +73,13 @@ public class CartItemsServiceImpl implements CartItemsService {
                 variantValues != null ? variantValues.getId() : null
         );
 
+        log.info("Existing cart item: {}", existingCartItem);
 
         int existingQuantity = existingCartItem.map(CartItems::getQuantity).orElse(0);
         int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
+
+        log.info("Existing quantity: {}, New quantity: {}, Total requested quantity: {}",
+                existingQuantity, cartItemCreateForm.getQuantity(), totalRequestedQuantity);
 
         int availableQuantity = (variantValues != null)
                 ? productVariantsValuesService.isVariantValueAvailable(
@@ -82,6 +89,8 @@ public class CartItemsServiceImpl implements CartItemsService {
                 : productVariantsService.checkProductVariantAvailability(
                 productVariants.getId()
         );
+
+        log.info("Available quantity: {}, Total requested quantity: {}", availableQuantity, totalRequestedQuantity);
 
         if(availableQuantity < totalRequestedQuantity || availableQuantity <= 0) {
             String stockInfo = "Available: " + availableQuantity + ", Requested: " + totalRequestedQuantity;
@@ -100,7 +109,7 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setProductVariant(productVariants);
         cartItems.setQuantity(cartItemCreateForm.getQuantity());
         cartItems.setVariantValue(variantValues);
-        cartItems.setSelected(false);
+        cartItems.setSelected(true);
         cartItems.setNote(cartItemCreateForm.getNote());
 
 

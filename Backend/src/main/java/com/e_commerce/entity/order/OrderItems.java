@@ -19,24 +19,24 @@ public class OrderItems extends Timestamped {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "OrderId", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Orders order;
 
     @ManyToOne
-    @JoinColumn(name = "ProductVariantsId", nullable = false)
+    @JoinColumn(name = "product_variants_id", nullable = false)
     private ProductVariants productVariant;
 
     @ManyToOne
-    @JoinColumn(name = "VariantValuesId", nullable = true)
+    @JoinColumn(name = "variant_values_id", nullable = true)
     private VariantValues variantValue;
 
-    @Column(name = "Quantity", nullable = false, columnDefinition = "int default 1")
+    @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
 
-    @Column(name = "Note")
+    @Column(name = "note")
     private String note;
 
-    @Column(name = "UnitPrice", nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
 }

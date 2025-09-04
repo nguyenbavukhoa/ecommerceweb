@@ -11,7 +11,7 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariants,
     @Query("""
         SELECT pv.stockQuantity
         FROM ProductVariants pv
-        JOIN pv.productId p
+        JOIN pv.product p
         WHERE pv.id = :productVariantId
           AND p.isActive = true
           AND pv.productVariantsStatus = 'ACTIVE'

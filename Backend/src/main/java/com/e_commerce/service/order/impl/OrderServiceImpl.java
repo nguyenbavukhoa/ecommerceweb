@@ -20,6 +20,7 @@ import com.e_commerce.service.order.OrderService;
 import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.service.product.ProductVariantsValuesService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
     private final OrdersMapper ordersMapper;
     private final OrdersRepository ordersRepository;
@@ -47,12 +49,20 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Orders createOrder(OrderCreateForm orderCreateForm) {
+    public OrderDTO createOrder(OrderCreateForm orderCreateForm) {
+        log.info("Creating order with form: {}", orderCreateForm);
         Account account = accountService.getAccountAuth();
 
         Carts carts = cartsService.getCartByAccountId(account.getId());
+        log.info("Cart for Account ID {}: {}", account.getId(), carts);
 
+        log.info("Cart ID: {}", carts.getId());
         List<CartItems> selectedCartItems  = cartItemsService.getCartItemsByCartId(carts.getId());
+
+        log.info("Selected Cart Items: {}", selectedCartItems.stream()
+                .map(ci -> "CartItem{id=" + ci.getId() + ", productVariantId=" + ci.getProductVariant().getId() + ", quantity=" + ci.getQuantity() + "}")
+                .collect(Collectors.joining(", ")));
+
 
         if (selectedCartItems  == null || selectedCartItems .isEmpty()) {
             throw new CustomException(ErrorResponse.CART_EMPTY);
@@ -73,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
         Orders order = ordersMapper.convertCreateDTOToEntity(orderCreateForm);
         order.setId(IdGenerator.getGenerationId());
         order.setAccount(account);
+        order.setTotalPrice(total);
         order = ordersRepository.save(order);
 
         // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)
@@ -90,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
         // Xóa các CartItems đã chọn khỏi giỏ hàng
         cartItemsService.deleteCartItems(selectedCartItems.stream().map(CartItems::getId).collect(Collectors.toList()));
 
-        return order;
+        return ordersMapper.convertEntityToDTO(order);
     }
 
     @Override

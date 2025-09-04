@@ -48,8 +48,10 @@ public class CartsServiceImpl implements CartsService {
 
     @Override
     public Carts getCartByAccountId(Integer accountId) {
+        log.info("Fetching cart for account ID: {}", accountId);
         return cartsRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new CustomException(ErrorResponse.CART_NOT_FOUND));
+
     }
 
 

@@ -88,7 +88,7 @@ public enum ErrorResponse {
     CART_ITEM_NOT_FOUND(5101, "Cart item not found", HttpStatus.NOT_FOUND),
     CART_ITEM_ALREADY_EXISTS(5102, "Cart item already exists", HttpStatus.CONFLICT),
     CART_ITEM_QUANTITY_INVALID(5103, "Invalid cart item quantity", HttpStatus.BAD_REQUEST),
-    CART_ITEM_QUANTITY_EXCEEDS_STOCK(5104, "Cart item quantity exceeds available stock . Available: %d, Requested: %d", HttpStatus.CONFLICT),
+    CART_ITEM_QUANTITY_EXCEEDS_STOCK(5104, "Cart item quantity exceeds available stock .", HttpStatus.CONFLICT),
     CART_ITEM_PRODUCT_UNAVAILABLE(5105, "Product variant is unavailable", HttpStatus.BAD_REQUEST),
 
     // Order Errors

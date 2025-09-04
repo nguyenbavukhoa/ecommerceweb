@@ -12,7 +12,7 @@ public interface ProductVariantValuesRepository extends JpaRepository<ProductVar
         SELECT pvv.quantity
         FROM ProductVariantValues pvv
         JOIN pvv.productVariants pv
-        JOIN pv.productId p
+        JOIN pv.product p
         WHERE pv.id = :variantId
           AND pvv.variantValues.id = :valueId
           AND pv.productVariantsStatus = 'ACTIVE'
