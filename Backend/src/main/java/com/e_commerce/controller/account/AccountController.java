@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,5 +32,11 @@ public class AccountController {
     public ResponseEntity<ApiResponse<AccountDTO>> register(@Valid @RequestBody RegistrationForm registrationForm, HttpServletRequest request) {
         AccountDTO register = accountService.createAccount(registrationForm);
         return ResponseEntity.ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
+    }
+
+    @GetMapping("/Customer")
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getCustomerInfo(HttpServletRequest request) {
+        List<AccountDTO> customerInfo = accountService.getCustomerInfoList();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
     }
 }

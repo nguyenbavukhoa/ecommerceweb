@@ -26,6 +26,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import com.e_commerce.enums.AccountRole;
 
 @Service
 @Slf4j
@@ -37,8 +39,8 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final UserInformationService userInformationService;
 
-
-    public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper, AccountRepository accountRepository, UserInformationService userInformationService) {
+    public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
+            AccountRepository accountRepository, UserInformationService userInformationService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
@@ -52,11 +54,11 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findByEmail(loginForm.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
 
-        if(account.isEnabled()){
+        if (account.isEnabled()) {
             throw new CustomException(ErrorResponse.ACCOUNT_DISABLED);
         }
 
-        if(!account.isAccountNonLocked()){
+        if (!account.isAccountNonLocked()) {
             throw new CustomException(ErrorResponse.ACCOUNT_LOCKED);
         }
 
@@ -106,6 +108,22 @@ public class AccountServiceImpl implements AccountService {
             throw new CustomException(ErrorResponse.UNAUTHORIZED);
         }
 
-        return  (Account) authentication.getPrincipal();
+        return (Account) authentication.getPrincipal();
+    }
+
+    @Override
+    public List<AccountDTO> getCustomerInfoList() {
+        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
+        log.info("Customers: {}", customers.size());
+        if (customers.isEmpty()) {
+            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+        }
+        return customers.stream().map(this::convertToDTO).toList();
+    }
+
+    private AccountDTO convertToDTO(Account account) {
+        UserInformation userInfo = account.getUserInformation();
+        String fullName = userInfo != null ? userInfo.getFullName() : null;
+        return accountMapper.convertEntityToDTO(account, fullName);
     }
 }
