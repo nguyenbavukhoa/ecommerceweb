@@ -46,6 +46,7 @@ public enum ErrorResponse {
     PRODUCT_INACTIVE(3005, "Product is inactive", HttpStatus.BAD_REQUEST),
     PRODUCT_DESCRIPTION_INVALID(3006, "Invalid product description", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_INVALID(3007, "Invalid product image", HttpStatus.BAD_REQUEST),
+    PRODUCT_STATUS_INVALID(3008, "Invalid product status", HttpStatus.BAD_REQUEST),
 
     // Product Variants Errors
     PRODUCT_VARIANT_NOT_FOUND(3101, "Product variant not found", HttpStatus.NOT_FOUND),

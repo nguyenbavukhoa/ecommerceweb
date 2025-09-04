@@ -1,11 +1,14 @@
 package com.e_commerce.controller.product;
 
 import com.e_commerce.dto.ApiResponse;
+import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
 import com.e_commerce.dto.product.productDTO.ProductDTO;
+import com.e_commerce.dto.product.productDTO.ProductFilter;
 import com.e_commerce.service.product.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,5 +26,18 @@ public class ProductController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, "Product created successfully", createdProduct, null, request.getRequestURI()));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageDTO<ProductDTO>>> getProducts(
+            ProductFilter filter,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request
+    ) {
+        PageDTO<ProductDTO> result = productService.getAllProductsAdmin(page,size, filter);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get products successfully", result, null, request.getRequestURI())
+        );
     }
 }

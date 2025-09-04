@@ -1,10 +1,12 @@
 package com.e_commerce.mapper.product;
 
+import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
 import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductUserViewDTO;
 import com.e_commerce.entity.product.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -63,6 +65,18 @@ public class ProductMapper {
                 .productCategory(productUpdateDTO.getProductCategory())
                 .description(productUpdateDTO.getDescription())
                 .imgMain(productUpdateDTO.getImage() != null ? productUpdateDTO.getImage().getOriginalFilename() : null)
+                .build();
+    }
+
+    public PageDTO<ProductDTO> convertProductPageToDTO(Page<Product> productPage) {
+        return PageDTO.<ProductDTO>builder()
+                .content(productPage.getContent().stream()
+                        .map(this::covertEntityToDTO)
+                        .collect(Collectors.toList()))
+                .page(productPage.getNumber())
+                .size(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
                 .build();
     }
 
