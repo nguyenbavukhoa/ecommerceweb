@@ -25,4 +25,6 @@ public interface CartItemsService {
     List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId);
 
     List<CartItems> getCartItemsByCartId(Integer cartId);
+
+    CartItemDTO changeSelectedCartItem(Integer id, boolean selected);
 }

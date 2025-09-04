@@ -55,4 +55,10 @@ public class CartItemController {
         cartItemsService.deleteCartItems(cartId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Delete cart item successfully", "Cart item deleted", null, request.getRequestURI()));
     }
+
+    @PutMapping("/{id}/select")
+    public ResponseEntity<ApiResponse<CartItemDTO>> changeSelectedCartItem(@PathVariable Integer id, @RequestParam boolean selected, HttpServletRequest request) {
+        CartItemDTO cartItemDTO = cartItemsService.changeSelectedCartItem(id, selected);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Change selected cart item successfully", cartItemDTO, null, request.getRequestURI()));
+    }
 }
