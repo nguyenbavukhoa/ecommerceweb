@@ -159,9 +159,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public List<CartItems> getCartItemsByCartId(Integer cartId) {
-        Account account = accountService.getAccountAuth();
-        Carts carts = cartsService.getCartByAccountId(account.getId());
-        return cartItemsRepository.findAllSelectedByCartId(carts.getId());
+        return cartItemsRepository.findAllSelectedByCartId(cartId);
     }
 
 }
