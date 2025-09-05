@@ -1,5 +1,6 @@
 package com.e_commerce.service.order;
 
+import com.e_commerce.dto.order.cartDTO.CheckoutForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.entity.order.Orders;
@@ -12,4 +13,6 @@ public interface OrderService {
     OrderDTO createOrder(OrderCreateForm orderCreateForm);
 
     Orders createOrderFromEntireCart(String orderNote);
+
+    OrderDTO checkout(CheckoutForm checkoutForm);
 }

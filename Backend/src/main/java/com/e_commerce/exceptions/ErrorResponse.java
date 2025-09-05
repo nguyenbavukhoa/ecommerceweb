@@ -110,6 +110,8 @@ public enum ErrorResponse {
     ORDER_ITEM_PRODUCT_UNAVAILABLE(6105, "Product variant is unavailable for order", HttpStatus.BAD_REQUEST),
     ORDER_ITEM_CANNOT_BE_MODIFIED(6106, "Order item cannot be modified", HttpStatus.CONFLICT),
 
+    // USER INFORMATION ERRORS
+    USER_INFO_NOT_FOUND(7001, "User information not found", HttpStatus.NOT_FOUND),
     ;
     private final int code;
     private final String message;

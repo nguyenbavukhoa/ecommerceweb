@@ -1,5 +1,6 @@
 package com.e_commerce.service.order.impl;
 
+import com.e_commerce.dto.order.cartDTO.CheckoutForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateFromCart;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
@@ -13,6 +14,8 @@ import com.e_commerce.mapper.order.OrdersMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrdersRepository;
 import com.e_commerce.service.account.AccountService;
+import com.e_commerce.service.account.UserInformationService;
+import com.e_commerce.service.account.impl.UserInformationServiceImpl;
 import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.order.OrderItemsService;
@@ -40,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemsService orderItemsService;
     private final ProductVariantsService productVariantsService;
     private final ProductVariantsValuesService productVariantsValuesService;
+    private final UserInformationService userInformationService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -48,7 +52,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
     public OrderDTO createOrder(OrderCreateForm orderCreateForm) {
         log.info("Creating order with form: {}", orderCreateForm);
         Account account = accountService.getAccountAuth();
@@ -64,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.joining(", ")));
 
 
-        if (selectedCartItems  == null || selectedCartItems .isEmpty()) {
+        if (selectedCartItems .isEmpty()) {
             throw new CustomException(ErrorResponse.CART_EMPTY);
         }
 
@@ -123,5 +126,12 @@ public class OrderServiceImpl implements OrderService {
                 .orderNote(orderNote)
                 .build();
         return null;
+    }
+
+    @Override
+    @Transactional
+    public OrderDTO checkout(CheckoutForm checkoutForm) {
+        userInformationService.updateUserInfo(checkoutForm.getUserInfo());
+        return createOrder(checkoutForm.getOrderForm());
     }
 }
