@@ -84,6 +84,7 @@ public class OrderServiceImpl implements OrderService {
         order.setId(IdGenerator.getGenerationId());
         order.setAccount(account);
         order.setTotalPrice(total);
+        order.setNote(orderCreateForm.getNote());
         order = ordersRepository.save(order);
 
         // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)

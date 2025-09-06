@@ -109,7 +109,7 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setProductVariant(productVariants);
         cartItems.setQuantity(cartItemCreateForm.getQuantity());
         cartItems.setVariantValue(variantValues);
-        cartItems.setSelected(true);
+        cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
 
 
@@ -159,9 +159,14 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public List<CartItems> getCartItemsByCartId(Integer cartId) {
-        Account account = accountService.getAccountAuth();
-        Carts carts = cartsService.getCartByAccountId(account.getId());
-        return cartItemsRepository.findAllSelectedByCartId(carts.getId());
+        return cartItemsRepository.findAllSelectedByCartId(cartId);
+    }
+
+    @Override
+    public CartItemDTO changeSelectedCartItem(Integer id, boolean selected) {
+        CartItems cartItems = getCartItemsById(id);
+        cartItems.setSelected(selected);
+        return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }
 
 }

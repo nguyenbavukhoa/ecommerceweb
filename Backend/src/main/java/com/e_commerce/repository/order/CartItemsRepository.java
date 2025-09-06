@@ -2,6 +2,7 @@ package com.e_commerce.repository.order;
 
 import com.e_commerce.entity.order.CartItems;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -51,5 +52,10 @@ public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
       AND ci.selected = true
 """)
     List<CartItems> findAllSelectedByCartId(Integer cartId);
+
+    @Modifying
+    @Query("UPDATE CartItems ci SET ci.selected = :selected WHERE ci.id = :id")
+    void updateSelected(@Param("id") Integer id, @Param("selected") boolean selected);
+
 
 }

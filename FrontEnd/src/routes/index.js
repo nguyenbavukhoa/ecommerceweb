@@ -14,11 +14,6 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/user-info-detail",
-    page: UserInfoPage,
-    isShowHeader: true,
-  },
-  {
     path: "/order",
     page: OrderPage,
     isShowHeader: true,

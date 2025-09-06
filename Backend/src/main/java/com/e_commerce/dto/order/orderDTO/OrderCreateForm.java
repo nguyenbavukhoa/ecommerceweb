@@ -23,4 +23,6 @@ public class OrderCreateForm {
     @NotNull(message = "Order items must not be null")
     @NotEmpty(message = "Order must have at least one item")
     private List<OrderItemsCreateForm> listOrderItems;
+
+    private String note;
 }
