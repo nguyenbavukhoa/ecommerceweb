@@ -17,5 +17,5 @@ public interface AccountService extends UserDetailsService {
 
     Account getAccountAuth();
 
-    List<AccountDTO> getCustomerInfoList();
+//    List<AccountDTO> getCustomerInfoList();
 }

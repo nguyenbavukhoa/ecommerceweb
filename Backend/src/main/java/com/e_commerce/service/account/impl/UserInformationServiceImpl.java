@@ -16,6 +16,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -38,29 +41,40 @@ public class UserInformationServiceImpl implements UserInformationService {
         return null;
     }
 
-    @Override
-    public UserInfoDTO updateUserInfo(UserInfoUpdateDTO userInfoCreateDTO) {
-        Account account = accountService.getAccountAuth();
-        UserInformation userInformation = userInformationRepository.findByAccount_Id(account.getId())
-                .orElseThrow(() -> new CustomException(ErrorResponse.USER_INFO_NOT_FOUND));
-
-            if (userInfoCreateDTO.getFullName() != null) {
-                userInformation.setFullName(userInfoCreateDTO.getFullName());
-            }
-
-            if (userInfoCreateDTO.getPhoneNumber() != null) {
-                userInformation.setPhoneNumber(userInfoCreateDTO.getPhoneNumber());
-            }
-
-            if (userInfoCreateDTO.getAddress() != null) {
-                userInformation.setAddress(userInfoCreateDTO.getAddress());
-            }
-        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
-    }
+//    @Override
+//    public UserInfoDTO updateUserInfo(UserInfoUpdateDTO userInfoCreateDTO) {
+//        Account account = accountService.getAccountAuth();
+//        Optional<UserInformation> existingUserInfo  = userInformationRepository.findByAccount_Id(account.getId());
+//
+//        if(existingUserInfo.isPresent()) {
+//
+//        }else{
+//            UserInformation userInformation = existingUserInfo.get();
+//            userInformation.setFullName(userInfoCreateDTO.getFullName());
+//            userInformation.setAddress(userInfoCreateDTO.getAddress());
+//            userInformation.setPhoneNumber(userInfoCreateDTO.getPhoneNumber());
+//            userInformation.setGender(userInfoCreateDTO.getGender());
+//            return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
+//        }
+//
+//        String address = userInfoCreateDTO.getAddress();
+//        String phoneNumber = userInfoCreateDTO.getPhoneNumber();
+//
+//        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
+//    }
 
     @Override
     public UserInformation getUserInformationEntityById(int id) {
         return userInformationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorResponse.USER_INFO_NOT_FOUND));
     }
+
+    @Override
+    public List<UserInfoDTO> getAllUserInfoByAccount() {
+        Account account = accountService.getAccountAuth();
+        List<UserInformation> userInformationList = userInformationRepository.findByAccount_IdOrderByIsDefaultDesc(account.getId());
+        return userInformationMapper.convertEntityListToDTOList(userInformationList);
+    }
+
+
 }

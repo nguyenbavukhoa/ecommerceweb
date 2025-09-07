@@ -40,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
     private final UserInformationService userInformationService;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-            AccountRepository accountRepository, UserInformationService userInformationService) {
+            AccountRepository accountRepository, @Lazy  UserInformationService userInformationService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
@@ -110,20 +110,20 @@ public class AccountServiceImpl implements AccountService {
 
         return (Account) authentication.getPrincipal();
     }
+//
+//    @Override
+//    public List<AccountDTO> getCustomerInfoList() {
+//        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
+//        log.info("Customers: {}", customers.size());
+//        if (customers.isEmpty()) {
+//            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+//        }
+//        return customers.stream().map(this::convertToDTO).toList();
+//    }
 
-    @Override
-    public List<AccountDTO> getCustomerInfoList() {
-        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
-        log.info("Customers: {}", customers.size());
-        if (customers.isEmpty()) {
-            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
-        }
-        return customers.stream().map(this::convertToDTO).toList();
-    }
-
-    private AccountDTO convertToDTO(Account account) {
-        UserInformation userInfo = account.getUserInformation();
-        String fullName = userInfo != null ? userInfo.getFullName() : null;
-        return accountMapper.convertEntityToDTO(account, fullName);
-    }
+//    private AccountDTO convertToDTO(Account account) {
+//        UserInformation userInfo = account.getUserInformation();
+//        String fullName = userInfo != null ? userInfo.getFullName() : null;
+//        return accountMapper.convertEntityToDTO(account, fullName);
+//    }
 }

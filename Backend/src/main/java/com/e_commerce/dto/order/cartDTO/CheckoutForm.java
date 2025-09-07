@@ -14,6 +14,6 @@ public class CheckoutForm {
     private OrderCreateForm orderForm;
 
     @Valid
-    @NotNull(message = "User info cannot be null")
-    private UserInfoUpdateDTO userInfo;
+    @NotNull(message = "User info id cannot be null")
+    private Integer userInfoId;
 }

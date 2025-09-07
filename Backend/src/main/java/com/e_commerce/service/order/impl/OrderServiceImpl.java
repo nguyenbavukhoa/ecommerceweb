@@ -131,7 +131,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDTO checkout(CheckoutForm checkoutForm) {
-        userInformationService.updateUserInfo(checkoutForm.getUserInfo());
+        Account account = accountService.getAccountAuth();
+//        userInformationService.updateUserInfo(checkoutForm.getUserInfo());
         return createOrder(checkoutForm.getOrderForm());
     }
 }

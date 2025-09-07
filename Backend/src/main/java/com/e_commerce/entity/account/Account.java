@@ -44,9 +44,9 @@ public class Account extends Timestamped implements UserDetails {
     @Column(name = "Role", nullable = false)
     private AccountRole role;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private UserInformation userInformation;
+    private List<UserInformation> userInformation;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

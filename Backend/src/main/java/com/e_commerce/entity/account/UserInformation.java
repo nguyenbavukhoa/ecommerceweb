@@ -28,8 +28,11 @@ public class UserInformation extends Timestamped {
     @Column(name = "PhoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "AccountId", nullable = false)
     @ToString.Exclude
     private Account account;
+
+    @Column(name = "IsDefault")
+    private Boolean isDefault = false;
 }
