@@ -19,10 +19,20 @@ public interface UserInformationRepository extends JpaRepository<UserInformation
     Optional<UserInformation> findByAccount_IdAndAddressAndPhoneNumber(
             @Param("accountId") Integer accountId,
             @Param("address") String address,
-            @Param("phoneNumber") String phoneNumber
-    );
+            @Param("phoneNumber") String phoneNumber);
 
     @Modifying
     @Query("UPDATE UserInformation ui SET ui.isDefault = :defaultStatus WHERE ui.account.id = :accountId")
-    void updateDefaultStatusByAccountId(@Param("accountId") Integer accountId, @Param("defaultStatus") Boolean defaultStatus);
+    void updateDefaultStatusByAccountId(@Param("accountId") Integer accountId,
+            @Param("defaultStatus") Boolean defaultStatus);
+
+    @Query(value = """
+                        SELECT if(count(*) > 0, TRUE, FALSE)
+            FROM account a JOIN user_information ui ON a.id = ui.account_id
+            WHERE a.id = :accountId
+              AND ui.fullname IS NOT NULL
+                AND ui.phone_number IS NOT NULL
+                AND ui.address IS NOT NULL""", nativeQuery = true)
+    Boolean validateForCheckout(@Param("accountId") int accountId);
+
 }

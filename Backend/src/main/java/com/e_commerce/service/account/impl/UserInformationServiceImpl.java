@@ -33,7 +33,21 @@ public class UserInformationServiceImpl implements UserInformationService {
         userInformation.setId(IdGenerator.getGenerationId());
         userInformation.setFullName(fullName);
         userInformation.setAccount(account);
-        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
+        return userInformationMapper.convertEntityToDTO(save(userInformation));
+    }
+
+    @Override
+    public UserInfoDTO createUserInfo(UserInfoCreateDTO userInfoCreateDTO) {
+        Account account = accountService.getAccountAuth();
+
+        UserInformation userInformation = userInformationMapper.convertCreateDTOToEntity(userInfoCreateDTO);
+        userInformation.setId(IdGenerator.getGenerationId());
+        userInformation.setAccount(account);
+        return userInformationMapper.convertEntityToDTO(save(userInformation));
+    }
+
+    private UserInformation save(UserInformation userInformation) {
+        return userInformationRepository.save(userInformation);
     }
 
     @Override
@@ -41,27 +55,25 @@ public class UserInformationServiceImpl implements UserInformationService {
         return null;
     }
 
-//    @Override
-//    public UserInfoDTO updateUserInfo(UserInfoUpdateDTO userInfoCreateDTO) {
-//        Account account = accountService.getAccountAuth();
-//        Optional<UserInformation> existingUserInfo  = userInformationRepository.findByAccount_Id(account.getId());
-//
-//        if(existingUserInfo.isPresent()) {
-//
-//        }else{
-//            UserInformation userInformation = existingUserInfo.get();
-//            userInformation.setFullName(userInfoCreateDTO.getFullName());
-//            userInformation.setAddress(userInfoCreateDTO.getAddress());
-//            userInformation.setPhoneNumber(userInfoCreateDTO.getPhoneNumber());
-//            userInformation.setGender(userInfoCreateDTO.getGender());
-//            return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
-//        }
-//
-//        String address = userInfoCreateDTO.getAddress();
-//        String phoneNumber = userInfoCreateDTO.getPhoneNumber();
-//
-//        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
-//    }
+    @Override
+    public UserInfoDTO updateUserInfo(Integer userInfoId, UserInfoUpdateDTO userInfoUpdateDTO) {
+        UserInformation userInformation = getUserInformationEntityById(userInfoId);
+
+        if (userInfoUpdateDTO.getFullName() != null) {
+            userInformation.setFullName(userInfoUpdateDTO.getFullName());
+        }
+        if (userInfoUpdateDTO.getPhoneNumber() != null) {
+            userInformation.setPhoneNumber(userInfoUpdateDTO.getPhoneNumber());
+        }
+        if (userInfoUpdateDTO.getAddress() != null) {
+            userInformation.setAddress(userInfoUpdateDTO.getAddress());
+        }
+        if (userInfoUpdateDTO.getGender() != null) {
+            userInformation.setGender(userInfoUpdateDTO.getGender());
+        }
+
+        return userInformationMapper.convertEntityToDTO(userInformationRepository.save(userInformation));
+    }
 
     @Override
     public UserInformation getUserInformationEntityById(int id) {
@@ -72,9 +84,14 @@ public class UserInformationServiceImpl implements UserInformationService {
     @Override
     public List<UserInfoDTO> getAllUserInfoByAccount() {
         Account account = accountService.getAccountAuth();
-        List<UserInformation> userInformationList = userInformationRepository.findByAccount_IdOrderByIsDefaultDesc(account.getId());
+        List<UserInformation> userInformationList = userInformationRepository
+                .findByAccount_IdOrderByIsDefaultDesc(account.getId());
         return userInformationMapper.convertEntityListToDTOList(userInformationList);
     }
 
+    public Boolean validateForCheckout() {
+        Account account = accountService.getAccountAuth();
 
+        return userInformationRepository.validateForCheckout(account.getId());
+    }
 }

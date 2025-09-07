@@ -14,4 +14,12 @@ import lombok.NoArgsConstructor;
 public class UserInfoCreateDTO {
     @Size(max = 255, message = "Fullname cannot exceed 255 characters")
     private String fullName;
+
+    private Gender gender;
+
+    @Size(max = 255, message = "Address cannot exceed 255 characters")
+    private String address;
+
+    @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number")
+    private String phoneNumber;
 }

@@ -13,12 +13,15 @@ import java.util.List;
 public interface UserInformationService {
     UserInfoDTO createUserInfo(Account account, String fullName);
 
+    UserInfoDTO createUserInfo(UserInfoCreateDTO userInfoCreateDTO);
+
     UserInfoDTO getUserInfoByAccountId(int accountId);
 
-//    UserInfoDTO updateUserInfo(UserInfoUpdateDTO userInfoCreateDTO);
+    UserInfoDTO updateUserInfo(Integer userInfoId, UserInfoUpdateDTO userInfoUpdateDTO);
 
     UserInformation getUserInformationEntityById(int id);
 
     List<UserInfoDTO> getAllUserInfoByAccount();
 
+    Boolean validateForCheckout();
 }
