@@ -23,5 +23,5 @@ public interface UserInformationService {
 
     List<UserInfoDTO> getAllUserInfoByAccount();
 
-    Boolean validateForCheckout();
+
 }

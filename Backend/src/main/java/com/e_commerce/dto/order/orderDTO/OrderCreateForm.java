@@ -25,4 +25,6 @@ public class OrderCreateForm {
     private List<OrderItemsCreateForm> listOrderItems;
 
     private String note;
+
+    private Integer userInfoId;
 }

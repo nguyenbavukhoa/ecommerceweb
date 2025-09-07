@@ -43,6 +43,7 @@ public class UserInformationServiceImpl implements UserInformationService {
         UserInformation userInformation = userInformationMapper.convertCreateDTOToEntity(userInfoCreateDTO);
         userInformation.setId(IdGenerator.getGenerationId());
         userInformation.setAccount(account);
+        userInformation.setIsDefault(!validateForCheckout(account.getId()));
         return userInformationMapper.convertEntityToDTO(save(userInformation));
     }
 
@@ -89,9 +90,7 @@ public class UserInformationServiceImpl implements UserInformationService {
         return userInformationMapper.convertEntityListToDTOList(userInformationList);
     }
 
-    public Boolean validateForCheckout() {
-        Account account = accountService.getAccountAuth();
-
-        return userInformationRepository.validateForCheckout(account.getId());
+    private boolean validateForCheckout(Integer accountId) {
+        return userInformationRepository.validateForCheckout(accountId);
     }
 }

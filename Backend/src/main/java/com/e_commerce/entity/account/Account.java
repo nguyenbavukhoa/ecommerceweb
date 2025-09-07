@@ -30,6 +30,11 @@ public class Account extends Timestamped implements UserDetails {
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message = "Account name cannot be blank")
+    @Column(name = "AccountName",nullable = false, length = 100)
+    @Size(min = 3, max = 100, message = "Account name must be between 3 and 100 characters")
+    private String accountName;
+
     @NotBlank(message = "Password cannot be blank")
     @Column(name = "Password",nullable = false, length = 800)
     @Size(min = 8, message = "Password must be at least 8 characters long")
@@ -46,8 +51,9 @@ public class Account extends Timestamped implements UserDetails {
     private AccountRole role;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
     private List<UserInformation> userInformation;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

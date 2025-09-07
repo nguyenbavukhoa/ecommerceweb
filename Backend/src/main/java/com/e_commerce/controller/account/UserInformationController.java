@@ -37,9 +37,4 @@ public class UserInformationController {
         return ResponseEntity.ok(new ApiResponse<>(true,"Update user info successfully",updatedUserInfo,null,request.getRequestURI()));
     }
 
-    @GetMapping("/validate")
-    public ResponseEntity<ApiResponse<Boolean>> validateForCheckout(HttpServletRequest request){
-        Boolean validateForCheckout = userInformationService.validateForCheckout();
-        return ResponseEntity.ok(new ApiResponse<>(true,"Validate for checkout successfully",validateForCheckout,null,request.getRequestURI()));
-    }
 }

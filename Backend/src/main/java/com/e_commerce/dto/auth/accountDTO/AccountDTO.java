@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class AccountDTO {
     private Integer id;
     private String email;
-    private String fullName;
+    private String accountName;
     private LocalDateTime createAt;
     private Boolean status;
     private String role;

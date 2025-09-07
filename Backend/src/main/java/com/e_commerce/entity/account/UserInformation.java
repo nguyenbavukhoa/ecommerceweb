@@ -30,7 +30,6 @@ public class UserInformation extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "AccountId", nullable = false)
-    @ToString.Exclude
     private Account account;
 
     @Column(name = "IsDefault")

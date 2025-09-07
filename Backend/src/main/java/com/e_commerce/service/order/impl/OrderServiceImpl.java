@@ -5,6 +5,7 @@ import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateFromCart;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.order.Orders;
@@ -53,8 +54,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDTO createOrder(OrderCreateForm orderCreateForm) {
+
         log.info("Creating order with form: {}", orderCreateForm);
         Account account = accountService.getAccountAuth();
+
+        UserInformation userInformation = userInformationService.getUserInformationEntityById(orderCreateForm.getUserInfoId());
 
         Carts carts = cartsService.getCartByAccountId(account.getId());
         log.info("Cart for Account ID {}: {}", account.getId(), carts);
@@ -88,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
         order.setAccount(account);
         order.setTotalPrice(total);
         order.setNote(orderCreateForm.getNote());
+        order.setUserInformation(userInformation);
         order = ordersRepository.save(order);
 
         // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)
