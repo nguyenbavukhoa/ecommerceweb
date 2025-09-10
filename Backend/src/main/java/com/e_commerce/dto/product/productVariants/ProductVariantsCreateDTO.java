@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -30,8 +31,8 @@ public class ProductVariantsCreateDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal price;
 
-//    @NotBlank(message = "Image URL is required")
-//    private String imgUrl;
+    @NotBlank(message = "Image URL is required")
+    private MultipartFile imgUrl;
 
     @NotNull(message = "Product variant status is required")
     private String productVariantsStatus;

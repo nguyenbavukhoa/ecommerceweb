@@ -59,7 +59,7 @@ public class CloudinaryService {
             uploadResult.put("customFileName", customFileName);
             uploadResult.put("originalFileName", originalFileName);
             uploadResult.put("folder", targetFolder);
-            uploadResult.put("filePath ", file.getResource().getURI().toString());
+
             log.info("Upload successful: {}", uploadResult);
             return uploadResult;
         } catch (IOException e) {
@@ -75,8 +75,9 @@ public class CloudinaryService {
         try {
             log.info("Deleting file with public_id: {}", publicId);
             return cloudinary.uploader().destroy(publicId, Map.of(
-                    "resource_type", "auto" // Tự động xác định loại tài nguyên (image, video, ...)
+                    "resource_type", "image"  // Tự động xác định loại tài nguyên (image, video, ...)
             ));
+
         } catch (IOException e) {
             log.error("Delete failed: {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -121,11 +122,7 @@ public class CloudinaryService {
      * Tạo tên file tùy chỉnh để tránh trùng lặp
      */
     private String generateCustomFileName(String originalFileName) {
-        String extension = "";
-
-        if (originalFileName != null && originalFileName.contains(".")) {
-            extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        }
-        return "upload_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString() + extension;
+        return "upload_" + System.currentTimeMillis() + "_" + UUID.randomUUID();
     }
+
 }

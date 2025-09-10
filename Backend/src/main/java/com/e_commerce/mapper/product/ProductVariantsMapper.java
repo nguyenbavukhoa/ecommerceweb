@@ -27,7 +27,6 @@ public class ProductVariantsMapper {
                 .price(productVariantsCreateDTO.getPrice())
                 .stockQuantity(productVariantsCreateDTO.getStockQuantity())
                 .sku(productVariantsCreateDTO.getSku())
-//                .imgUrl(productVariantsCreateDTO.getImgUrl())
                 .productVariantsStatus(ProductVariantsStatus.valueOf(productVariantsCreateDTO.getProductVariantsStatus()))
                 .build();
     }
