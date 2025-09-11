@@ -2,6 +2,7 @@ package com.e_commerce.entity.order;
 
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
+import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
@@ -43,4 +44,7 @@ public class Orders extends Timestamped {
     private List<OrderItems> orderItems;
 
     private String note;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payments;
 }
