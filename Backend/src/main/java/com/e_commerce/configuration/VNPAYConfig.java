@@ -1,5 +1,7 @@
 package com.e_commerce.configuration;
 
+import com.e_commerce.util.VNPayUtil;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,11 +12,12 @@ import java.util.Map;
 import java.util.TimeZone;
 
 @Configuration
+@Data
 public class VNPAYConfig {
     private final String vnp_TmnCode;
     private final String vnp_HashSecret;
     private final String vnp_Url;
-    private final String vnp_Returnurl;
+    private final String vnp_ReturnUrl;
     private final String vnp_Version;
     private final String vnp_Command;
     private final String vnp_CurrCode;
@@ -24,16 +27,16 @@ public class VNPAYConfig {
             @Value("${vnpay.tmnCode}") String vnp_TmnCode,
             @Value("${vnpay.hashSecret}") String vnp_HashSecret,
             @Value("${vnpay.url}") String vnp_Url,
-            @Value("${vnpay.returnUrl}") String vnp_Returnurl,
+            @Value("${vnpay.returnUrl}") String vnp_ReturnUrl,
             @Value("${vnpay.version}") String vnp_Version,
             @Value("${vnpay.command}") String vnp_Command,
-            @Value("${vnpay.currcode}") String vnp_CurrCode,
-            @Value("${vnpay.ordertype}") String vnp_OrderType
+            @Value("${vnpay.currCode}") String vnp_CurrCode,
+            @Value("${vnpay.orderType}") String vnp_OrderType
     ) {
         this.vnp_TmnCode = vnp_TmnCode;
         this.vnp_HashSecret = vnp_HashSecret;
         this.vnp_Url = vnp_Url;
-        this.vnp_Returnurl = vnp_Returnurl;
+        this.vnp_ReturnUrl = vnp_ReturnUrl;
         this.vnp_Version = vnp_Version;
         this.vnp_Command = vnp_Command;
         this.vnp_CurrCode = vnp_CurrCode;
@@ -48,10 +51,10 @@ public class VNPAYConfig {
         configMap.put("vnp_TmnCode", vnp_TmnCode);
         configMap.put("vnp_Locale", "vn");
         configMap.put("vnp_CurrCode", vnp_CurrCode);
-        configMap.put("vnp_TxnRef", "");
-        configMap.put("vnp_OrderInfo", "Thanh toan don hang");
+        configMap.put("vnp_TxnRef", VNPayUtil.getRandomNumber(8));
+        configMap.put("vnp_OrderInfo", "Thanh toan don hang :" +  VNPayUtil.getRandomNumber(8));
         configMap.put("vnp_OrderType", vnp_OrderType);
-        configMap.put("vnp_ReturnUrl", vnp_Returnurl);
+        configMap.put("vnp_ReturnUrl", vnp_ReturnUrl);
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
