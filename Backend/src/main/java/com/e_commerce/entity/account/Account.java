@@ -25,8 +25,8 @@ public class Account extends Timestamped implements UserDetails {
     @Id
     private Integer id;
 
-    @NotBlank(message = "Username cannot be blank")
-    @Column(nullable = false, unique = true, length = 100)
+    @NotBlank(message = "Email cannot be blank")
+    @Column(name = "email",nullable = false, unique = true, length = 100)
     @Email(message = "Invalid email format")
     private String email;
 

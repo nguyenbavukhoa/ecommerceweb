@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
         //build query url
         String queryUrl = VNPayUtil.getPaymentURL(vnpParamsMap, true); // Có Encode ký tự
         String hashData = VNPayUtil.getPaymentURL(vnpParamsMap, false); // Không Encode ký tự
-        String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getVnp_HashSecret(), hashData);
+        String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getVnp_SecretKey()  , hashData);
 
         queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
         String paymentUrl = vnPayConfig.getVnp_Url() + "?" + queryUrl;

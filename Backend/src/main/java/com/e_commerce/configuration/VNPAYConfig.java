@@ -15,7 +15,7 @@ import java.util.TimeZone;
 @Data
 public class VNPAYConfig {
     private final String vnp_TmnCode;
-    private final String vnp_HashSecret;
+    private final String vnp_SecretKey;
     private final String vnp_Url;
     private final String vnp_ReturnUrl;
     private final String vnp_Version;
@@ -25,7 +25,7 @@ public class VNPAYConfig {
 
     public VNPAYConfig(
             @Value("${vnpay.tmnCode}") String vnp_TmnCode,
-            @Value("${vnpay.hashSecret}") String vnp_HashSecret,
+            @Value("${vnpay.secretKey}") String vnp_SecretKey,
             @Value("${vnpay.url}") String vnp_Url,
             @Value("${vnpay.returnUrl}") String vnp_ReturnUrl,
             @Value("${vnpay.version}") String vnp_Version,
@@ -34,7 +34,7 @@ public class VNPAYConfig {
             @Value("${vnpay.orderType}") String vnp_OrderType
     ) {
         this.vnp_TmnCode = vnp_TmnCode;
-        this.vnp_HashSecret = vnp_HashSecret;
+        this.vnp_SecretKey = vnp_SecretKey;
         this.vnp_Url = vnp_Url;
         this.vnp_ReturnUrl = vnp_ReturnUrl;
         this.vnp_Version = vnp_Version;
@@ -49,11 +49,11 @@ public class VNPAYConfig {
         configMap.put("vnp_Version", vnp_Version);
         configMap.put("vnp_Command", vnp_Command);
         configMap.put("vnp_TmnCode", vnp_TmnCode);
-        configMap.put("vnp_Locale", "vn");
         configMap.put("vnp_CurrCode", vnp_CurrCode);
         configMap.put("vnp_TxnRef", VNPayUtil.getRandomNumber(8));
-        configMap.put("vnp_OrderInfo", "Thanh toan don hang :" +  VNPayUtil.getRandomNumber(8));
+        configMap.put("vnp_OrderInfo", "Thanh toan don hang:" +  VNPayUtil.getRandomNumber(8));
         configMap.put("vnp_OrderType", vnp_OrderType);
+        configMap.put("vnp_Locale", "vn");
         configMap.put("vnp_ReturnUrl", vnp_ReturnUrl);
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));

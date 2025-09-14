@@ -60,17 +60,12 @@ public class VNPayUtil {
         return paramsMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty()) // Lọc bỏ các entry có giá trị null hoặc rỗng
                 .sorted(Map.Entry.comparingByKey()) // Sắp xếp theo key(alphabet)
-//                .map(entry ->
-//                        (encodeKey ? URLEncoder.encode(entry.getKey(),
-//                                StandardCharsets.US_ASCII)
-//                                : entry.getKey()) + "=" +
-//                                URLEncoder.encode(entry.getValue()
-//                                        , StandardCharsets.US_ASCII))
-//                .map(entry -> entry.getKey() + "=" +
-//                        (encodeKey ? URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8)
-//                                : entry.getValue()))
-                .map(entry -> entry.getKey() + "=" +
-                        URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII))
+                .map(entry ->
+                        (encodeKey ? URLEncoder.encode(entry.getKey(),
+                                StandardCharsets.US_ASCII)
+                                : entry.getKey()) + "=" +
+                                URLEncoder.encode(entry.getValue()
+                                        , StandardCharsets.US_ASCII))
                 .collect(Collectors.joining("&"));
     }
 }
