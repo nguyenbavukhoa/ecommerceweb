@@ -93,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalPrice(total);
         order.setNote(orderCreateForm.getNote());
         order.setUserInformation(userInformation);
+
         order = ordersRepository.save(order);
 
         // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)
@@ -139,5 +140,11 @@ public class OrderServiceImpl implements OrderService {
         Account account = accountService.getAccountAuth();
 //        userInformationService.updateUserInfo(checkoutForm.getUserInfo());
         return createOrder(checkoutForm.getOrderForm());
+    }
+
+    @Override
+    public Orders getOrder() {
+        Account account = accountService.getAccountAuth();
+        return ordersRepository.findTopByAccount_IdOrderByOrderTimeDesc(account.getId()).orElseThrow(() -> new RuntimeException("Order not found for account id: " + account.getId()));
     }
 }

@@ -50,8 +50,6 @@ public class VNPAYConfig {
         configMap.put("vnp_Command", vnp_Command);
         configMap.put("vnp_TmnCode", vnp_TmnCode);
         configMap.put("vnp_CurrCode", vnp_CurrCode);
-        configMap.put("vnp_TxnRef", VNPayUtil.getRandomNumber(8));
-        configMap.put("vnp_OrderInfo", "Thanh toan don hang:" +  VNPayUtil.getRandomNumber(8));
         configMap.put("vnp_OrderType", vnp_OrderType);
         configMap.put("vnp_Locale", "vn");
         configMap.put("vnp_ReturnUrl", vnp_ReturnUrl);

@@ -15,4 +15,6 @@ public interface OrderService {
     Orders createOrderFromEntireCart(String orderNote);
 
     OrderDTO checkout(CheckoutForm checkoutForm);
+
+    Orders getOrder();
 }
