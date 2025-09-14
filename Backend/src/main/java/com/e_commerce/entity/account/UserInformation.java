@@ -15,23 +15,23 @@ public class UserInformation extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "Address")
+    @Column(name = "address")
     private String address;
 
-    @Column(name = "Fullname")
+    @Column(name = "fullname")
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Gender", length = 6)
+    @Column(name = "gender", length = 6)
     private Gender gender;
 
-    @Column(name = "PhoneNumber", length = 20, unique = true)
+    @Column(name = "phone_number", length = 20, unique = true)
     private String phoneNumber;
 
     @ManyToOne
-    @JoinColumn(name = "AccountId", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @Column(name = "IsDefault")
+    @Column(name = "is_default", nullable = false)
     private Boolean isDefault = false;
 }

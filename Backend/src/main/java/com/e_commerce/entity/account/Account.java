@@ -26,28 +26,28 @@ public class Account extends Timestamped implements UserDetails {
     private Integer id;
 
     @NotBlank(message = "Username cannot be blank")
-    @Column(name = "Username",nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 100)
     @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "Account name cannot be blank")
-    @Column(name = "AccountName",nullable = false, length = 100)
+    @Column(name = "account_name",nullable = false, length = 100)
     @Size(min = 3, max = 100, message = "Account name must be between 3 and 100 characters")
     private String accountName;
 
     @NotBlank(message = "Password cannot be blank")
-    @Column(name = "Password",nullable = false, length = 800)
+    @Column(name = "password",nullable = false, length = 800)
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "status", nullable = false)
     private Boolean status = false;
 
-    @Column(name = "Active", nullable = false)
+    @Column(name = "active", nullable = false)
     private Boolean active = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Role", nullable = false)
+    @Column(name = "role", nullable = false)
     private AccountRole role;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)

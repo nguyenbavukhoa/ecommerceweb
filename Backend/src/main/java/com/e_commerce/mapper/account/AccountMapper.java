@@ -26,6 +26,7 @@ public class AccountMapper {
     public Account convertCreateDTOToEntity(RegistrationForm registrationForm) {
         return Account.builder()
                 .email(registrationForm.getEmail())
+                .accountName(registrationForm.getAccountName())
                 .role((AccountRole.valueOf(registrationForm.getRole())))
                 .status(false)
                 .active(true)

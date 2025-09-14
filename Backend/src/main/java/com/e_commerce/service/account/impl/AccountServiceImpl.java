@@ -74,10 +74,11 @@ public class AccountServiceImpl implements AccountService {
         }
         // tao xac thuc email o day
 
-        Account account = new Account();
+        Account account = accountMapper.convertCreateDTOToEntity(registrationForm);
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
+        log.info("Create account: {}", account);
 
         return accountMapper.convertEntityToDTO(accountRepository.save(account));
     }
