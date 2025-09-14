@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentMethodDTO {
-    private Integer id;
+public class PaymentMethodUpdateDTO {
     private String name;
+
     private String code;
+
     private String description;
+
     private Boolean isActive;
 }
