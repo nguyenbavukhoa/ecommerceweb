@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProduct(ProductUpdateDTO productUpdateDTO, Integer id) {
+    public ProductDTO updateProduct(Integer id, ProductUpdateDTO productUpdateDTO) {
         Product existingProduct = getProductEntityById(id);
 
         if(productUpdateDTO.getName() != null) {

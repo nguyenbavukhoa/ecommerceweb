@@ -14,7 +14,8 @@ public interface ProductService {
 
     ProductDTO createProduct(ProductCreateDTO productCreateDTO);
 
-    ProductDTO updateProduct(ProductUpdateDTO productUpdateDTO, Integer id);
+    ProductDTO updateProduct(Integer id, ProductUpdateDTO productUpdateDTO);
+
 
     PageDTO<ProductDTO> getAllProductsAdmin(int page, int size, ProductFilter productFilter);
 }

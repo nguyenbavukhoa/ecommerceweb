@@ -23,20 +23,37 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@Valid @RequestBody LoginForm loginForm,
+            HttpServletRequest request) {
         AuthenticationDTO login = accountService.signIn(loginForm);
-        return ResponseEntity.ok(new ApiResponse<>(true,"Login successfully" ,login ,null ,request.getRequestURI()));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Login successfully", login, null, request.getRequestURI()));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AccountDTO>> register(@Valid @RequestBody RegistrationForm registrationForm, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AccountDTO>> register(@Valid @RequestBody RegistrationForm registrationForm,
+            HttpServletRequest request) {
         AccountDTO register = accountService.createAccount(registrationForm);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
+        return ResponseEntity
+                .ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 
-    @GetMapping("/Customer")
-    public ResponseEntity<ApiResponse<List<AccountDTO>>> getCustomerInfo(HttpServletRequest request) {
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String token,
+            HttpServletRequest request) {
+        String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+        accountService.logout(jwt);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Logged out successfully",
+                null,
+                null,
+                request.getRequestURI()));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getCustomers(HttpServletRequest request) {
         List<AccountDTO> customerInfo = accountService.getCustomerInfoList();
-        return ResponseEntity.ok(new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
     }
 }

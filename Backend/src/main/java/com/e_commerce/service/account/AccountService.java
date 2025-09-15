@@ -18,4 +18,6 @@ public interface AccountService extends UserDetailsService {
     Account getAccountAuth();
 
     List<AccountDTO> getCustomerInfoList();
+
+    void logout(String token);
 }
