@@ -2,10 +2,8 @@ package com.e_commerce.configuration;
 
 import com.e_commerce.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,22 +27,23 @@ public class WebSecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AccountService accountService;
 
-    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,AccountService accountService) {
+    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, AccountService accountService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.accountService = accountService;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource)
+            throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST,"/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/**").permitAll()
                         .requestMatchers("/payments/vnpay/**").permitAll()
 
                         .anyRequest()
-                        .authenticated()
-                )
+                        .authenticated())
                 .httpBasic(withDefaults())
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,7 +71,5 @@ public class WebSecurityConfiguration {
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
     }
-
-
 
 }
