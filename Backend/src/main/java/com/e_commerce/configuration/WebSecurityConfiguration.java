@@ -40,6 +40,7 @@ public class WebSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/**").permitAll()
+                        .requestMatchers("/payments/vnpay/**").permitAll()
 
                         .anyRequest()
                         .authenticated()

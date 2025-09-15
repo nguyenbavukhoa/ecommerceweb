@@ -5,6 +5,7 @@ import com.e_commerce.dto.payment.PaymentDTO.PaymentDTO;
 import com.e_commerce.service.payment.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/payments")
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentController {
     private final PaymentService paymentService;
 
@@ -23,15 +25,30 @@ public class PaymentController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Payment URL generated successfully", paymentDTO, null, request.getRequestURI()));
     }
 
-    @GetMapping("/callback")
+    @GetMapping("vnpay/callback")
     public ResponseEntity<ApiResponse<PaymentDTO>> paymentCallback(HttpServletRequest request) {
-        String status = request.getParameter("vnp_ResponseCode");
+        log.info("VNPay callback called: {}", request.getQueryString());
+        try {
+            paymentService.paymentCallback(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Payment processed successfully", null, null, request.getRequestURI()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null, null, request.getRequestURI()));
+        }
+    }
 
-        if ("00".equals(status)) {
+    @GetMapping("vnpay/return")
+    public ResponseEntity<ApiResponse<PaymentDTO>> paymentReturn(HttpServletRequest request) {
+        log.info("VNPay returnUrl called: {}", request.getQueryString());
+        String responseCode = request.getParameter("vnp_ResponseCode");
+        String txnRef = request.getParameter("vnp_TxnRef");
+
+        if ("00".equals(responseCode)) {
+
             PaymentDTO paymentDTO = new PaymentDTO(
                     "00",
                     "Payment successful",
-                    request.getParameter("vnp_TxnRef") // hoặc thêm orderId/paymentId tuỳ bạn cần
+                    "Payment ID: " + txnRef
             );
 
             return ResponseEntity.ok(
@@ -39,9 +56,9 @@ public class PaymentController {
             );
         } else {
             PaymentDTO paymentDTO = new PaymentDTO(
-                    status,
+                    responseCode,
                     "Payment failed",
-                    request.getParameter("vnp_TxnRef")
+                    "Payment ID: " + txnRef
             );
 
             return ResponseEntity.ok(

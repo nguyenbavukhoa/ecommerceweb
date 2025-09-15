@@ -19,7 +19,7 @@ public class Payment extends Timestamped {
     @Id
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Orders order;
 

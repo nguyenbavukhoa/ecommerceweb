@@ -7,6 +7,8 @@ import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.entity.payment.PaymentMethod;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.enums.PaymentStatus;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.payment.PaymentRepository;
 import com.e_commerce.service.order.OrderService;
@@ -14,6 +16,7 @@ import com.e_commerce.service.payment.PaymentMethodService;
 import com.e_commerce.service.payment.PaymentService;
 import com.e_commerce.util.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,13 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMethodService paymentMethodService;
 
     @Override
+    public Payment getPaymentEntityById(Integer id) {
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorResponse.PAYMENT_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
     public PaymentDTO createPayment(HttpServletRequest request) {
         Orders order = orderService.getOrder();
         String paymentType = request.getParameter("paymentType");
@@ -48,7 +58,8 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setTransactionId("CASH-" + order.getId());
             paymentRepository.save(payment);
 
-            order.setOrderStatus(OrderStatus.PLACED);
+            orderService.confirmOrderAfterPayment(order);
+
             return PaymentDTO.builder()
                     .code("ok")
                     .message("success")
@@ -65,11 +76,12 @@ public class PaymentServiceImpl implements PaymentService {
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
         String txnRef = String.valueOf(orderService.getOrder().getId());
 
-        vnpParamsMap.put("vnp_TxnRef", txnRef);
+        vnpParamsMap.put("vnp_TxnRef", payment.getId().toString());
         vnpParamsMap.put("vnp_OrderInfo", "Thanh toan don hang: " + txnRef);
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
 
         log.info("Amount: {}", amount);
+        log.info("vnp_TxnRef: {}", vnpParamsMap.get("vnp_TxnRef"));
 
         String bankCode = request.getParameter("bankCode");
         if (bankCode != null && !bankCode.isEmpty()) {
@@ -92,5 +104,26 @@ public class PaymentServiceImpl implements PaymentService {
                 .code("ok")
                 .message("success")
                 .paymentUrl(paymentUrl).build();
+    }
+
+    @Override
+    @Transactional
+    public void paymentCallback(HttpServletRequest request) {
+        Payment payment = getPaymentEntityById(Integer.parseInt(request.getParameter("vnp_TxnRef")));
+        String responseCode = request.getParameter("vnp_ResponseCode");
+
+        if ("00".equals(responseCode)) {
+            payment.setStatus(PaymentStatus.COMPLETED);
+            payment.setTransactionId(request.getParameter("vnp_TransactionNo"));
+            paymentRepository.save(payment);
+
+            orderService.confirmOrderAfterPayment(payment.getOrder());
+
+        } else {
+            payment.setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+
+            orderService.updateOrderStatus(payment.getOrder().getId(), OrderStatus.CANCELLED);
+        }
     }
 }

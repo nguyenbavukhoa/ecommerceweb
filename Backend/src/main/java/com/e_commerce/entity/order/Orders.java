@@ -45,6 +45,6 @@ public class Orders extends Timestamped {
 
     private String note;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    private Payment payments;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments;
 }
