@@ -8,7 +8,6 @@ import "./css/main.css";
 import "./css/home-responsive.css";
 import "./css/toast-message.css";
 import "./font/font-awesome-pro-v6-6.2.0/css/all.min.css";
-import productsData from "../src/JSON/products.json";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

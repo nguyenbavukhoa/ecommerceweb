@@ -5,9 +5,45 @@ import banner3 from "../../assets/images/banner-3.png";
 import banner4 from "../../assets/images/banner-4.png";
 import banner5 from "../../assets/images/banner-5.png";
 
+import ProductList from "../ProductComponent/ProductListComponent/ProductListComponent";
+
 const banners = [banner2, banner3, banner4, banner5];
 export default function MainComponent() {
   const [current, setCurrent] = useState(0);
+
+  const [products, setProducts] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 12;
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/products.json");
+        const data = await res.json();
+
+        // nếu JSON dạng { products: [...] }
+        setProducts(data.products || []);
+        // nếu JSON trực tiếp là array thì setProducts(data);
+      } catch (err) {
+        console.error("Lỗi fetch:", err);
+        setProducts([]); // fallback rỗng
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const handleDetail = (id) => {
+    console.log("Xem chi tiết sản phẩm:", id);
+  };
+
+  // Page pagination
+  const start = (currentPage - 1) * perPage;
+  const end = start + perPage;
+  const currentProducts = products.slice(start, end);
+
+  const totalPages = Math.ceil(products.length / perPage);
 
   // Auto slide
   useEffect(() => {
@@ -78,14 +114,31 @@ export default function MainComponent() {
           </div>
         </div>
 
-        <div className="home-title-block" id="home-title">
-          <h2 className="home-title">Khám phá thực đơn của chúng tôi</h2>
-        </div>
-
-        <div className="home-products" id="home-products"></div>
+        <ProductList products={currentProducts} onDetail={handleDetail} />
 
         <div className="page-nav">
-          <ul className="page-nav-list"></ul>
+          <ul className="page-nav-list">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li
+                key={i + 1}
+                className={`page-nav-item ${
+                  currentPage === i + 1 ? "active" : ""
+                }`}
+              >
+                <a
+                  href="#!"
+                  onClick={() => {
+                    setCurrentPage(i + 1);
+                    document
+                      .getElementById("home-service")
+                      .scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  {i + 1}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
