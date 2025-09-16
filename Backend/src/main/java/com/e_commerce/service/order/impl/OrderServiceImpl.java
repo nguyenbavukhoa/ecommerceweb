@@ -1,9 +1,12 @@
 package com.e_commerce.service.order.impl;
 
+import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.order.cartDTO.CheckoutForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateFromCart;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
+import com.e_commerce.dto.order.orderDTO.OrderFilter;
+import com.e_commerce.dto.product.productDTO.ProductFilter;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.order.CartItems;
@@ -23,8 +26,12 @@ import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.order.OrderService;
 import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.service.product.ProductVariantsValuesService;
+import com.e_commerce.specification.OrderSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,20 +62,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO createOrder(OrderCreateForm orderCreateForm) {
 
-        log.info("Creating order with form: {}", orderCreateForm);
         Account account = accountService.getAccountAuth();
 
         UserInformation userInformation = userInformationService.getUserInformationEntityById(orderCreateForm.getUserInfoId());
 
         Carts carts = cartsService.getCartByAccountId(account.getId());
-        log.info("Cart for Account ID {}: {}", account.getId(), carts);
 
-        log.info("Cart ID: {}", carts.getId());
         List<CartItems> selectedCartItems  = cartItemsService.getCartItemsByCartId(carts.getId());
-
-        log.info("Selected Cart Items: {}", selectedCartItems.stream()
-                .map(ci -> "CartItem{id=" + ci.getId() + ", productVariantId=" + ci.getProductVariant().getId() + ", quantity=" + ci.getQuantity() + "}")
-                .collect(Collectors.joining(", ")));
 
 
         if (selectedCartItems .isEmpty()) {
@@ -173,6 +173,14 @@ public class OrderServiceImpl implements OrderService {
         Orders order = getOrderEntityById(orderId);
         order.setOrderStatus(status);
         return ordersMapper.convertEntityToDTO(ordersRepository.save(order));
+    }
+
+    @Override
+    public PageDTO<OrderDTO> getAllOrders(int page, int size, OrderFilter orderFilter) {
+        Account account = accountService.getAccountAuth();
+        Specification<Orders> specification = OrderSpecification.filterOrder(orderFilter, account.getId());
+        Pageable pageable = PageRequest.of(page-1, size);
+        return ordersMapper.convertEntityPageToDTOPage(ordersRepository.findAll(specification, pageable));
     }
 
 

@@ -61,4 +61,23 @@ public class CartItemController {
         CartItemDTO cartItemDTO = cartItemsService.changeSelectedCartItem(id, selected);
         return ResponseEntity.ok(new ApiResponse<>(true, "Change selected cart item successfully", cartItemDTO, null, request.getRequestURI()));
     }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CartItemDTO>>> getCartItems(
+            @RequestParam(value = "selected", required = false) Boolean selected,
+            HttpServletRequest request) {
+
+        List<CartItemDTO> cartItemDTO;
+
+        if (Boolean.TRUE.equals(selected)) {
+            cartItemDTO = cartItemsService.getCartItemsAllSelected();
+        } else {
+            cartItemDTO = cartItemsService.getAll();
+        }
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get cart items successfully", cartItemDTO, null, request.getRequestURI())
+        );
+    }
+
 }
