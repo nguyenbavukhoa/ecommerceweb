@@ -19,5 +19,5 @@ public class ProductCategories extends Timestamped {
 
     @ManyToOne
     @JoinColumn(name = "category_id",nullable = false)
-    private Category categoryId;
+    private Category category;
 }

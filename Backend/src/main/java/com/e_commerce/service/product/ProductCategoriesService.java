@@ -7,6 +7,8 @@ import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.entity.product.ProductCategories;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface ProductCategoriesService {
     ProductCategories getProductCategoryEntityById(Integer id);
@@ -16,4 +18,6 @@ public interface ProductCategoriesService {
     ProductCategoryDTO createProductCategory(ProductCategoryCreateDTO productCategoryCreateDTO);
 
     ProductCategoryDTO updateProductCategory(ProductCategoryUpdateDTO productCategoryUpdateDTO, Integer id);
+
+    List<ProductCategoryDTO> getProductCategoryByCategoryId(Integer categoryId);
 }

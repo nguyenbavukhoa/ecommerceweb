@@ -9,15 +9,19 @@ import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductCategoryMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductCategoryRepository;
+import com.e_commerce.service.product.CategoryService;
 import com.e_commerce.service.product.ProductCategoriesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class ProductCategoriesServiceImpl implements ProductCategoriesService {
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductCategoryMapper productCategoryMapper;
+    private final CategoryService categoryService;
 
     @Override
     public ProductCategories getProductCategoryEntityById(Integer id) {
@@ -45,5 +49,11 @@ public class ProductCategoriesServiceImpl implements ProductCategoriesService {
             existingCategory.setName(productCategoryUpdateDTO.getName());
         }
         return productCategoryMapper.convertEntityToDTO(productCategoryRepository.save(existingCategory));
+    }
+
+    @Override
+    public List<ProductCategoryDTO> getProductCategoryByCategoryId(Integer categoryId) {
+        categoryService.getCategoryEntityById(categoryId);
+        return productCategoryMapper.convertPageToListDTO(productCategoryRepository.findByCategory_Id(categoryId));
     }
 }

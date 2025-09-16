@@ -41,7 +41,8 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/**").permitAll()
                         .requestMatchers("/payments/vnpay/**").permitAll()
-
+                        .requestMatchers(HttpMethod.GET,"categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"product-categories/**").permitAll()
                         .anyRequest()
                         .authenticated())
                 .httpBasic(withDefaults())
