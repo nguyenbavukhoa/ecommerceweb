@@ -5,6 +5,7 @@ import com.e_commerce.dto.auth.accountDTO.AuthenticationDTO;
 import com.e_commerce.dto.auth.accountDTO.LoginForm;
 import com.e_commerce.dto.auth.accountDTO.RegistrationForm;
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.enums.AccountRole;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.account.AccountMapper;
@@ -21,6 +22,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
 @Service
 @Slf4j
 public class AccountServiceImpl implements AccountService {
@@ -98,20 +102,19 @@ public class AccountServiceImpl implements AccountService {
 
         return (Account) authentication.getPrincipal();
     }
-//
-//    @Override
-//    public List<AccountDTO> getCustomerInfoList() {
-//        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
-//        log.info("Customers: {}", customers.size());
-//        if (customers.isEmpty()) {
-//            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
-//        }
-//        return customers.stream().map(this::convertToDTO).toList();
-//    }
 
-//    private AccountDTO convertToDTO(Account account) {
-//        UserInformation userInfo = account.getUserInformation();
-//        String fullName = userInfo != null ? userInfo.getFullName() : null;
-//        return accountMapper.convertEntityToDTO(account, fullName);
-//    }
+    @Override
+    public List<AccountDTO> getAccountAllByRoleUser() {
+        List<Account> accounts = accountRepository.findByRole(AccountRole.USER);
+        if (accounts.isEmpty()) {
+            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+        }
+        return accountMapper.convertListEntityToListDTO(accounts);
+    }
+
+    @Override
+    public Account getAccountEntityById(int id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
+    }
 }

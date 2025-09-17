@@ -37,4 +37,9 @@ public class UserInformationController {
         return ResponseEntity.ok(new ApiResponse<>(true,"Update user info successfully",updatedUserInfo,null,request.getRequestURI()));
     }
 
+    @GetMapping("/{accountId}")
+    public ResponseEntity<ApiResponse<List<UserInfoDTO>>> getUserInfoByAccountId(@PathVariable Integer accountId, HttpServletRequest request){
+        List<UserInfoDTO> userInfoByAccountId = userInformationService.getUserInfoByAccountId(accountId);
+        return ResponseEntity.ok(new ApiResponse<>(true,"Get user info by account id successfully",userInfoByAccountId,null,request.getRequestURI()));
+    }
 }

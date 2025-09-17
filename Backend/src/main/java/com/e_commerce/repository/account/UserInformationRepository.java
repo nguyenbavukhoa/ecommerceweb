@@ -24,5 +24,6 @@ public interface UserInformationRepository extends JpaRepository<UserInformation
 """, nativeQuery = true)
     boolean validateForCheckout(@Param("accountId") int accountId);
 
+    List<UserInformation> findByAccount_Id(Integer accountId);
 
 }

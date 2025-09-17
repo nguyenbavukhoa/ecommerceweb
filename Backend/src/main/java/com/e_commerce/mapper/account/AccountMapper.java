@@ -7,6 +7,9 @@ import com.e_commerce.enums.AccountRole;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @AllArgsConstructor
 public class AccountMapper {
@@ -18,6 +21,7 @@ public class AccountMapper {
                 .email(account.getUsername())
                 .accountName(account.getAccountName())
                 .createAt(account.getCreatedAt())
+                .active(account.getActive().toString())
                 .status(account.getStatus())
                 .role(account.getRole().name())
                 .build();
@@ -31,5 +35,11 @@ public class AccountMapper {
                 .status(false)
                 .active(true)
                 .build();
+    }
+
+    public List<AccountDTO> convertListEntityToListDTO(List<Account> accounts) {
+        return accounts.stream()
+                .map(this::convertEntityToDTO)
+                .collect(Collectors.toList());
     }
 }

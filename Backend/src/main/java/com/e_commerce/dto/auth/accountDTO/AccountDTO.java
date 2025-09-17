@@ -15,4 +15,5 @@ public class AccountDTO {
     private LocalDateTime createAt;
     private Boolean status;
     private String role;
+    private String active;
 }

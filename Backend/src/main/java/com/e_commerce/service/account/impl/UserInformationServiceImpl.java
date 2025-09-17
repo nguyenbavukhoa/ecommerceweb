@@ -52,8 +52,10 @@ public class UserInformationServiceImpl implements UserInformationService {
     }
 
     @Override
-    public UserInfoDTO getUserInfoByAccountId(int accountId) {
-        return null;
+    public List<UserInfoDTO> getUserInfoByAccountId(int accountId) {
+        Account account = accountService.getAccountEntityById(accountId);
+        return userInformationMapper.convertEntityListToDTOList(
+                userInformationRepository.findByAccount_Id(account.getId()));
     }
 
     @Override

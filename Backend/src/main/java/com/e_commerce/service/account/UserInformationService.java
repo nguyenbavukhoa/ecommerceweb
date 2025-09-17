@@ -15,7 +15,7 @@ public interface UserInformationService {
 
     UserInfoDTO createUserInfo(UserInfoCreateDTO userInfoCreateDTO);
 
-    UserInfoDTO getUserInfoByAccountId(int accountId);
+    List<UserInfoDTO> getUserInfoByAccountId(int accountId);
 
     UserInfoDTO updateUserInfo(Integer userInfoId, UserInfoUpdateDTO userInfoUpdateDTO);
 

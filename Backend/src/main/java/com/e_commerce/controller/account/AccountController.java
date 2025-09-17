@@ -34,9 +34,9 @@ public class AccountController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 
-//    @GetMapping("/Customer")
-//    public ResponseEntity<ApiResponse<List<AccountDTO>>> getCustomerInfo(HttpServletRequest request) {
-//        List<AccountDTO> customerInfo = accountService.getCustomerInfoList();
-//        return ResponseEntity.ok(new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
-//    }
+    @GetMapping("/all-user")
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getAllUser(HttpServletRequest request) {
+        List<AccountDTO> accountDTOList = accountService.getAccountAllByRoleUser();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Get all user successfully", accountDTOList, null, request.getRequestURI()));
+    }
 }
