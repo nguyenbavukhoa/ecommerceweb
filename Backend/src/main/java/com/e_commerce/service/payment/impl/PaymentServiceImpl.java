@@ -72,7 +72,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setTransactionId(null);
         paymentRepository.save(payment);
 
-        long amount = orderService.getOrder().getTotalPrice().multiply(new BigDecimal(100)).longValue();
+        long amount = (orderService.getOrder().getTotalPrice().longValue()) * 100L;
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
         String txnRef = String.valueOf(orderService.getOrder().getId());
 

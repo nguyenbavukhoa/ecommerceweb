@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    @GetMapping({ "", "/", "/create" })
+    @GetMapping("/pay" )
     public ResponseEntity<ApiResponse<PaymentDTO>> createPayment(HttpServletRequest request) {
         PaymentDTO paymentDTO = paymentService.createPayment(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Payment URL generated successfully", paymentDTO, null,
