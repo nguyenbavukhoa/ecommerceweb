@@ -103,18 +103,12 @@ public class AccountServiceImpl implements AccountService {
         return (Account) authentication.getPrincipal();
     }
 
-    @Override
-    public List<AccountDTO> getAccountAllByRoleUser() {
-        List<Account> accounts = accountRepository.findByRole(AccountRole.USER);
-        if (accounts.isEmpty()) {
-            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
-        }
-        return accountMapper.convertListEntityToListDTO(accounts);
-    }
 
     @Override
     public Account getAccountEntityById(int id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
     }
+
+    
 }

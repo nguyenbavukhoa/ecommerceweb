@@ -17,7 +17,4 @@ public interface AccountService extends UserDetailsService {
 
     Account getAccountAuth();
 
-    List<AccountDTO> getAccountAllByRoleUser();
-
-    Account getAccountEntityById(int id);
 }

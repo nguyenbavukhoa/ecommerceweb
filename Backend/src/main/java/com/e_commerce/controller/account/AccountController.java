@@ -23,20 +23,18 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<AuthenticationDTO>> login(@Valid @RequestBody LoginForm loginForm,
+            HttpServletRequest request) {
         AuthenticationDTO login = accountService.signIn(loginForm);
-        return ResponseEntity.ok(new ApiResponse<>(true,"Login successfully" ,login ,null ,request.getRequestURI()));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Login successfully", login, null, request.getRequestURI()));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AccountDTO>> register(@Valid @RequestBody RegistrationForm registrationForm, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AccountDTO>> register(@Valid @RequestBody RegistrationForm registrationForm,
+            HttpServletRequest request) {
         AccountDTO register = accountService.createAccount(registrationForm);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
+        return ResponseEntity
+                .ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 
-    @GetMapping("/all-user")
-    public ResponseEntity<ApiResponse<List<AccountDTO>>> getAllUser(HttpServletRequest request) {
-        List<AccountDTO> accountDTOList = accountService.getAccountAllByRoleUser();
-        return ResponseEntity.ok(new ApiResponse<>(true, "Get all user successfully", accountDTOList, null, request.getRequestURI()));
-    }
 }

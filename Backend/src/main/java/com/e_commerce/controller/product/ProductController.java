@@ -3,6 +3,7 @@ package com.e_commerce.controller.product;
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
+import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductFilter;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
@@ -13,6 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -27,6 +32,14 @@ public class ProductController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, "Product created successfully", createdProduct, null, request.getRequestURI()));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse<ProductDTO>> updateProduct(@PathVariable Integer id, @RequestBody ProductUpdateDTO productUpdateDTO, HttpServletRequest request) {
+        ProductDTO updatedProduct = productService.updateProduct(id, productUpdateDTO);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Product updated successfully", updatedProduct, null, request.getRequestURI())
+        );
     }
 
     @GetMapping
