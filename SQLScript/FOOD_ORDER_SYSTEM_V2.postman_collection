@@ -1,0 +1,993 @@
+{
+	"info": {
+		"_postman_id": "4a58fbb2-2423-4f20-ad07-38a445339b14",
+		"name": "FOOD_ORDER_SYSTEM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37230304"
+	},
+	"item": [
+		{
+			"name": "product",
+			"item": [
+				{
+					"name": "create_product",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Phở Bò Hà Nội",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Phở bò truyền thống với nước dùng được ninh từ xương bò suốt 12 tiếng, thịt bò tươi ngon và bánh phở dai mềm",
+									"type": "text"
+								},
+								{
+									"key": "priceBase",
+									"value": "45000",
+									"type": "text"
+								},
+								{
+									"key": "productCategoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "imgMain",
+									"type": "file",
+									"src": "/C:/Users/Dell/OneDrive - Saigon University/Pictures/Hình nền/fef0ef75-ff5f-4b86-b081-eb178f91bf69.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API}}products/create",
+							"host": [
+								"{{API}}products"
+							],
+							"path": [
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_product_vairant",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "productVariantsStatus",
+									"value": "ACTIVE",
+									"type": "text"
+								},
+								{
+									"key": "sku",
+									"value": "PHO-BO-TAI-001",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "45000",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "-1426044175",
+									"type": "text"
+								},
+								{
+									"key": "variantOptionId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "stockQuantity",
+									"value": "500",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API}}product-variants/create",
+							"host": [
+								"{{API}}product-variants"
+							],
+							"path": [
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_product_variant_value",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "valueId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "variantId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API}}product-variant-values/create",
+							"host": [
+								"{{API}}product-variant-values"
+							],
+							"path": [
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{API}}products?page=1&name=Cơm sườn",
+							"host": [
+								"{{API}}products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "name",
+									"value": "Cơm sườn"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Phở Bò Hà Nội",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Phở bò truyền thống với nước dùng được ninh từ xương bò suốt 12 tiếng, thịt bò tươi ngon và bánh phở dai mềm",
+									"type": "text"
+								},
+								{
+									"key": "priceBase",
+									"value": "45000",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "productCategoryId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/Dell/OneDrive - Saigon University/Pictures/Hình nền/c3cf8792-9726-4f0e-8063-38dbce2cab41.jpg"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API}}products/-1273084124",
+							"host": [
+								"{{API}}products"
+							],
+							"path": [
+								"-1273084124"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "account",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.expect(pm.response.code).to.eql(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response content type is XML\", function () {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/xml');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response body is well-formed XML\", function () {\r",
+									"    const responseBody = pm.response.text();\r",
+									"    pm.expect(() => {\r",
+									"        xml2Json(responseBody);\r",
+									"    }).to.not.throw(Error, \"Response body is not well-formed XML\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the XML schema against expected structure\", function () {\r",
+									"    const responseData = xml2Json(pm.response.text());\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData).to.have.all.keys('loginResponse'); // Assuming 'loginResponse' is the expected root element\r",
+									"    pm.expect(responseData.loginResponse).to.have.all.keys('token', 'userId', 'expires'); // Adjust keys based on expected structure\r",
+									"    \r",
+									"    // You can also validate the types of the properties if needed\r",
+									"    pm.expect(responseData.loginResponse.token).to.be.a('string');\r",
+									"    pm.expect(responseData.loginResponse.userId).to.be.a('string');\r",
+									"    pm.expect(responseData.loginResponse.expires).to.be.a('string'); // Assuming 'expires' is a string format\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"kien123456789@gmail.com\",\r\n    \"password\": \"Kien12345@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}auth/login",
+							"host": [
+								"{{API}}auth"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"kkkkkkk@gmail.com\",\r\n    \"password\": \"Kien12345@\",\r\n    \"accountName\": \"Nguyen Van A\",\r\n    \"role\": \"USER\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}auth/register",
+							"host": [
+								"{{API}}auth"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cart",
+			"item": [
+				{
+					"name": "AddToCart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"productVariantsId\": \"6\",\r\n    \"variantValuesId\": \"7\",\r\n    \"quantity\": \"1\",\r\n    \"note\": \"giao trước 13h\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}cart-items/addCart",
+							"host": [
+								"{{API}}cart-items"
+							],
+							"path": [
+								"addCart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_list_cart_item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{API}}cart-items/all",
+							"host": [
+								"{{API}}cart-items"
+							],
+							"path": [
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_selected",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{API}}cart-items?selected=true",
+							"host": [
+								"{{API}}cart-items"
+							],
+							"query": [
+								{
+									"key": "selected",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"orderStatus\": \"PLACED\",\r\n    \"listOrderItems\": [\r\n    {\r\n      \"productVariantsId\": 6,\r\n      \"quantity\": 1,\r\n      \"note\": \"Không hành\",\r\n      \"variantValueId\": 7\r\n    },\r\n    {\r\n      \"productVariantsId\": 5,\r\n      \"quantity\": 1,\r\n      \"note\": \"Thêm topping trứng\",\r\n      \"variantValueId\": 6\r\n    }\r\n  ],\r\n  \"userInfoId\":\"1550863646\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}orders/create",
+							"host": [
+								"{{API}}orders"
+							],
+							"path": [
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{API}}orders/all?page=1",
+							"host": [
+								"{{API}}orders"
+							],
+							"path": [
+								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user_info",
+			"item": [
+				{
+					"name": "GET ALL",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"kien123456789@gmail.com\",\r\n    \"password\": \"Kien12345@\"\r\n}"
+						},
+						"url": {
+							"raw": "{{API}}user-info/all",
+							"host": [
+								"{{API}}user-info"
+							],
+							"path": [
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\": \"kien\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}user-info/1550863646",
+							"host": [
+								"{{API}}user-info"
+							],
+							"path": [
+								"1550863646"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\" : \"kk\",\r\n    \"gender\" : \"MALE\",\r\n    \"address\" : \"123456\",\r\n    \"phoneNumber\" : \"0123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API}}user-info",
+							"host": [
+								"{{API}}user-info"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "pay",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{API}}payments/pay?paymentType=VNPAY&bankCode=NCB",
+							"host": [
+								"{{API}}payments"
+							],
+							"path": [
+								"pay"
+							],
+							"query": [
+								{
+									"key": "paymentType",
+									"value": "VNPAY"
+								},
+								{
+									"key": "bankCode",
+									"value": "NCB"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "call-back",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{Token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API}}payments/vnpay/callback?vnp_Amount=11000000&vnp_BankCode=NCB&vnp_BankTranNo=VNP15169235&vnp_CardType=ATM&vnp_OrderInfo=Thanh+toan+don+hang%3A+-1299951934&vnp_PayDate=20250915232728&vnp_ResponseCode=00&vnp_TmnCode=K7AYB02L&vnp_TransactionNo=15169235&vnp_TransactionStatus=00&vnp_TxnRef=178828616&vnp_SecureHash=1897e62c9e1c036f999d3b7da3a066e27fdfa77692895a95f173b1b616e1683d9eebce872a7a893e60a7a1dca4c45f26d4ae1f547308794d67efeb225da7acb6",
+							"host": [
+								"{{API}}payments"
+							],
+							"path": [
+								"vnpay",
+								"callback"
+							],
+							"query": [
+								{
+									"key": "vnp_Amount",
+									"value": "11000000"
+								},
+								{
+									"key": "vnp_BankCode",
+									"value": "NCB"
+								},
+								{
+									"key": "vnp_BankTranNo",
+									"value": "VNP15169235"
+								},
+								{
+									"key": "vnp_CardType",
+									"value": "ATM"
+								},
+								{
+									"key": "vnp_OrderInfo",
+									"value": "Thanh+toan+don+hang%3A+-1299951934"
+								},
+								{
+									"key": "vnp_PayDate",
+									"value": "20250915232728"
+								},
+								{
+									"key": "vnp_ResponseCode",
+									"value": "00"
+								},
+								{
+									"key": "vnp_TmnCode",
+									"value": "K7AYB02L"
+								},
+								{
+									"key": "vnp_TransactionNo",
+									"value": "15169235"
+								},
+								{
+									"key": "vnp_TransactionStatus",
+									"value": "00"
+								},
+								{
+									"key": "vnp_TxnRef",
+									"value": "178828616"
+								},
+								{
+									"key": "vnp_SecureHash",
+									"value": "1897e62c9e1c036f999d3b7da3a066e27fdfa77692895a95f173b1b616e1683d9eebce872a7a893e60a7a1dca4c45f26d4ae1f547308794d67efeb225da7acb6"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "get all",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API}}categories/all",
+							"host": [
+								"{{API}}categories"
+							],
+							"path": [
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "product-category",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API}}product-categories?categoryId=2",
+							"host": [
+								"{{API}}product-categories"
+							],
+							"query": [
+								{
+									"key": "categoryId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{API}}payment/vn-pay?amount=200000&bankCode=NCB",
+					"host": [
+						"{{API}}payment"
+					],
+					"path": [
+						"vn-pay"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "200000"
+						},
+						{
+							"key": "bankCode",
+							"value": "NCB"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "API",
+			"value": "http://localhost:8080/api/v1/"
+		},
+		{
+			"key": "Token",
+			"value": "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6WyJVU0VSIl0sInN1YiI6ImtpZW4xMjM0NTY3ODlAZ21haWwuY29tIiwiaWF0IjoxNzU3NDg1NDg4LCJleHAiOjE3NTc0ODYzODh9.cNZkCew7iF3mn3QT6TWIXrGLRcEAVz2T2jpvIP-4svswdW2LmZ9kgAJNHJCYV88868a1Bx06HPvElByLVXDd3g"
+		}
+	]
+}

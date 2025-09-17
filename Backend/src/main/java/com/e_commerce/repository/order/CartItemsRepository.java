@@ -58,4 +58,7 @@ public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
     void updateSelected(@Param("id") Integer id, @Param("selected") boolean selected);
 
 
+    @Query("SELECT ci FROM CartItems ci WHERE ci.cart.account.id = :id")
+    List<CartItems> findCartItemsByAccountId(@Param("id") Integer accountId);
+
 }

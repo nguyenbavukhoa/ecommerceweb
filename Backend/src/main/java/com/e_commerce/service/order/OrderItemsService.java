@@ -18,4 +18,6 @@ public interface OrderItemsService {
     List<OrderItems> createOrderItemsFromCartItem(List<CartItems> cartItems, Orders order);
 
     void validateCartItemsStock(List<CartItems> cartItems);
+
+
 }

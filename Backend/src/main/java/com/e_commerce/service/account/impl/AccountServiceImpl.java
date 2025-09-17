@@ -120,7 +120,8 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountDTO convertToDTO(Account account) {
         UserInformation userInfo = account.getUserInformation().isEmpty() ? null : account.getUserInformation().get(0);
-        return accountMapper.convertEntityToDTO(userInfo.getAccount());
+        String fullName = userInfo != null ? userInfo.getFullName() : null;
+        return accountMapper.convertEntityToDTO(account);
     }
 
     @Override
@@ -135,7 +136,6 @@ public class AccountServiceImpl implements AccountService {
 
 @Override
     public void logout(String token) {
-        tokenBlacklistService.addToBlacklist(token);
         log.info("Logging out token: {}", token);
     }
 

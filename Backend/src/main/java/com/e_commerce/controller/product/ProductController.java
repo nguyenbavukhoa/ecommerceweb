@@ -6,6 +6,7 @@ import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductFilter;
+import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.service.product.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -53,4 +54,5 @@ public class ProductController {
                 new ApiResponse<>(true, "Get products successfully", result, null, request.getRequestURI())
         );
     }
+
 }

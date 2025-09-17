@@ -24,6 +24,9 @@ public class UserInformationMapper {
     public UserInformation convertCreateDTOToEntity(UserInfoCreateDTO userInfoCreateDTO) {
         return UserInformation.builder()
                 .fullName(userInfoCreateDTO.getFullName())
+                .address(userInfoCreateDTO.getAddress())
+                .phoneNumber(userInfoCreateDTO.getPhoneNumber())
+                .gender(userInfoCreateDTO.getGender() != null ? userInfoCreateDTO.getGender() : null)
                 .build();
     }
 

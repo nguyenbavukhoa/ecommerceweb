@@ -7,6 +7,7 @@ import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductVariantsMapper;
+import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductVariantRepository;
 import com.e_commerce.service.product.ProductService;
@@ -15,6 +16,8 @@ import com.e_commerce.service.product.VariantOptionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @AllArgsConstructor
 public class ProductVariantsServiceImpl implements ProductVariantsService {
@@ -22,6 +25,7 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
     private final ProductVariantsMapper productVariantsMapper;
     private final ProductService productService;
     private final VariantOptionsService variantOptionsService;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public ProductVariants getProductVariantEntityById(Integer id) {
@@ -35,6 +39,11 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
         productVariants.setId(IdGenerator.getGenerationId());
         productVariants.setProduct(productService.getProductEntityById(productVariantsCreateDTO.getProductId()));
         productVariants.setVariantOption(variantOptionsService.getVariantOptionEntityById(productVariantsCreateDTO.getVariantOptionId()));
+
+        if (productVariantsCreateDTO.getImgUrl() != null || !productVariantsCreateDTO.getImgUrl().isEmpty()) {
+            Map<String, Object> imageUrl = cloudinaryService.uploadFile(productVariantsCreateDTO.getImgUrl(), "product_variant");
+            productVariants.setImgUrl((String) imageUrl.get("url"));
+        }
         return productVariantsMapper.covertEntityToDTO(productVariantRepository.save(productVariants));
     }
 

@@ -18,6 +18,8 @@ public interface CartItemsService {
 
     List<CartItemDTO> getCartItemsByAccountId(Integer accountId);
 
+    List<CartItemDTO> getAll();
+
     void deleteCartItems(List<Integer> id);
 
     void deleteAllCartItemsByAccountId(Integer accountId);
@@ -27,4 +29,6 @@ public interface CartItemsService {
     List<CartItems> getCartItemsByCartId(Integer cartId);
 
     CartItemDTO changeSelectedCartItem(Integer id, boolean selected);
+
+    List<CartItemDTO> getCartItemsAllSelected();
 }

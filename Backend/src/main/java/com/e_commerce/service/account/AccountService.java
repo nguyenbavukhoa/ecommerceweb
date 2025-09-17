@@ -16,7 +16,7 @@ public interface AccountService extends UserDetailsService {
     AccountDTO createAccount(RegistrationForm registrationForm);
 
     Account getAccountAuth();
-
+    
     List<AccountDTO> getCustomerInfoList();
 
     void logout(String token);
@@ -24,4 +24,5 @@ public interface AccountService extends UserDetailsService {
     List<AccountDTO> getAccountAllByRoleUser();
 
     Account getAccountEntityById(int id);
+
 }

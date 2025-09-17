@@ -13,6 +13,8 @@ import com.e_commerce.service.product.CategoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -58,4 +60,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
 
+    @Override
+    public List<CategoryDTO> getAllCategory() {
+        return categoryMapper.convertPageToListDTO(categoryRepository.findAll());
+    }
 }

@@ -15,6 +15,10 @@ public class OrderItemMapper {
                 .productVariantsId(orderItem.getProductVariant().getId())
                 .quantity(orderItem.getQuantity())
                 .orderId(orderItem.getOrder().getId())
+                .imgUrl(orderItem.getProductVariant().getImgUrl())
+                .productName(orderItem.getProductVariant().getProduct().getName())
+                .price(orderItem.getProductVariant().getPrice())
+                .note(orderItem.getNote())
                 .build();
     }
 
