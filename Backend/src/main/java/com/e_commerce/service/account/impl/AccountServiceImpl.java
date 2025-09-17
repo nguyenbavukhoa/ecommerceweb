@@ -27,8 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import com.e_commerce.enums.AccountRole;
-import com.e_commerce.service.account.token.TokenBlacklistService;
 
 @Service
 @Slf4j
@@ -39,12 +37,9 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
     private final UserInformationService userInformationService;
-    private final TokenBlacklistService tokenBlacklistService;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-            AccountRepository accountRepository, UserInformationService userInformationService, 
-            TokenBlacklistService tokenBlacklistService) {
-        this.tokenBlacklistService = tokenBlacklistService;
+            AccountRepository accountRepository, UserInformationService userInformationService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
@@ -115,15 +110,7 @@ public class AccountServiceImpl implements AccountService {
         return (Account) authentication.getPrincipal();
     }
 
-    @Override
-    public List<AccountDTO> getCustomerInfoList() {
-        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
-        log.info("Customers: {}", customers.size());
-        if (customers.isEmpty()) {
-            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
-        }
-        return customers.stream().map(this::convertToDTO).toList();
-    }
+   
 
     private AccountDTO convertToDTO(Account account) {
         UserInformation userInfo = account.getUserInformation();
@@ -131,8 +118,5 @@ public class AccountServiceImpl implements AccountService {
         return accountMapper.convertEntityToDTO(account, fullName);
     }
 
-    @Override
-    public void logout(String token) {
-        log.info("Logging out token: {}", token);
-    }
+    
 }
