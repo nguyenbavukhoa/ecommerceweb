@@ -133,7 +133,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void logout(String token) {
-        tokenBlacklistService.addToBlacklist(token);
         log.info("Logging out token: {}", token);
     }
 }
