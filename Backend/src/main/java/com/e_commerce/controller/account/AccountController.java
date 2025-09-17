@@ -37,4 +37,30 @@ public class AccountController {
                 .ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String token,
+            HttpServletRequest request) {
+        String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+        accountService.logout(jwt);
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Logged out successfully",
+                null,
+                null,
+                request.getRequestURI()));
+    }
+
+     @GetMapping("/all-user")
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getAllUser(HttpServletRequest request) {
+        List<AccountDTO> accountDTOList = accountService.getAccountAllByRoleUser();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Get all user successfully", accountDTOList, null, request.getRequestURI()));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<AccountDTO>>> getCustomers(HttpServletRequest request) {
+        List<AccountDTO> customerInfo = accountService.getCustomerInfoList();
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
+
+    }
 }
