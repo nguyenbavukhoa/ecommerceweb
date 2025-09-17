@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,29 +25,35 @@ public class Account extends Timestamped implements UserDetails {
     @Id
     private Integer id;
 
-    @NotBlank(message = "Username cannot be blank")
-    @Column(name = "Username",nullable = false, unique = true, length = 100)
+    @NotBlank(message = "Email cannot be blank")
+    @Column(name = "email",nullable = false, unique = true, length = 100)
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message = "Account name cannot be blank")
+    @Column(name = "account_name",nullable = false, length = 100)
+    @Size(min = 3, max = 100, message = "Account name must be between 3 and 100 characters")
+    private String accountName;
+
     @NotBlank(message = "Password cannot be blank")
-    @Column(name = "Password",nullable = false, length = 800)
+    @Column(name = "password",nullable = false, length = 800)
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "status", nullable = false)
     private Boolean status = false;
 
-    @Column(name = "Active", nullable = false)
+    @Column(name = "active", nullable = false)
     private Boolean active = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Role", nullable = false)
+    @Column(name = "role", nullable = false)
     private AccountRole role;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    private UserInformation userInformation;
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserInformation> userInformation;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

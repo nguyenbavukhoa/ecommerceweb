@@ -37,5 +37,4 @@ public class AccountController {
                 .ok(new ApiResponse<>(true, "Register successfully", register, null, request.getRequestURI()));
     }
 
-    
 }

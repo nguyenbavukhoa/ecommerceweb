@@ -110,6 +110,16 @@ public enum ErrorResponse {
     ORDER_ITEM_PRODUCT_UNAVAILABLE(6105, "Product variant is unavailable for order", HttpStatus.BAD_REQUEST),
     ORDER_ITEM_CANNOT_BE_MODIFIED(6106, "Order item cannot be modified", HttpStatus.CONFLICT),
 
+    // USER INFORMATION ERRORS
+    USER_INFO_NOT_FOUND(7001, "User information not found", HttpStatus.NOT_FOUND),
+
+    // Payment Errors
+    PAYMENT_NOT_FOUND(8001, "Payment not found", HttpStatus.NOT_FOUND),
+    PAYMENT_ALREADY_EXISTS(8002, "Payment already exists", HttpStatus.CONFLICT),
+
+    // Payment Method Errors
+    PAYMENT_METHOD_NOT_FOUND(8101, "Payment method not found", HttpStatus.NOT_FOUND),
+    PAYMENT_METHOD_ALREADY_EXISTS(8102, "Payment method already exists", HttpStatus.CONFLICT)
     ;
     private final int code;
     private final String message;

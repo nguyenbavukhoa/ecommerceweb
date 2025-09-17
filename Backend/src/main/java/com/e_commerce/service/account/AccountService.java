@@ -17,5 +17,4 @@ public interface AccountService extends UserDetailsService {
 
     Account getAccountAuth();
 
-
 }

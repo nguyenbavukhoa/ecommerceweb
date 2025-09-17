@@ -135,6 +135,12 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
+    public List<CartItemDTO> getAll() {
+        Account account = accountService.getAccountAuth();
+        return cartItemMapper.convertPageToList(cartItemsRepository.findByCart_Account_Id(account.getId()));
+    }
+
+    @Override
     public void deleteCartItems(List<Integer> id) {
        cartItemsRepository.deleteAllByIdIn(id);
     }
@@ -167,6 +173,13 @@ public class CartItemsServiceImpl implements CartItemsService {
         CartItems cartItems = getCartItemsById(id);
         cartItems.setSelected(selected);
         return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
+    }
+
+    @Override
+    public List<CartItemDTO> getCartItemsAllSelected() {
+        Account account = accountService.getAccountAuth();
+        Carts carts = cartsService.getCartByAccountId(account.getId());
+        return cartItemMapper.convertPageToList(cartItemsRepository.findAllSelectedByCartId(carts.getId()));
     }
 
 }

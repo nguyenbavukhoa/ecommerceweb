@@ -6,6 +6,7 @@ import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductFilter;
+import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.service.product.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,12 @@ public class ProductController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Get products successfully", result, null, request.getRequestURI())
         );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductDTO>> updateProduct(@PathVariable Integer id, @ModelAttribute ProductUpdateDTO productUpdateDTO, HttpServletRequest request) {
+        ProductDTO updatedProduct = productService.updateProduct(productUpdateDTO, id);
+        return ResponseEntity
+                .ok(new ApiResponse<>(true, "Product updated successfully", updatedProduct, null, request.getRequestURI()));
     }
 }

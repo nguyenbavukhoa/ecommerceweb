@@ -6,6 +6,8 @@ import com.e_commerce.dto.product.categoryDTO.CategoryUpdateForm;
 import com.e_commerce.entity.product.Category;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface CategoryService {
     Category getCategoryEntityById(Integer id);
@@ -15,4 +17,6 @@ public interface CategoryService {
     CategoryDTO updateCategory(CategoryUpdateForm categoryUpdateForm, Integer id);
 
     void deleteCategory(Integer id);
+
+    List<CategoryDTO> getAllCategory();
 }
