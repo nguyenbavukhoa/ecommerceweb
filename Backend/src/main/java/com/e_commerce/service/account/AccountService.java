@@ -25,4 +25,5 @@ public interface AccountService extends UserDetailsService {
 
     Account getAccountEntityById(int id);
 
+    Account getAccountEntityById(int id);
 }
