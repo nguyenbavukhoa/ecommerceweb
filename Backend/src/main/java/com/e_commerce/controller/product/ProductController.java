@@ -54,11 +54,4 @@ public class ProductController {
                 new ApiResponse<>(true, "Get products successfully", result, null, request.getRequestURI())
         );
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductDTO>> updateProduct(@PathVariable Integer id, @ModelAttribute ProductUpdateDTO productUpdateDTO, HttpServletRequest request) {
-        ProductDTO updatedProduct = productService.updateProduct(productUpdateDTO, id);
-        return ResponseEntity
-                .ok(new ApiResponse<>(true, "Product updated successfully", updatedProduct, null, request.getRequestURI()));
-    }
 }
