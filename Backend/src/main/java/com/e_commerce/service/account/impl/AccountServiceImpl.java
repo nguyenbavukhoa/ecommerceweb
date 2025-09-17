@@ -27,6 +27,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import com.e_commerce.enums.AccountRole;
+import com.e_commerce.service.account.token.TokenBlacklistService;
+
 
 @Service
 @Slf4j
@@ -37,14 +40,17 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
     private final UserInformationService userInformationService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-            AccountRepository accountRepository, UserInformationService userInformationService) {
+            AccountRepository accountRepository, UserInformationService userInformationService,
+            TokenBlacklistService tokenBlacklistService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
         this.accountRepository = accountRepository;
         this.userInformationService = userInformationService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
                 .build();
     }
 
-    @Override
+     @Override
     public AccountDTO createAccount(RegistrationForm registrationForm) {
         if (accountRepository.existsByEmail(registrationForm.getEmail())) {
             throw new CustomException(ErrorResponse.ACCOUNT_ALREADY_EXISTS);
@@ -85,13 +91,10 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountMapper.convertCreateDTOToEntity(registrationForm);
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
-        account.setRole(AccountRole.USER);
 
-        account = accountRepository.save(account);
+        log.info("Create account: {}", account);
 
-        userInformationService.createUserInfo(account, registrationForm.getFullName());
-
-        return accountMapper.convertEntityToDTO(account, registrationForm.getFullName());
+        return accountMapper.convertEntityToDTO(accountRepository.save(account));
     }
 
     @Override
@@ -109,14 +112,41 @@ public class AccountServiceImpl implements AccountService {
 
         return (Account) authentication.getPrincipal();
     }
-
-   
-
-    private AccountDTO convertToDTO(Account account) {
-        UserInformation userInfo = account.getUserInformation();
-        String fullName = userInfo != null ? userInfo.getFullName() : null;
-        return accountMapper.convertEntityToDTO(account, fullName);
+      @Override
+    public Account getAccountEntityById(int id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
     }
 
+    private AccountDTO convertToDTO(Account account) {
+        UserInformation userInfo = account.getUserInformation().isEmpty() ? null : account.getUserInformation().get(0);
+        return accountMapper.convertEntityToDTO(userInfo.getAccount());
+    }
+
+    @Override
+    public List<AccountDTO> getCustomerInfoList() {
+        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
+        log.info("Customers: {}", customers.size());
+        if (customers.isEmpty()) {
+            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+        }
+        return customers.stream().map(this::convertToDTO).toList();
+    }
+
+@Override
+    public void logout(String token) {
+        tokenBlacklistService.addToBlacklist(token);
+        log.info("Logging out token: {}", token);
+    }
+
+
+    @Override
+    public List<AccountDTO> getAccountAllByRoleUser() {
+        List<Account> accounts = accountRepository.findByRole(AccountRole.USER);
+        if (accounts.isEmpty()) {
+            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+        }
+        return accountMapper.convertListEntityToListDTO(accounts);
+    }
     
 }
