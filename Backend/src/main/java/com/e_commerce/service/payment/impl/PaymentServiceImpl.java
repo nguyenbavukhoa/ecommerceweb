@@ -19,9 +19,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -145,6 +147,7 @@ public class PaymentServiceImpl implements PaymentService {
     public void paymentCallback(HttpServletRequest request) {
         Payment payment = getPaymentEntityById(Integer.parseInt(request.getParameter("vnp_TxnRef")));
         String responseCode = request.getParameter("vnp_ResponseCode");
+        String transactionNo = request.getParameter("vnp_TransactionNo");
 
         if ("00".equals(responseCode)) {
             payment.setStatus(PaymentStatus.COMPLETED);
@@ -155,9 +158,30 @@ public class PaymentServiceImpl implements PaymentService {
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
+            payment.setTransactionId(transactionNo);
             paymentRepository.save(payment);
 
             orderService.updateOrderStatus(payment.getOrder().getId(), OrderStatus.CANCELLED);
         }
     }
+
+//    @Transactional
+//    @Scheduled(fixedDelay = 60000) // Check every 1 minutes
+//    @Override
+//    public void checkPendingPayments() {
+//        List<Payment> pendingPayments = paymentRepository.findByStatus(PaymentStatus.PENDING);
+//        for (Payment payment : pendingPayments) {
+//            Orders order = payment.getOrder();
+//            log.info("Checking payment {} - paymentTime: {}, now: {}",
+//                    payment.getId(), payment.getPaymentTime(), LocalDateTime.now());
+//
+//            if (payment.getPaymentTime().plusMinutes(15).isBefore(LocalDateTime.now())) {
+//                payment.setStatus(PaymentStatus.FAILED);
+//                paymentRepository.save(payment);
+//
+//                orderService.updateOrderStatus(order.getId(), OrderStatus.CANCELLED);
+//                log.info("Cancelled order {} due to unpaid payment {}", order.getId(), payment.getId());
+//            }
+//        }
+//    }
 }

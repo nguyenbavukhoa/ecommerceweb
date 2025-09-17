@@ -1,10 +1,7 @@
 package com.e_commerce.controller.account;
 
 import com.e_commerce.dto.ApiResponse;
-import com.e_commerce.dto.auth.accountDTO.AccountDTO;
-import com.e_commerce.dto.auth.accountDTO.AuthenticationDTO;
-import com.e_commerce.dto.auth.accountDTO.LoginForm;
-import com.e_commerce.dto.auth.accountDTO.RegistrationForm;
+import com.e_commerce.dto.auth.accountDTO.*;
 import com.e_commerce.service.account.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -62,5 +59,12 @@ public class AccountController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Get customer info successfully", customerInfo, null, request.getRequestURI()));
 
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<AuthenticationDTO>> refreshToken(@RequestBody @Valid RefreshTokenDTO refreshTokenDTO,
+            HttpServletRequest request) {
+        AuthenticationDTO authenticationDTO = accountService.refreshToken(refreshTokenDTO);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Token refreshed successfully", authenticationDTO, null, request.getRequestURI()));
     }
 }
