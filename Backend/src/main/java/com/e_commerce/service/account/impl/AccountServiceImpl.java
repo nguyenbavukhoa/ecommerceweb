@@ -39,18 +39,13 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
-    private final UserInformationService userInformationService;
-    private final TokenBlacklistService tokenBlacklistService;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-            AccountRepository accountRepository, UserInformationService userInformationService,
-            TokenBlacklistService tokenBlacklistService) {
+            AccountRepository accountRepository) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
         this.accountRepository = accountRepository;
-        this.userInformationService = userInformationService;
-        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional(readOnly = true)
