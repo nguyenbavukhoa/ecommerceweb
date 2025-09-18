@@ -11,4 +11,6 @@ public interface PaymentService {
     PaymentDTO createPayment(HttpServletRequest request);
 
     void paymentCallback(HttpServletRequest request);
+
+//    void checkPendingPayments();
 }
