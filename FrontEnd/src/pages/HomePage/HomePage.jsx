@@ -1,4 +1,4 @@
-import MainWrapperComponent from "../../components//HeaderComponent/MainWrapper";
+import MainWrapperComponent from "../../components/MainWrapperComponent/MainWrapper";
 function HomePage() {
   return <MainWrapperComponent />;
 }
