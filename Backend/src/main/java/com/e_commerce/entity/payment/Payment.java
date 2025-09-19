@@ -19,11 +19,11 @@ public class Payment extends Timestamped {
     @Id
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Orders order;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "PaymentMethodId", nullable = false)
     private PaymentMethod paymentMethod;
 

@@ -1,11 +1,10 @@
 package com.e_commerce.entity.payment;
 
 import com.e_commerce.orther.Timestamped;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -29,6 +28,6 @@ public class PaymentMethod extends Timestamped {
     @Column(name = "Code")
     private String code;
 
-    @OneToOne(mappedBy = "paymentMethod")
-    private Payment payment;
+    @OneToMany(mappedBy = "paymentMethod", fetch = FetchType.LAZY)
+    private List<Payment> payment;
 }

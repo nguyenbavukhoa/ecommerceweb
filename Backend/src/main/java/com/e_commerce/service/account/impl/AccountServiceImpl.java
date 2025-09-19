@@ -36,13 +36,15 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-            AccountRepository accountRepository) {
+                              AccountRepository accountRepository, TokenBlacklistService tokenBlacklistService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
         this.accountRepository = accountRepository;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +72,7 @@ public class AccountServiceImpl implements AccountService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .role(account.getRole().name())
+                .accountName(account.getAccountName())
                 .build();
     }
 
@@ -84,7 +87,6 @@ public class AccountServiceImpl implements AccountService {
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
-        log.info("Create account: {}", account);
 
         return accountMapper.convertEntityToDTO(accountRepository.save(account));
     }
@@ -127,6 +129,8 @@ public class AccountServiceImpl implements AccountService {
             String newAccessToken = jwtUtil.generateToken((UserDetails) account);
             String newRefreshToken = jwtUtil.generateRefreshToken((UserDetails) account);
 
+            // logic xóa refresh-token cũ
+
             return AuthenticationDTO.builder()
                     .accessToken(newAccessToken)
                     .refreshToken(newRefreshToken)
@@ -147,7 +151,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<AccountDTO> getCustomerInfoList() {
         List<Account> customers = accountRepository.findByRole(AccountRole.USER);
-        log.info("Customers: {}", customers.size());
         if (customers.isEmpty()) {
             throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
         }
@@ -157,6 +160,7 @@ public class AccountServiceImpl implements AccountService {
 @Override
     public void logout(String token) {
         log.info("Logging out token: {}", token);
+        tokenBlacklistService.addToBlacklist(token);
     }
 
 
