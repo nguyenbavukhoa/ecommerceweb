@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useCategory } from "../../Hooks/useCategory";
 
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";
@@ -10,11 +11,13 @@ import ProductList from "../ProductComponent/ProductListComponent/ProductListCom
 const banners = [banner2, banner3, banner4, banner5];
 export default function MainComponent() {
   const [current, setCurrent] = useState(0);
-
   const [products, setProducts] = useState([]);
-
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 12;
+  
+  // Get the selected category from the context
+  const [selectedCategory] = useCategory();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -34,6 +37,20 @@ export default function MainComponent() {
     fetchProducts();
   }, []);
 
+  // Filter products based on selected category
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product => 
+        product.category === selectedCategory
+      );
+      setFilteredProducts(filtered);
+    }
+    // Reset to first page when category changes
+    setCurrentPage(1);
+  }, [selectedCategory, products]);
+
   const handleDetail = (id) => {
     console.log("Xem chi tiết sản phẩm:", id);
   };
@@ -41,9 +58,9 @@ export default function MainComponent() {
   // Page pagination
   const start = (currentPage - 1) * perPage;
   const end = start + perPage;
-  const currentProducts = products.slice(start, end);
+  const currentProducts = filteredProducts.slice(start, end);
 
-  const totalPages = Math.ceil(products.length / perPage);
+  const totalPages = Math.ceil(filteredProducts.length / perPage);
 
   // Auto slide
   useEffect(() => {
