@@ -7,17 +7,22 @@ import {
 } from "react-router-dom";
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import { routes } from "./routes";
+import { CategoryProvider } from "./Hooks/useCategory";
+
+// Import custom CSS
+import "./css/category.css";
 
 function App() {
   return (
     <div>
-      <Router>
-        <Routes>
-          {/* Redirect "/" sang "/about" */}
-          {/* <Route
-            path="/"
-            element={<Navigate to="/user-info-detail" replace />}
-          /> */}
+      <CategoryProvider>
+        <Router>
+          <Routes>
+            {/* Redirect "/" sang "/about" */}
+            {/* <Route
+              path="/"
+              element={<Navigate to="/user-info-detail" replace />}
+            /> */}
 
           {routes.map((route) => {
             const Page = route.page;
@@ -38,6 +43,7 @@ function App() {
           })}
         </Routes>
       </Router>
+      </CategoryProvider>
     </div>
   );
 }

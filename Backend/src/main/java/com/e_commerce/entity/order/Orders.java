@@ -1,6 +1,8 @@
 package com.e_commerce.entity.order;
 
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.entity.account.UserInformation;
+import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
@@ -25,6 +27,10 @@ public class Orders extends Timestamped {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @ManyToOne
+    @JoinColumn(name = "user_infomation_id", nullable = false)
+    private UserInformation userInformation;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus;
@@ -38,4 +44,7 @@ public class Orders extends Timestamped {
     private List<OrderItems> orderItems;
 
     private String note;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments;
 }

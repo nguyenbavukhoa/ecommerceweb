@@ -10,7 +10,7 @@ function ProductList({ products, onDetail }) {
             Xin lỗi, chúng tôi không thể tìm được kết quả hợp với tìm kiếm của
             bạn
           </div>
-          <div className="no-result-i">
+          <div className="no-result-i">z
             <i className="fa-light fa-face-sad-cry"></i>
           </div>
         </div>

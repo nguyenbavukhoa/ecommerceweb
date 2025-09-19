@@ -15,6 +15,10 @@ public class CartItemMapper {
                 .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
                 .variantValuesId(cartItem.getVariantValue() != null ? cartItem.getVariantValue().getId() : null)
+                .imgUrl(cartItem.getProductVariant().getImgUrl())
+                .productName(cartItem.getProductVariant().getProduct().getName())
+                .price(cartItem.getProductVariant().getPrice())
+                .note(cartItem.getNote())
                 .build();
     }
 

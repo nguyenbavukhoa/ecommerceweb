@@ -1,9 +1,10 @@
 package com.e_commerce.controller.orders;
 
 import com.e_commerce.dto.ApiResponse;
+import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
-import com.e_commerce.entity.order.Orders;
+import com.e_commerce.dto.order.orderDTO.OrderFilter;
 import com.e_commerce.service.order.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,6 +29,19 @@ public class OrderController {
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true,"Create order successfully",orders,null,request.getRequestURI()));
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<PageDTO<OrderDTO>>> getAllOrders(
+            OrderFilter orderFilter,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request
+    ){
+        PageDTO<OrderDTO> result = orderService.getAllOrders(page,size,orderFilter);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true,"Get order successfully",result,null,request.getRequestURI()));
+    }
+
 
 
 }

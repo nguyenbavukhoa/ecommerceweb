@@ -1,9 +1,6 @@
 package com.e_commerce.service.account;
 
-import com.e_commerce.dto.auth.accountDTO.AccountDTO;
-import com.e_commerce.dto.auth.accountDTO.AuthenticationDTO;
-import com.e_commerce.dto.auth.accountDTO.LoginForm;
-import com.e_commerce.dto.auth.accountDTO.RegistrationForm;
+import com.e_commerce.dto.auth.accountDTO.*;
 import com.e_commerce.entity.account.Account;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -18,4 +15,13 @@ public interface AccountService extends UserDetailsService {
     Account getAccountAuth();
 
     List<AccountDTO> getCustomerInfoList();
+
+    void logout(String token);
+
+    List<AccountDTO> getAccountAllByRoleUser();
+
+    Account getAccountEntityById(int id);
+
+    AuthenticationDTO refreshToken(RefreshTokenDTO refreshTokenDTO);
+
 }

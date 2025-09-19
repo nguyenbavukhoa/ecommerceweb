@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class CategoryMapper {
     public CategoryDTO convertEntityToDTO(Category category) {
         return CategoryDTO.builder()
+                .id(category.getId())
                 .name(category.getName())
                 .build();
     }
