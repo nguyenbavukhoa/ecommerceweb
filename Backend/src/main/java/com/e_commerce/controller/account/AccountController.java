@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -66,5 +65,12 @@ public class AccountController {
             HttpServletRequest request) {
         AuthenticationDTO authenticationDTO = accountService.refreshToken(refreshTokenDTO);
         return ResponseEntity.ok(new ApiResponse<>(true, "Token refreshed successfully", authenticationDTO, null, request.getRequestURI()));
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<ApiResponse<Void>> activateAccount(@RequestParam("token") String token, HttpServletRequest request) {
+        accountService.activeAccount(token);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "Account activated successfully", null, null, request.getRequestURI()));
     }
 }

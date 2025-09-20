@@ -1,6 +1,9 @@
 package com.e_commerce.service.email.impl;
 
+import com.e_commerce.entity.account.Account;
 import com.e_commerce.enums.OrderStatus;
+import com.e_commerce.service.account.AccountService;
+import com.e_commerce.service.account.TokenService;
 import com.e_commerce.service.email.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -20,8 +23,12 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
     private final String fromEmail ;
+    private final AccountService accountService;
+    private final TokenService tokenService;
 
-    public EmailServiceImpl(JavaMailSender javaMailSender,@Value("${spring.mail.username}") String fromEmail) {
+    public EmailServiceImpl(JavaMailSender javaMailSender,@Value("${spring.mail.username}") String fromEmail, AccountService accountService, TokenService tokenService) {
+        this.tokenService = tokenService;
+        this.accountService = accountService;
         this.javaMailSender = javaMailSender;
         this.fromEmail = fromEmail;
     }
@@ -253,7 +260,42 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(customerEmail, subject, body);
     }
 
+    @Override
+    public void sendRegistrationUserConfirm(String email) {
+        log.info("Sending registration confirmation email to {}", email);
+        Account account = accountService.getAccountByEmail(email);
+        String token = tokenService.getTokenByAccountIdAndTokenType(account.getId(), "EMAIL_VERIFICATION").getToken();
+        log.info("Generated token for email confirmation: {}", token);
+        String confirmationUrl = "http://localhost:8080/api/v1/auth/activate?token=" + token;
 
+        String subject = "Xác Nhận Đăng Ký Tài Khoản";
+        String body = getRegistrationEmailContent(confirmationUrl);
+        sendEmail(email, subject, body);
+    }
+
+    private String getRegistrationEmailContent(String confirmationUrl) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+                  <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="background: #17a2b8; padding: 20px; color: white; text-align: center;">
+                      <h2 style="margin: 0;">Welcome to SGU Enterprise!</h2>
+                    </div>
+                    <div style="padding: 20px; color: #2c3e50;">
+                      <p>Thank you for registering with SGU Enterprise. Please confirm your email address by clicking the link below:</p>
+                      <p style="text-align: center; margin: 30px 0;">
+                        <a href="%s" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Confirm Email</a>
+                      </p>
+                      <p>If you did not create an account, please ignore this email.</p>
+                    </div>
+                    <div style="background: #f8f9fa; text-align: center; padding: 15px; font-size: 13px; color: #7f8c8d;">
+                      Best regards,<br/>SGU Enterprise Team
+                    </div>
+                  </div>
+                </body>
+                </html>
+                """.formatted(confirmationUrl);
+    }
 
     private void sendEmail(final String toEmail,final  String subject,final String body) {
         MimeMessage message = javaMailSender.createMimeMessage();

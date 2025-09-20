@@ -124,6 +124,8 @@ public enum ErrorResponse {
     // Token Errors
     REFRESH_TOKEN_EXPIRED(9001, "Refresh token has expired", HttpStatus.UNAUTHORIZED),
     INVALID_REFRESH_TOKEN(9002, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
+    TOKEN_NOT_FOUND(9005, "Token not found", HttpStatus.NOT_FOUND),
+    TOKEN_EXPIRED(9006, "Token has expired", HttpStatus.UNAUTHORIZED),
     ;
     private final int code;
     private final String message;

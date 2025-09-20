@@ -24,4 +24,9 @@ public interface AccountService extends UserDetailsService {
 
     AuthenticationDTO refreshToken(RefreshTokenDTO refreshTokenDTO);
 
+    Account getAccountByEmail(String email);
+
+    void activeAccount(String token);
+
+    void deleteByAccountId(Integer accountId);
 }

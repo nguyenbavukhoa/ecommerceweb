@@ -2,19 +2,23 @@ package com.e_commerce.service.account.impl;
 
 import com.e_commerce.dto.auth.accountDTO.*;
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.entity.account.Token;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.enums.AccountRole;
+import com.e_commerce.enums.TokenType;
+import com.e_commerce.event.RegistrationCompleteEvent;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.account.AccountMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.account.AccountRepository;
-import com.e_commerce.repository.account.UserInformationRepository;
 import com.e_commerce.service.account.AccountService;
-import com.e_commerce.service.account.UserInformationService;
+import com.e_commerce.service.account.TokenService;
 import com.e_commerce.util.JwtUtil;
-import lombok.AllArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,8 +27,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import com.e_commerce.enums.AccountRole;
 import com.e_commerce.service.account.token.TokenBlacklistService;
 
 
@@ -37,9 +42,13 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
     private final TokenBlacklistService tokenBlacklistService;
+    private final TokenService tokenService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AccountServiceImpl(@Lazy PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AccountMapper accountMapper,
-                              AccountRepository accountRepository, TokenBlacklistService tokenBlacklistService) {
+                              AccountRepository accountRepository, TokenBlacklistService tokenBlacklistService, TokenService tokenService, ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+        this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.accountMapper = accountMapper;
@@ -47,13 +56,13 @@ public class AccountServiceImpl implements AccountService {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public AuthenticationDTO signIn(LoginForm loginForm) {
         Account account = accountRepository.findByEmail(loginForm.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
 
-        if (account.isEnabled()) {
+        if (!account.isEnabled()) {
             throw new CustomException(ErrorResponse.ACCOUNT_DISABLED);
         }
 
@@ -68,15 +77,16 @@ public class AccountServiceImpl implements AccountService {
         String jwtToken = jwtUtil.generateToken(account);
         String refreshToken = jwtUtil.generateRefreshToken(account);
 
+        // Lưu refresh token vào database
+        tokenService.generateRefreshToken(account, refreshToken);
+
         return AuthenticationDTO.builder()
                 .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .role(account.getRole().name())
                 .accountName(account.getAccountName())
                 .build();
     }
 
-     @Override
+    @Override
     public AccountDTO createAccount(RegistrationForm registrationForm) {
         if (accountRepository.existsByEmail(registrationForm.getEmail())) {
             throw new CustomException(ErrorResponse.ACCOUNT_ALREADY_EXISTS);
@@ -87,8 +97,13 @@ public class AccountServiceImpl implements AccountService {
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
+        Account savedAccount = accountRepository.save(account);
 
-        return accountMapper.convertEntityToDTO(accountRepository.save(account));
+        tokenService.generateToken(account); // Tạo và lưu token xác thực email
+
+        eventPublisher.publishEvent(new RegistrationCompleteEvent(registrationForm.getEmail()));
+
+        return accountMapper.convertEntityToDTO(savedAccount);
     }
 
     @Override
@@ -140,6 +155,43 @@ public class AccountServiceImpl implements AccountService {
             log.error("Error refreshing token: {}", e.getMessage());
             throw new CustomException(ErrorResponse.INVALID_REFRESH_TOKEN);
         }
+    }
+
+    @Override
+    public Account getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public void activeAccount(String token) {
+        Token registrationToken = tokenService.getTokenByTokenAndTokenType(token, TokenType.EMAIL_VERIFICATION.name())
+                .orElseThrow(() -> new CustomException(ErrorResponse.TOKEN_NOT_FOUND));
+
+        if (registrationToken == null) {
+            throw new CustomException(ErrorResponse.TOKEN_NOT_FOUND);
+        }
+
+        if (registrationToken.getExpirationTime().isAfter(LocalDateTime.now())) {
+            Account account = registrationToken.getAccount();
+            account.setStatus(true);
+            accountRepository.save(account);
+            tokenService.deleteToken(token, TokenType.EMAIL_VERIFICATION.name());
+            log.info("Account with email {} has been activated.", account.getEmail());
+        } else{
+            tokenService.deleteToken(token, TokenType.EMAIL_VERIFICATION.name());
+            deleteByAccountId(registrationToken.getAccount().getId());
+            throw new CustomException(ErrorResponse.TOKEN_EXPIRED);
+        }
+    }
+
+    @Override
+    public void deleteByAccountId(Integer accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
+        }
+        accountRepository.deleteById(accountId);
     }
 
     private AccountDTO convertToDTO(Account account) {

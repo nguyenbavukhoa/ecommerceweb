@@ -43,6 +43,8 @@ public class WebSecurityConfiguration {
                         .requestMatchers("/payments/vnpay/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"product-categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"auth/activate").permitAll()
+                        
                         .anyRequest()
                         .authenticated())
                 .httpBasic(withDefaults())

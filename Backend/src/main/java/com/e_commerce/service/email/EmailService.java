@@ -14,4 +14,6 @@ public interface EmailService {
     void sendPaymentFailedEmail(String customerEmail, String customerName, String orderId, String transactionId);
 
     void sendOrderStatusEmail(OrderStatus status,String customerEmail,String customerName,String orderId, BigDecimal amount);
+
+    void sendRegistrationUserConfirm(String email);
 }
