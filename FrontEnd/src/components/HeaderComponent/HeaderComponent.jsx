@@ -1,6 +1,10 @@
 import logo from "../../assets/images/logo/logo.png";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { useCategory } from "../../Hooks/useCategory";
+import { useCategories } from "../../Hooks/useProducts";
+
 export default function HeaderComponent() {
   const searchProducts = () => {
     console.log("Searching...");
@@ -62,7 +66,7 @@ export default function HeaderComponent() {
             {/* Logo */}
             <div className="header-middle-left">
               <div className="header-logo">
-                <a href="#">
+                <a href="/">
                   <img src={logo} alt="" className="header-logo-img" />
                 </a>
               </div>
@@ -151,107 +155,38 @@ export default function HeaderComponent() {
 
 function HeaderBottom() {
   const [selectedCategory, showCategory] = useCategory();
+  const categories = useCategories();
 
   return (
     <nav className="header-bottom">
       <div className="container">
         <ul className="menu-list">
           <li className="menu-list-item">
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'all' ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                showCategory('all');
-              }}
+            <Link
+              to="/"
+              className={`menu-link ${
+                selectedCategory === "all" ? "active" : ""
+              }`}
+              onClick={() => showCategory("all")}
             >
               Trang chủ
-            </a>
+            </Link>
           </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món chay")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món chay' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món chay
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món mặn")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món mặn' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món mặn
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món lẩu")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món lẩu' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món lẩu
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món ăn vặt")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món ăn vặt' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món ăn vặt
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món tráng miệng")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món tráng miệng' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món tráng miệng
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Nước uống")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Nước uống' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Nước uống
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món khác")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món khác' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món khác
-            </a>
-          </li>
+
+          {/* Render categories từ products */}
+          {categories.map((category) => (
+            <li key={category} className="menu-list-item">
+              <Link
+                to="/"
+                className={`menu-link ${
+                  selectedCategory === category ? "active" : ""
+                }`}
+                onClick={() => showCategory(category)}
+              >
+                {category}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </nav>

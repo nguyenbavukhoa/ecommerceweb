@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useCategory } from "../../Hooks/useCategory";
+import { useProducts } from "../../Hooks/useProducts";
 
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";
@@ -9,58 +10,23 @@ import banner5 from "../../assets/images/banner-5.png";
 import ProductList from "../ProductComponent/ProductListComponent/ProductListComponent";
 
 const banners = [banner2, banner3, banner4, banner5];
-export default function MainComponent() {
+export default function MainComponent({ onProductDetail }) {
   const [current, setCurrent] = useState(0);
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 12;
-  
+
   // Get the selected category from the context
   const [selectedCategory] = useCategory();
 
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await fetch("/products.json");
-        const data = await res.json();
-
-        // nếu JSON dạng { products: [...] }
-        setProducts(data.products || []);
-        // nếu JSON trực tiếp là array thì setProducts(data);
-      } catch (err) {
-        console.error("Lỗi fetch:", err);
-        setProducts([]); // fallback rỗng
-      }
-    }
-
-    fetchProducts();
-  }, []);
-
-  // Filter products based on selected category
-  useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter(product => 
-        product.category === selectedCategory
-      );
-      setFilteredProducts(filtered);
-    }
-    // Reset to first page when category changes
-    setCurrentPage(1);
-  }, [selectedCategory, products]);
-
-  const handleDetail = (id) => {
-    console.log("Xem chi tiết sản phẩm:", id);
-  };
+  // Sử dụng useProducts với selectedCategory
+  const { data: products, isLoading, error } = useProducts(selectedCategory);
 
   // Page pagination
   const start = (currentPage - 1) * perPage;
   const end = start + perPage;
-  const currentProducts = filteredProducts.slice(start, end);
+  const currentProducts = (products || []).slice(start, end);
 
-  const totalPages = Math.ceil(filteredProducts.length / perPage);
+  const totalPages = Math.ceil((products || []).length / perPage);
 
   // Auto slide
   useEffect(() => {
@@ -69,6 +35,9 @@ export default function MainComponent() {
     }, 3000); // đổi sau 1 giây
     return () => clearInterval(interval);
   }, [banners.length]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading products</div>;
 
   return (
     <main className="main-wrapper">
@@ -131,7 +100,10 @@ export default function MainComponent() {
           </div>
         </div>
 
-        <ProductList products={currentProducts} onDetail={handleDetail} />
+        <ProductList
+          products={currentProducts}
+          onProductDetail={onProductDetail}
+        />
 
         <div className="page-nav">
           <ul className="page-nav-list">
