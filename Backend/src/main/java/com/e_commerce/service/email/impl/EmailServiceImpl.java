@@ -26,7 +26,10 @@ public class EmailServiceImpl implements EmailService {
     private final AccountService accountService;
     private final TokenService tokenService;
 
-    public EmailServiceImpl(JavaMailSender javaMailSender,@Value("${spring.mail.username}") String fromEmail, AccountService accountService, TokenService tokenService) {
+    private final int maxAttempts;
+
+    public EmailServiceImpl(JavaMailSender javaMailSender,@Value("${spring.mail.username}") String fromEmail, AccountService accountService, TokenService tokenService, @Value("${spring.otp.max-attempts}") int maxAttempts) {
+        this.maxAttempts = maxAttempts;
         this.tokenService = tokenService;
         this.accountService = accountService;
         this.javaMailSender = javaMailSender;
@@ -36,7 +39,6 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEmailOTP(String email, String otp, int otpExpirationMinutes) {
         String subject = "Password Reset OTP - SGU Enterprise";
-        int maxAttempts = 5;
         String body = getOtpEmailContent(email, otp, maxAttempts);
         sendEmail(email, subject, body);
     }
@@ -262,10 +264,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendRegistrationUserConfirm(String email) {
-        log.info("Sending registration confirmation email to {}", email);
         Account account = accountService.getAccountByEmail(email);
         String token = tokenService.getTokenByAccountIdAndTokenType(account.getId(), "EMAIL_VERIFICATION").getToken();
-        log.info("Generated token for email confirmation: {}", token);
         String confirmationUrl = "http://localhost:8080/api/v1/auth/activate?token=" + token;
 
         String subject = "Xác Nhận Đăng Ký Tài Khoản";
@@ -296,6 +296,9 @@ public class EmailServiceImpl implements EmailService {
                 </html>
                 """.formatted(confirmationUrl);
     }
+
+
+
 
     private void sendEmail(final String toEmail,final  String subject,final String body) {
         MimeMessage message = javaMailSender.createMimeMessage();

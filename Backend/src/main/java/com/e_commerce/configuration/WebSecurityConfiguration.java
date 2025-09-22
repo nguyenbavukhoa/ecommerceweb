@@ -44,7 +44,9 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET,"categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"product-categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"auth/activate").permitAll()
-                        
+                        .requestMatchers(HttpMethod.POST,"auth/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST,"auth/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.POST,"auth/verify-otp").permitAll()
                         .anyRequest()
                         .authenticated())
                 .httpBasic(withDefaults())

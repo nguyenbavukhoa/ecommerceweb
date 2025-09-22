@@ -29,4 +29,10 @@ public interface AccountService extends UserDetailsService {
     void activeAccount(String token);
 
     void deleteByAccountId(Integer accountId);
+
+    ForgotPasswordResponseDTO forgotPasswordRequest(ForgotPasswordRequestDTO request);
+
+    OtpVerificationResponseDTO verifyOtp(OtpVerificationRequestDTO request);
+
+    void resetPassword(ResetPasswordDTO request);
 }
