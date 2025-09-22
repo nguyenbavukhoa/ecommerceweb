@@ -6,6 +6,8 @@ import { useCategory } from "../../Hooks/useCategory";
 import { useCategories } from "../../Hooks/useProducts";
 
 export default function HeaderComponent() {
+  const navigate = useNavigate();
+
   const searchProducts = () => {
     console.log("Searching...");
   };
@@ -121,13 +123,13 @@ export default function HeaderComponent() {
                   </div>
                   <ul className="header-middle-right-menu">
                     <li>
-                      <a id="login" href="/sign-in">
+                      <a id="login" href="/auth?action=login">
                         <i className="fa-light fa-right-to-bracket"></i> Đăng
                         nhập
                       </a>
                     </li>
                     <li>
-                      <a id="signup" href="/sign-up">
+                      <a id="signup" href="/auth?action=login">
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>

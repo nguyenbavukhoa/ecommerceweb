@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import MainWrapperComponent from "../../components/MainWrapperComponent/MainWrapper";
 import ProductDetailsComponent from "../../components/ProductComponent/ProductDetailsComponent/ProductDetailsComponent";
 import { useToast } from "../../context/ToastContext";
-
 function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
