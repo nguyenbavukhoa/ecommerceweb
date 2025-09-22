@@ -24,9 +24,11 @@ public enum ErrorResponse {
     ACCOUNT_EMAIL_INVALID(1003, "Invalid email format", HttpStatus.BAD_REQUEST),
     ACCOUNT_INVALID_PASSWORD(1004, "Invalid password", HttpStatus.BAD_REQUEST),
     ACCOUNT_PASSWORD_TO_SHORT(1005, "Password account to short", HttpStatus.BAD_REQUEST),
-    ACCOUNT_PASSWORD_MISMATCH(1006, "Password and Confirm Password do not match", HttpStatus.BAD_REQUEST),
-    ACCOUNT_LOCKED(1007, "Account is locked", HttpStatus.FORBIDDEN),
+    ACCOUNT_PASSWORD_MISMATCH(1006, "Password do not match", HttpStatus.BAD_REQUEST),
+    ACCOUNT_LOCKED(1007, "Account locked due to entering wrong password too many times", HttpStatus.FORBIDDEN),
     ACCOUNT_DISABLED(1008, "Account is disabled", HttpStatus.FORBIDDEN),
+    ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED(1009, "Maximum login attempts exceeded. Please try again later.", HttpStatus.FORBIDDEN),
+    ACCOUNT_LOCKED_TOO_MANY_ATTEMPTS(1010, "Account is locked due to too many failed login attempts. Please try again later.", HttpStatus.FORBIDDEN),
 
     // Category Errors
     CATEGORY_NOT_FOUND(2001, "Category not found", HttpStatus.NOT_FOUND),
@@ -124,6 +126,14 @@ public enum ErrorResponse {
     // Token Errors
     REFRESH_TOKEN_EXPIRED(9001, "Refresh token has expired", HttpStatus.UNAUTHORIZED),
     INVALID_REFRESH_TOKEN(9002, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
+    TOKEN_NOT_FOUND(9005, "Token not found", HttpStatus.NOT_FOUND),
+    TOKEN_EXPIRED(9006, "Token has expired", HttpStatus.UNAUTHORIZED),
+
+    // OTP Errors
+    OTP_EXPIRED_OR_INVALID(10001, "OTP is expired or invalid", HttpStatus.BAD_REQUEST),
+    OTP_MAX_ATTEMPTS_EXCEEDED(10002, "Maximum OTP attempts exceeded", HttpStatus.FORBIDDEN),
+    OTP_ALREADY_SENT(10004, "OTP has already been sent. Please wait before requesting a new one.", HttpStatus.TOO_MANY_REQUESTS),
+    OTP_REQUIRED(10005, "OTP is required", HttpStatus.BAD_REQUEST),
     ;
     private final int code;
     private final String message;

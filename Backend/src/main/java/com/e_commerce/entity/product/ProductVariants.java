@@ -37,7 +37,7 @@ public class ProductVariants extends Timestamped {
     @Enumerated(EnumType.STRING)
     private ProductVariantsStatus productVariantsStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "variant_option_id")
     private VariantOptions variantOption;
 }

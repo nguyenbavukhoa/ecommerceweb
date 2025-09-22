@@ -30,11 +30,11 @@ public class OrdersMapper {
                 .build();
     }
 
-    public Orders convertCreateDTOToEntity(OrderCreateForm orderDTO) {
+        public Orders convertCreateDTOToEntity(OrderCreateForm orderDTO) {
         return Orders.builder()
                 .orderStatus(OrderStatus.PLACED)
-                .orderItems(OrderItemMapper.convertCreateDTOListToEntityList(orderDTO.getListOrderItems()))
                 .orderTime(LocalDateTime.now())
+                .note(orderDTO.getNote())
                 .build();
     }
 

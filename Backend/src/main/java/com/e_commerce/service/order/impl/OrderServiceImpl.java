@@ -11,6 +11,7 @@ import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
+import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.exceptions.CustomException;
@@ -20,6 +21,7 @@ import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrdersRepository;
 import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.account.UserInformationService;
+import com.e_commerce.service.email.EmailService;
 import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.order.OrderItemsService;
@@ -52,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserInformationService userInformationService;
     private final ProductVariantsService productVariantsService;
     private final ProductVariantsValuesService productVariantsValuesService;
+    private final EmailService emailService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -91,13 +94,16 @@ public class OrderServiceImpl implements OrderService {
         order.setId(IdGenerator.getGenerationId());
         order.setAccount(account);
         order.setTotalPrice(total);
-        order.setNote(orderCreateForm.getNote());
         order.setUserInformation(userInformation);
 
         order = ordersRepository.save(order);
 
         // Tạo các OrderItems từ các CartItems đã chọn và liên kết chúng với đơn hàng mới tạo (check ton kho trong day)
-        orderItemsService.createOrderItemsFromCartItem(selectedCartItems, order);
+        List<OrderItems> orderItems = orderItemsService.createOrderItemsFromCartItem(selectedCartItems, order);
+
+        order.setOrderItems(orderItems);
+
+        order = ordersRepository.save(order);
 
         // Cập nhật số lượng tồn kho của từng sản phẩm trong giỏ hàng đã chọn
 //        for (CartItems cartItem : selectedCartItems) {
@@ -166,12 +172,33 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderStatus(OrderStatus.CONFIRMED);
         ordersRepository.save(order);
+
+        emailService.sendOrderStatusEmail(OrderStatus.CONFIRMED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
     }
 
     @Override
     public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
         Orders order = getOrderEntityById(orderId);
         order.setOrderStatus(status);
+        Orders savedOrder = ordersRepository.save(order);
+
+        switch (status){
+            case CONFIRMED -> {
+                emailService.sendOrderStatusEmail(OrderStatus.CONFIRMED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
+            }
+            case CANCELLED -> {
+                emailService.sendOrderStatusEmail(OrderStatus.CANCELLED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
+            }
+            case IN_PROGRESS -> {
+                emailService.sendOrderStatusEmail(OrderStatus.IN_PROGRESS, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
+            }
+            case COMPLETED -> {
+                emailService.sendOrderStatusEmail(OrderStatus.COMPLETED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
+            }
+            case REJECTED -> {
+                emailService.sendOrderStatusEmail(OrderStatus.REJECTED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
+            }
+        }
         return ordersMapper.convertEntityToDTO(ordersRepository.save(order));
     }
 

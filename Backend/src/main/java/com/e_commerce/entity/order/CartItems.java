@@ -3,6 +3,7 @@ package com.e_commerce.entity.order;
 import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.orther.Timestamped;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,16 +17,17 @@ public class CartItems extends Timestamped {
     @Id
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cart_id", nullable = false)
     private Carts cart;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_variants_id", nullable = false)
     private ProductVariants productVariant;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_values_id", nullable = true)
+    @JsonBackReference
     private VariantValues variantValue;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
