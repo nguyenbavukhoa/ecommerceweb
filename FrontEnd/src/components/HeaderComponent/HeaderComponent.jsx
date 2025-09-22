@@ -129,7 +129,7 @@ export default function HeaderComponent() {
                       </a>
                     </li>
                     <li>
-                      <a id="signup" href="/auth?action=login">
+                      <a id="signup" href="/auth?action=register">
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>

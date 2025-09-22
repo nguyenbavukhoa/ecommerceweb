@@ -8,16 +8,9 @@ function AuthPage() {
   const action = searchParams.get("action"); // lấy ?action=...
 
   const navigate = useNavigate();
-  const [isLoginActive, setIsLoginActive] = useState(true);
-
-  // Chỉ cập nhật state khi action thay đổi
-  useEffect(() => {
-    if (action === "login") {
-      setIsLoginActive(true);
-    } else if (action === "register") {
-      setIsLoginActive(false);
-    }
-  }, [action]);
+  const [isLoginActive, setIsLoginActive] = useState(
+    action !== "register" ? true : false
+  );
 
   const handleSignup = () => {
     const user = {
