@@ -30,6 +30,13 @@ public class ProductCategoryMapper {
                 .build();
     }
 
+    public ProductCategories convertDTOToEntity(ProductCategoryDTO productCategoryDTO) {
+        return ProductCategories.builder()
+                .id(productCategoryDTO.getId())
+                .name(productCategoryDTO.getName())
+                .build();
+    }
+
     public List<ProductCategoryDTO> convertPageToListDTO(List<ProductCategories> productCategoriesList) {
         return productCategoriesList.stream()
                 .map(this::convertEntityToDTO)
