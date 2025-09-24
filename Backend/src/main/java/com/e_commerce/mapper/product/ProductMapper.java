@@ -6,6 +6,7 @@ import com.e_commerce.dto.product.productDTO.ProductDTO;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.dto.product.productDTO.ProductUserViewDTO;
 import com.e_commerce.entity.product.Product;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -13,14 +14,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ProductMapper {
+    private final ProductCategoryMapper productCategoryMapper;
     public ProductDTO covertEntityToDTO(Product product) {
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .isActive(product.isActive())
                 .priceBase(product.getPriceBase())
-                .productCategory(product.getProductCategory())
+                .productCategoryDTO(product.getProductCategory() != null ?
+                        productCategoryMapper.convertEntityToDTO(product.getProductCategory()) : null)
                 .description(product.getDescription())
                 .imgMain(product.getImgMain())
                 .build();
@@ -42,7 +46,8 @@ public class ProductMapper {
                 .name(productDTO.getName())
                 .isActive(productDTO.isActive())
                 .priceBase(productDTO.getPriceBase())
-                .productCategory(productDTO.getProductCategory())
+                .productCategory(productDTO.getProductCategoryDTO() != null ?
+                        productCategoryMapper.convertDTOToEntity(productDTO.getProductCategoryDTO()) : null)
                 .description(productDTO.getDescription())
                 .imgMain(productDTO.getImgMain())
                 .build();
