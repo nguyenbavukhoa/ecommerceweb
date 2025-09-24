@@ -17,6 +17,7 @@ import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.service.product.ProductVariantsValuesService;
 import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderItemsServiceImpl implements OrderItemsService {
     private final OrderItemMapper orderItemMapper;
     private final OrderItemsRepository orderItemsRepository;

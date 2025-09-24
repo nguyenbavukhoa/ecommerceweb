@@ -25,7 +25,7 @@ public class VariantValues extends Timestamped {
     @Column(name = "stock_quantity", nullable = false, columnDefinition = "int default 0")
     private int stockQuantity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_options_id", nullable = false)
     private VariantOptions variantOptions;
 }

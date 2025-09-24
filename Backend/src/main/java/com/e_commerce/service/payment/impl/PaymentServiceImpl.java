@@ -2,6 +2,7 @@ package com.e_commerce.service.payment.impl;
 
 import com.e_commerce.configuration.VNPAYConfig;
 import com.e_commerce.dto.payment.PaymentDTO.PaymentDTO;
+import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.Orders;
 import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.entity.payment.PaymentMethod;
@@ -11,6 +12,7 @@ import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.payment.PaymentRepository;
+import com.e_commerce.service.email.EmailService;
 import com.e_commerce.service.order.OrderService;
 import com.e_commerce.service.payment.PaymentMethodService;
 import com.e_commerce.service.payment.PaymentService;
@@ -19,11 +21,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -34,6 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderService orderService;
     private final PaymentRepository paymentRepository;
     private final PaymentMethodService paymentMethodService;
+    private final EmailService emailService;
 
     @Override
     public Payment getPaymentEntityById(Integer id) {
@@ -155,13 +155,26 @@ public class PaymentServiceImpl implements PaymentService {
             paymentRepository.save(payment);
 
             orderService.confirmOrderAfterPayment(payment.getOrder());
-
+            emailService.sendPaymentSuccessEmail(
+                    payment.getOrder().getAccount().getEmail(),
+                    payment.getOrder().getAccount().getAccountName(),
+                    String.valueOf(payment.getOrder().getId()),
+                    payment.getTransactionId(),
+                    payment.getAmount()
+            );
         } else {
             payment.setStatus(PaymentStatus.FAILED);
             payment.setTransactionId(transactionNo);
             paymentRepository.save(payment);
 
             orderService.updateOrderStatus(payment.getOrder().getId(), OrderStatus.CANCELLED);
+            emailService.sendPaymentFailedEmail(
+                    payment.getOrder().getAccount().getEmail(),
+                    payment.getOrder().getAccount().getAccountName(),
+                    String.valueOf(payment.getOrder().getId()),
+                    payment.getTransactionId()
+            );
+
         }
     }
 

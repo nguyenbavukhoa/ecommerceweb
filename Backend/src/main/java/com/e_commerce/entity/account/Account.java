@@ -50,7 +50,7 @@ public class Account extends Timestamped implements UserDetails {
     @Column(name = "role", nullable = false)
     private AccountRole role;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<UserInformation> userInformation;
 
 

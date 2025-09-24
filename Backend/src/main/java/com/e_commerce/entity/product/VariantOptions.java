@@ -17,7 +17,7 @@ public class VariantOptions extends Timestamped {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_categories_id", nullable = false)
     private ProductCategories productCategories;
 }

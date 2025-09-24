@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -66,5 +65,30 @@ public class AccountController {
             HttpServletRequest request) {
         AuthenticationDTO authenticationDTO = accountService.refreshToken(refreshTokenDTO);
         return ResponseEntity.ok(new ApiResponse<>(true, "Token refreshed successfully", authenticationDTO, null, request.getRequestURI()));
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<ApiResponse<Void>> activateAccount(@RequestParam("token") String token, HttpServletRequest request) {
+        accountService.activeAccount(token);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "Account activated successfully", null, null, request.getRequestURI()));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<ForgotPasswordResponseDTO>> forgotPassword(@RequestBody @Valid ForgotPasswordRequestDTO forgotPasswordDTO, HttpServletRequest request) {
+        ForgotPasswordResponseDTO responseDTO = accountService.forgotPasswordRequest(forgotPasswordDTO);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Forgot password email sent successfully", responseDTO, null, request.getRequestURI()));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid ResetPasswordDTO resetPasswordDTO, HttpServletRequest request) {
+        accountService.resetPassword(resetPasswordDTO);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Password reset successfully", null, null, request.getRequestURI()));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse<OtpVerificationResponseDTO>> verifyOtp(@RequestBody @Valid OtpVerificationRequestDTO otpVerificationDTO, HttpServletRequest request) {
+        OtpVerificationResponseDTO responseDTO = accountService.verifyOtp(otpVerificationDTO);
+        return ResponseEntity.ok(new ApiResponse<>(true, "OTP verified successfully", responseDTO, null, request.getRequestURI()));
     }
 }

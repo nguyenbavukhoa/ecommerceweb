@@ -20,11 +20,11 @@ public class ProductVariantValues extends Timestamped {
     @Id
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "value_id")
     private VariantValues variantValues;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "variant_id", nullable = false)
     private ProductVariants productVariants;
 
