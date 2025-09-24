@@ -1,0 +1,14 @@
+Cách dùng các component react trong project
+
+1.	Dùng ToastMessage 
+A.	Import và sử dụng hook useToast
+// import { useToast } from '../../context/ToastContext';
+// const { showToast } = useToast();
+
+B.	Gọi showToast với các options
+// showToast({
+//   title: "Success",
+//   message: "Thao tác thành công!",
+//   type: "success", // 'success' | 'info' | 'warning' | 'error'
+//   duration: 3000 // thời gian hiển thị (ms)
+// });

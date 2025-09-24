@@ -1,6 +1,9 @@
 import logo from "../../assets/images/logo/logo.png";
-
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCategory } from "../../Hooks/useCategory";
+import { useCategories } from "../../Hooks/useProducts";
+
 export default function HeaderComponent() {
   const searchProducts = () => {
     console.log("Searching...");
@@ -62,7 +65,7 @@ export default function HeaderComponent() {
             {/* Logo */}
             <div className="header-middle-left">
               <div className="header-logo">
-                <a href="#">
+                <a href="/">
                   <img src={logo} alt="" className="header-logo-img" />
                 </a>
               </div>
@@ -117,13 +120,13 @@ export default function HeaderComponent() {
                   </div>
                   <ul className="header-middle-right-menu">
                     <li>
-                      <a id="login" href="#">
+                      <a id="login" href="/auth?action=login">
                         <i className="fa-light fa-right-to-bracket"></i> Đăng
                         nhập
                       </a>
                     </li>
                     <li>
-                      <a id="signup" href="#">
+                      <a id="signup" href="/auth?action=register">
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>
@@ -150,73 +153,79 @@ export default function HeaderComponent() {
 }
 
 function HeaderBottom() {
-  // const [selectedCategory, showCategory] = useCategory();
+  const [selectedCategory, showCategory] = useCategory();
+  const categories = useCategories();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const handleCategoryChange = (e, cat) => {
+    e.preventDefault(); // chặn reload mặc định của <a>
+    showCategory(cat);
+
+    if (location.pathname === "/") {
+      document
+        .getElementById("home-service")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(`/`);
+    }
+  };
+  // const handleCategoryChange = (e, cat) => {
+  //   e.preventDefault();
+  //   showCategory(cat);
+
+  //   if (
+  //     location.pathname === "/" ||
+  //     location.pathname.startsWith("/products")
+  //   ) {
+  //     // Nếu đang ở trang chủ hoặc products thì scroll
+  //     document
+  //       .getElementById("home-service")
+  //       ?.scrollIntoView({ behavior: "smooth" });
+
+  //     // Nếu chưa ở products thì đổi query param
+  //     if (location.pathname !== "/products") {
+  //       navigate(`/products?category=${cat}`);
+  //     } else {
+  //       navigate(`/products?category=${cat}`, { replace: true });
+  //     }
+  //   } else {
+  //     // Nếu ở chỗ khác nữa thì điều hướng về home
+  //     navigate(`/products?category=${cat}`);
+  //   }
+  // };
 
   return (
     <nav className="header-bottom">
       <div className="container">
         <ul className="menu-list">
           <li className="menu-list-item">
-            <a href="/" className="menu-link">
+            <a
+              href="/products?category=all"
+              className={`menu-link ${
+                selectedCategory === "all" ? "active" : ""
+              }`}
+              onClick={(e) => handleCategoryChange(e, "all")}
+            >
               Trang chủ
             </a>
           </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món chay")}
-          >
-            <a href="#" className="menu-link">
-              Món chay
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món mặn")}
-          >
-            <a href="#" className="menu-link">
-              Món mặn
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món lẩu")}
-          >
-            <a href="#" className="menu-link">
-              Món lẩu
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món ăn vặt")}
-          >
-            <a href="#" className="menu-link">
-              Món ăn vặt
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món tráng miệng")}
-          >
-            <a href="#" className="menu-link">
-              Món tráng miệng
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Nước uống")}
-          >
-            <a href="#" className="menu-link">
-              Nước uống
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            // onClick={() => showCategory("Món khác")}
-          >
-            <a href="#" className="menu-link">
-              Món khác
-            </a>
-          </li>
+
+          {/* Render categories từ products */}
+          {categories.map((category) => (
+            <li key={category} className="menu-list-item">
+              <a
+                href={`/products?category=${category}`}
+                className={`menu-link ${
+                  selectedCategory === category ? "active" : ""
+                }`}
+                onClick={(e) => handleCategoryChange(e, category)}
+              >
+                {category}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     </nav>

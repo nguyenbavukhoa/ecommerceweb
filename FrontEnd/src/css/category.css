@@ -1,0 +1,34 @@
+.menu-link.active {
+  color: #ff6b6b;
+  font-weight: bold;
+  position: relative;
+}
+
+.menu-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ff6b6b;
+}
+
+.category-info {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.category-info h3 {
+  margin-bottom: 5px;
+  font-size: 18px;
+  color: #333;
+}
+
+.category-info p {
+  color: #666;
+  font-size: 14px;
+}
