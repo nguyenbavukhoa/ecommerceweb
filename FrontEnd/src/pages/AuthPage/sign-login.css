@@ -10,7 +10,7 @@
   padding: 0 10px;
   margin: 0 auto;
   margin-top: 80px;
-  height: 700px;
+  height: 800px;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -177,8 +177,14 @@
 }
 
 .remember-forgot label input {
+  min-width: 13px;
   accent-color: #e4e4e4e4;
   margin-right: 3px;
+}
+
+.remember-forgot input[type="checkbox"],
+.form-checkbox input[type="checkbox"] {
+  display: inline-block !important;
 }
 
 .form-submit {

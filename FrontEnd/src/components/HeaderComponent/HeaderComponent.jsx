@@ -1,13 +1,10 @@
 import logo from "../../assets/images/logo/logo.png";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCategory } from "../../Hooks/useCategory";
 import { useCategories } from "../../Hooks/useProducts";
 
 export default function HeaderComponent() {
-  const navigate = useNavigate();
-
   const searchProducts = () => {
     console.log("Searching...");
   };
@@ -158,35 +155,75 @@ export default function HeaderComponent() {
 function HeaderBottom() {
   const [selectedCategory, showCategory] = useCategory();
   const categories = useCategories();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const handleCategoryChange = (e, cat) => {
+    e.preventDefault(); // chặn reload mặc định của <a>
+    showCategory(cat);
+
+    if (location.pathname === "/") {
+      document
+        .getElementById("home-service")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(`/`);
+    }
+  };
+  // const handleCategoryChange = (e, cat) => {
+  //   e.preventDefault();
+  //   showCategory(cat);
+
+  //   if (
+  //     location.pathname === "/" ||
+  //     location.pathname.startsWith("/products")
+  //   ) {
+  //     // Nếu đang ở trang chủ hoặc products thì scroll
+  //     document
+  //       .getElementById("home-service")
+  //       ?.scrollIntoView({ behavior: "smooth" });
+
+  //     // Nếu chưa ở products thì đổi query param
+  //     if (location.pathname !== "/products") {
+  //       navigate(`/products?category=${cat}`);
+  //     } else {
+  //       navigate(`/products?category=${cat}`, { replace: true });
+  //     }
+  //   } else {
+  //     // Nếu ở chỗ khác nữa thì điều hướng về home
+  //     navigate(`/products?category=${cat}`);
+  //   }
+  // };
 
   return (
     <nav className="header-bottom">
       <div className="container">
         <ul className="menu-list">
           <li className="menu-list-item">
-            <Link
-              to="/"
+            <a
+              href="/products?category=all"
               className={`menu-link ${
                 selectedCategory === "all" ? "active" : ""
               }`}
-              onClick={() => showCategory("all")}
+              onClick={(e) => handleCategoryChange(e, "all")}
             >
               Trang chủ
-            </Link>
+            </a>
           </li>
 
           {/* Render categories từ products */}
           {categories.map((category) => (
             <li key={category} className="menu-list-item">
-              <Link
-                to="/"
+              <a
+                href={`/products?category=${category}`}
                 className={`menu-link ${
                   selectedCategory === category ? "active" : ""
                 }`}
-                onClick={() => showCategory(category)}
+                onClick={(e) => handleCategoryChange(e, category)}
               >
                 {category}
-              </Link>
+              </a>
             </li>
           ))}
         </ul>
