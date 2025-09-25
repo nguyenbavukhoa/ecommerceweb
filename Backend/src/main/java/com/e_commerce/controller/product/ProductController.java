@@ -46,7 +46,7 @@ public class ProductController {
     public ResponseEntity<ApiResponse<PageDTO<ProductDTO>>> getProducts(
             ProductFilter filter,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request
     ) {
         PageDTO<ProductDTO> result = productService.getAllProductsAdmin(page,size, filter);
