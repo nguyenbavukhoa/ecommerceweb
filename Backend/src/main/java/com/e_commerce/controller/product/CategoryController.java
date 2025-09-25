@@ -1,5 +1,6 @@
 package com.e_commerce.controller.product;
 
+
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.product.categoryDTO.CategoryDTO;
 import com.e_commerce.service.product.CategoryService;
@@ -25,4 +26,5 @@ public class CategoryController {
                 new ApiResponse<>(true, "Get all categories successfully", categoryDTO , null, "/categories/all")
         );
     }
+
 }

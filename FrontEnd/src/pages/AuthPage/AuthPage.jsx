@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import "./sign-login.css";
@@ -7,13 +7,12 @@ import "./sign-login.css";
 function AuthPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get("action");
-  const navigate = useNavigate();
   const { loginUser, signupUser } = useAuth();
   const { showToast } = useToast();
 
   const [isLoginActive, setIsLoginActive] = useState(action !== "register");
   const [fullname, setFullname] = useState("");
-  const [accountName, setAccountName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -24,14 +23,14 @@ function AuthPage() {
     e.preventDefault();
 
     try {
-      const user = await loginUser(accountName, password);
+      const user = await loginUser(email, password, rememberMe);
       if (!user) throw new Error("Tên tài khoản hoặc mật khẩu không đúng!");
       showToast({
         title: "Login Success",
-        message: `Xin chào ${accountName}`,
+        message: `Xin chào ${user.accountName || email}`,
         type: "success",
       });
-      setTimeout(() => navigate("/"), 1500);
+      // setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       showToast({
         title: "Login Failed",
@@ -63,19 +62,30 @@ function AuthPage() {
       return;
     }
 
+    if (!agreeTerms) {
+      showToast({
+        title: "Signup Failed",
+        message: "Bạn phải đồng ý với Chính sách trang web!",
+        type: "error",
+      });
+      return;
+    }
+
     try {
-      const result = await signupUser(accountName, password, fullname);
-      if (!result) throw new Error("Tài khoản đã tồn tại!");
+      const result = await signupUser(email, password, fullname);
+      if (!result.success) throw new Error("Tài khoản đã tồn tại!");
       showToast({
         title: "Signup Success",
-        message: "Đăng ký thành công! Vui lòng đăng nhập.",
+        message: result.message,
         type: "success",
       });
+
+      // Reset form và chuyển sang login
       setTimeout(() => {
         setIsLoginActive(true);
         setSearchParams({ action: "login" });
         setFullname("");
-        setAccountName("");
+        setEmail("");
         setPassword("");
         setConfirmPassword("");
         setAgreeTerms(false);
@@ -134,26 +144,18 @@ function AuthPage() {
               <h3 className="form-title">Đăng nhập tài khoản</h3>
               <div className="form-group">
                 <span className="icon">
-                  <i className="fa-regular fa-phone"></i>
+                  <i className="fa-regular fa-envelope"></i>
                 </span>
                 <input
-                  id="phone-login"
-                  type="text"
+                  id="email-login"
+                  type="email"
                   className="form-control"
-                  value={accountName}
-                  onChange={(e) => setAccountName(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Login Failed",
-                      message: "Vui lòng nhập số điện thoại!",
-                      type: "error",
-                    });
-                  }}
                 />
-                <label htmlFor="phone-login" className="form-label">
-                  Số điện thoại
+                <label htmlFor="email-login" className="form-label">
+                  Email
                 </label>
               </div>
               <div className="form-group">
@@ -167,14 +169,6 @@ function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Login Failed",
-                      message: "Vui lòng nhập mật khẩu!",
-                      type: "error",
-                    });
-                  }}
                 />
                 <label htmlFor="password-login" className="form-label">
                   Mật khẩu
@@ -183,8 +177,7 @@ function AuthPage() {
               <div className="remember-forgot">
                 <label>
                   <input
-                    id="checkbox-logins"
-                    className="checkbox"
+                    id="checkbox-login"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
@@ -231,14 +224,6 @@ function AuthPage() {
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Signup Failed",
-                      message: "Vui lòng nhập tên đầy đủ!",
-                      type: "error",
-                    });
-                  }}
                 />
                 <label htmlFor="fullname" className="form-label">
                   Tên đầy đủ
@@ -246,26 +231,18 @@ function AuthPage() {
               </div>
               <div className="form-group">
                 <span className="icon">
-                  <i className="fa-regular fa-phone"></i>
+                  <i className="fa-regular fa-envelope"></i>
                 </span>
                 <input
-                  id="phone"
-                  type="text"
+                  id="email"
+                  type="email"
                   className="form-control"
-                  value={accountName}
-                  onChange={(e) => setAccountName(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Signup Failed",
-                      message: "Vui lòng nhập số điện thoại!",
-                      type: "error",
-                    });
-                  }}
                 />
-                <label htmlFor="phone" className="form-label">
-                  Số điện thoại
+                <label htmlFor="email" className="form-label">
+                  Email
                 </label>
               </div>
               <div className="form-group">
@@ -279,14 +256,6 @@ function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Signup Failed",
-                      message: "Vui lòng nhập mật khẩu!",
-                      type: "error",
-                    });
-                  }}
                 />
                 <label htmlFor="password" className="form-label">
                   Mật khẩu
@@ -303,14 +272,6 @@ function AuthPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  onInvalid={(e) => {
-                    e.preventDefault();
-                    showToast({
-                      title: "Signup Failed",
-                      message: "Vui lòng nhập lại mật khẩu!",
-                      type: "error",
-                    });
-                  }}
                 />
                 <label htmlFor="password_confirmation" className="form-label">
                   Nhập lại mật khẩu
@@ -324,14 +285,6 @@ function AuthPage() {
                     checked={agreeTerms}
                     onChange={(e) => setAgreeTerms(e.target.checked)}
                     required
-                    onInvalid={(e) => {
-                      e.preventDefault();
-                      showToast({
-                        title: "Signup Failed",
-                        message: "Bạn phải đồng ý với Chính sách trang web!",
-                        type: "error",
-                      });
-                    }}
                   />{" "}
                   Tôi đồng ý với{" "}
                   <a href="#" title="chính sách trang web" target="_blank">
