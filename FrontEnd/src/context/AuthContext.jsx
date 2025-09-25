@@ -6,111 +6,104 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
 
-  // --- LOGIN THẬT ---
-  const loginUser = async (username, password) => {
+  // --- LOGIN ---
+  const loginUser = async (email, password, rememberMe = false) => {
     try {
-      const res = await fetch("http://localhost:8080/auth/login", {
+      const res = await fetch("http://localhost:8080/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include",
+        body: JSON.stringify({ email, password }),
+        // credentials: "include",
       });
+
       const data = await res.json();
 
-      if (data.accessToken) {
+      if (res.ok && data.success && data.data) {
+        const userData = data.data;
+
         const authData = {
-          accountName: data.accountName,
-          role: data.role,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
+          email, // từ input login
+          accountName: userData.accountName,
+          role: userData.role || "USER", // fallback nếu null
+          accessToken: userData.accessToken,
+          refreshToken: userData.refreshToken,
         };
+
         setAuth(authData);
-        if (!data.refreshToken)
+
+        // rememberMe -> localStorage, ngược lại sessionStorage
+        if (rememberMe) {
           localStorage.setItem("auth", JSON.stringify(authData));
+        } else {
+          sessionStorage.setItem("auth", JSON.stringify(authData));
+        }
+
         return authData;
+      } else {
+        throw new Error(data.message || "Sai email hoặc mật khẩu!");
       }
     } catch (err) {
       console.error("Login failed:", err);
+      throw err;
     }
-    return null;
   };
 
-  // --- SIGNUP THẬT: chỉ tạo tài khoản, không login ---
-  const signupUser = async (accountName, password) => {
+  // --- SIGNUP ---
+  const signupUser = async (email, password, accountName) => {
     try {
-      const res = await fetch("http://localhost:8080/auth/register", {
+      const res = await fetch("http://localhost:8080/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountName, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          accountName,
+          role: "USER", // server mặc định cũng có, nhưng thêm cho chắc
+        }),
         credentials: "include",
       });
+
       const data = await res.json();
 
-      // Nếu thành công, chỉ trả true để show toast, không login
-      if (res.ok) return true;
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Đăng ký thất bại!");
+      }
+
+      // Không login ngay, chỉ báo user check email
+      return {
+        success: true,
+        message: "Vui lòng xác thực email rồi đăng nhập",
+      };
     } catch (err) {
       console.error("Signup failed:", err);
+      throw err;
     }
-    return false;
-  };
-
-  // --- FAKE LOGIN ---
-  const loginFakeUser = async (accountName = "Demo") => {
-    const fakeData = {
-      accountName,
-      role: "user",
-      accessToken: "abc123",
-      refreshToken: null,
-    };
-    setAuth(fakeData);
-    localStorage.setItem("auth", JSON.stringify(fakeData));
-    return fakeData;
-  };
-
-  // --- FAKE SIGNUP ---
-  const signupFakeUser = async (accountName = "Demo") => {
-    return { accountName };
   };
 
   // --- LOGOUT ---
-  const logout = () => {
-    setAuth(null);
-    localStorage.removeItem("auth");
-    fetch("http://localhost:8080/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+  const logout = async () => {
+    try {
+      setAuth(null);
+      localStorage.removeItem("auth");
+      sessionStorage.removeItem("auth");
+
+      await fetch("http://localhost:8080/api/v1/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   // --- Restore auth khi reload ---
   useEffect(() => {
-    const restoreAuth = async () => {
-      if (!auth) {
-        try {
-          const res = await fetch("http://localhost:8080/refresh-token", {
-            method: "POST",
-            credentials: "include",
-          });
-          const data = await res.json();
-          if (data.accessToken) {
-            setAuth({
-              accountName: data.accountName,
-              role: data.role,
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-            });
-            return;
-          }
-        } catch (err) {
-          console.log("Không có refresh token hoặc hết hạn");
-        }
-
-        const saved = localStorage.getItem("auth");
-        if (saved) setAuth(JSON.parse(saved));
-      }
-    };
-    restoreAuth();
-  }, [auth]);
+    const saved =
+      localStorage.getItem("auth") || sessionStorage.getItem("auth");
+    if (saved) {
+      setAuth(JSON.parse(saved));
+    }
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -118,8 +111,6 @@ export const AuthProvider = ({ children }) => {
         auth,
         loginUser,
         signupUser,
-        loginFakeUser,
-        signupFakeUser,
         logout,
       }}
     >
