@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ProductController {
     private final ProductService productService;
 

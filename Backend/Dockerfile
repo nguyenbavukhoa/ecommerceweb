@@ -6,18 +6,17 @@ LABEL authors="kien"
 
 WORKDIR /app
 
-# Copy file cấu hình Maven trước để cache dependency
-COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
+# Copy pom.xml để cache dependency
+COPY pom.xml ./
 
-RUN ./mvnw dependency:go-offline -B
+# Tải dependency
+RUN mvn dependency:go-offline -B
 
-# Copy source `code`
+# Copy source
 COPY src ./src
 
-# Build ứng dụng (skip test để nhanh hơn)
-RUN ./mvnw clean package -DskipTests
+# Build jar
+RUN mvn clean package -DskipTests -Pprod -Dspring-boot.build-image=false -Dpackaging=jar
 
 # =========================
 # Stage 2: Run JAR

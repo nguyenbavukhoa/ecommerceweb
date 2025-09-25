@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/user-info")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class UserInformationController {
     private final UserInformationService userInformationService;
     @GetMapping("/all")

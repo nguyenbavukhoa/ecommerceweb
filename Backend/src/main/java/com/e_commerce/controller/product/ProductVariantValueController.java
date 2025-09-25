@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/product-variant-values")
-@CrossOrigin(origins = "*")
 public class ProductVariantValueController {
     private final ProductVariantsValuesService productVariantsValuesService;
 
