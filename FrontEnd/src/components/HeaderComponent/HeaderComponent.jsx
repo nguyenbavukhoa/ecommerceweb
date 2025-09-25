@@ -1,6 +1,8 @@
 import logo from "../../assets/images/logo/logo.png";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { useCategory, useCategories } from "../../Hooks/useCategory";
 
-import { useCategory } from "../../Hooks/useCategory";
 export default function HeaderComponent() {
   const searchProducts = () => {
     console.log("Searching...");
@@ -62,7 +64,7 @@ export default function HeaderComponent() {
             {/* Logo */}
             <div className="header-middle-left">
               <div className="header-logo">
-                <a href="#">
+                <a href="/">
                   <img src={logo} alt="" className="header-logo-img" />
                 </a>
               </div>
@@ -117,13 +119,15 @@ export default function HeaderComponent() {
                   </div>
                   <ul className="header-middle-right-menu">
                     <li>
-                      <a id="login" href="/sign-in">
+                      <a id="login" href="/auth?action=login">
+
                         <i className="fa-light fa-right-to-bracket"></i> Đăng
                         nhập
                       </a>
                     </li>
                     <li>
-                      <a id="signup" href="/sign-up">
+                      <a id="signup" href="/auth?action=register">
+
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>
@@ -151,107 +155,56 @@ export default function HeaderComponent() {
 
 function HeaderBottom() {
   const [selectedCategory, showCategory] = useCategory();
+  const { data: categories = [] } = useCategories(); // mặc định mảng rỗng
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleCategoryChange = (e, cat) => {
+    e.preventDefault();
+    showCategory(cat);
+
+    if (location.pathname === "/") {
+      document
+        .getElementById("home-service")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(`/`);
+    }
+  };
+
 
   return (
     <nav className="header-bottom">
       <div className="container">
         <ul className="menu-list">
           <li className="menu-list-item">
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'all' ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                showCategory('all');
-              }}
+            <a
+              href="/products?category=all"
+              className={`menu-link ${
+                selectedCategory === "all" ? "active" : ""
+              }`}
+              onClick={(e) => handleCategoryChange(e, "all")}
+
             >
               Trang chủ
             </a>
           </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món chay")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món chay' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món chay
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món mặn")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món mặn' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món mặn
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món lẩu")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món lẩu' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món lẩu
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món ăn vặt")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món ăn vặt' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món ăn vặt
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món tráng miệng")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món tráng miệng' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món tráng miệng
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Nước uống")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Nước uống' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Nước uống
-            </a>
-          </li>
-          <li
-            className="menu-list-item"
-            onClick={() => showCategory("Món khác")}
-          >
-            <a 
-              href="#" 
-              className={`menu-link ${selectedCategory === 'Món khác' ? 'active' : ''}`}
-              onClick={(e) => e.preventDefault()}
-            >
-              Món khác
-            </a>
-          </li>
+
+
+          {categories.map((cat) => (
+            <li key={cat.id} className="menu-list-item">
+              <a
+                href={`/products?category=${cat.name}`}
+                className={`menu-link ${
+                  selectedCategory === cat.id ? "active" : ""
+                }`}
+                onClick={(e) => handleCategoryChange(e, cat.id)}
+              >
+                {cat.name}
+              </a>
+            </li>
+          ))}
+
         </ul>
       </div>
     </nav>

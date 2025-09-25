@@ -1,0 +1,220 @@
+.sign-login-title {
+  color: rgb(122, 14, 14);
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.modals.signup-login .modal-signup-login-container {
+  position: relative;
+  max-width: 1130px;
+  padding: 0 10px;
+  margin: 0 auto;
+  margin-top: 80px;
+  height: 800px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+}
+
+.modal-signup-login-container .form-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58%;
+  height: 100%;
+  padding: 80px;
+  color: rgb(122, 14, 14);
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+}
+
+.form-content .logo {
+  font-size: 30px;
+}
+
+.form-content h2 {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.form-content h2 span {
+  font-size: 25px;
+}
+
+.text-sci p {
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.social-icons a i {
+  font-size: 20px;
+  margin-right: 10px;
+  padding: 10px;
+  width: 40px;
+  height: 42px;
+  color: rgb(122, 14, 14);
+  transition: transform 0.3s linear;
+  border: 1px solid rgb(122, 14, 14);
+  border-radius: 20%;
+}
+
+.social-icons a:hover i {
+  transform: scale(1.1);
+  color: aliceblue;
+  background: rgb(122, 14, 14);
+  border: none;
+}
+
+.modal-signup-login-container .logreg-box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(42%);
+  height: 100%;
+  overflow: hidden;
+}
+
+.logreg-box .form-box {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgb(122, 14, 14);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  flex-direction: column;
+  color: rgba(106, 103, 103, 0.6);
+}
+
+.logreg-box .form-box:first-child {
+  transform: translateX(0);
+  transition: transform 0.6s ease;
+  transition-delay: 0.7s;
+}
+
+.logreg-box.active .form-box:first-child {
+  transform: translateX(480px);
+  transition-delay: 0s;
+}
+
+.logreg-box .form-box:nth-child(2) {
+  transform: translateX(480px);
+  transition: transform 0.6s ease;
+  transition-delay: 0s;
+}
+
+.logreg-box.active .form-box:nth-child(2) {
+  transform: translateX(0);
+  transition-delay: 0.7s;
+}
+
+.form-title {
+  font-size: 32px;
+  text-align: center;
+}
+
+.login-form .form-group,
+.sign-up-form .form-group {
+  position: relative;
+  width: 340px;
+  height: 50px;
+  border-bottom: 2px solid #e4e4e4e4;
+  margin: 30px 0;
+}
+
+.form-group input {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #838282e4;
+  font-weight: 450;
+  padding-right: 28px;
+}
+
+.form-group .form-label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: 0.5s ease;
+}
+
+.form-group input:focus ~ label,
+.form-group input:valid ~ label {
+  top: -5px;
+}
+
+.form-group .icon {
+  position: absolute;
+  top: 13px;
+  right: 0;
+  font-size: 19px;
+}
+
+.form-box .form-message {
+  position: relative;
+  color: red;
+  font-weight: 500;
+  height: 10px;
+  font-size: 14px;
+}
+
+.form-box .remember-forgot {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin: 15px 0 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.remember-forgot label input {
+  min-width: 13px;
+  accent-color: #e4e4e4e4;
+  margin-right: 3px;
+}
+
+.remember-forgot input[type="checkbox"],
+.form-checkbox input[type="checkbox"] {
+  display: inline-block !important;
+}
+
+.form-submit {
+  width: 100%;
+  height: 45px;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: rgb(122, 14, 14);
+  color: #e4e4e4e4;
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(106, 103, 103, 0.6);
+  margin-top: 10px;
+}
+
+.form-box .change-login {
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 25px;
+}
+
+.change-login a {
+  color: rgb(122, 14, 14);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.change-login a:hover {
+  text-decoration: underline;
+}

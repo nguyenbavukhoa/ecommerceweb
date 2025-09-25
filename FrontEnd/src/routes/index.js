@@ -1,11 +1,11 @@
+import { useSearchParams } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage";
 import UserInfoPage from "../pages/UserInfoPage/UserInfoPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import OrderPage from "../pages/OrderPage/OrderPage";
 import ProductsPage from "../pages/ProductsPage/ProductsPage";
 import ProductDetailsPage from "../pages/ProductDetailsPage/ProductDetailsPage";
-import SigninPage from "../pages/SigninPage/SigninPage";
-import SignupPage from "../pages/SignupPage/SignupPage";
+import AuthPage from "../pages/AuthPage/AuthPage.jsx";
 
 export const routes = [
   {
@@ -29,13 +29,8 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/sign-in",
-    page: SigninPage,
-    isShowHeader: true,
-  },
-  {
-    path: "/sign-up",
-    page: SignupPage,
+    path: "/auth", // For signup and signin
+    page: AuthPage,
     isShowHeader: true,
   },
   {

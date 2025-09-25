@@ -15,14 +15,9 @@ public class ProductSpecification {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Filter theo categoryId
-            if (productFilter.getCategoryId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), productFilter.getCategoryId()));
-            }
-
             // Filter theo productCategoriesId
             if (productFilter.getProductCategoriesId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("productCategories").get("id"), productFilter.getProductCategoriesId()));
+                predicates.add(criteriaBuilder.equal(root.get("productCategory").get("id"), productFilter.getProductCategoriesId()));
             }
 
             // Filter theo trạng thái isActive
@@ -44,12 +39,12 @@ public class ProductSpecification {
 
             // Filter theo giá min/max
             if (productFilter.getMinPrice() != null && productFilter.getMaxPrice() != null) {
-                predicates.add(criteriaBuilder.between(root.get("price"),
+                predicates.add(criteriaBuilder.between(root.get("priceBase"),
                         productFilter.getMinPrice(), productFilter.getMaxPrice()));
             } else if (productFilter.getMinPrice() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), productFilter.getMinPrice()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("priceBase"), productFilter.getMinPrice()));
             } else if (productFilter.getMaxPrice() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), productFilter.getMaxPrice()));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("priceBase"), productFilter.getMaxPrice()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
