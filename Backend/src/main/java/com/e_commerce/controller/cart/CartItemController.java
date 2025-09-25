@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/cart-items")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 @Slf4j
 public class CartItemController {
     private final CartItemsService cartItemsService;

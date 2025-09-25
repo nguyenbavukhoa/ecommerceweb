@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 @Slf4j
 public class AccountController {
     private final AccountService accountService;
