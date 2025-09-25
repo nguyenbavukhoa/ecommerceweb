@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCategory } from "../../Hooks/useCategory";
 import { useProducts } from "../../Hooks/useProducts";
 
+
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";
 import banner4 from "../../assets/images/banner-4.png";
@@ -26,6 +27,7 @@ export default function MainComponent({ onProductDetail }) {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory]);
+
 
   // Auto slide
   useEffect(() => {
@@ -98,8 +100,8 @@ export default function MainComponent({ onProductDetail }) {
             </div>
           </div>
         </div>
-
         <ProductList products={products} onProductDetail={onProductDetail} />
+
 
         <div className="page-nav">
           <ul className="page-nav-list">

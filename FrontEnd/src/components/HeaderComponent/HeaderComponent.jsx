@@ -120,12 +120,14 @@ export default function HeaderComponent() {
                   <ul className="header-middle-right-menu">
                     <li>
                       <a id="login" href="/auth?action=login">
+
                         <i className="fa-light fa-right-to-bracket"></i> Đăng
                         nhập
                       </a>
                     </li>
                     <li>
                       <a id="signup" href="/auth?action=register">
+
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>
@@ -170,6 +172,7 @@ function HeaderBottom() {
     }
   };
 
+
   return (
     <nav className="header-bottom">
       <div className="container">
@@ -181,10 +184,12 @@ function HeaderBottom() {
                 selectedCategory === "all" ? "active" : ""
               }`}
               onClick={(e) => handleCategoryChange(e, "all")}
+
             >
               Trang chủ
             </a>
           </li>
+
 
           {categories.map((cat) => (
             <li key={cat.id} className="menu-list-item">
@@ -199,6 +204,7 @@ function HeaderBottom() {
               </a>
             </li>
           ))}
+
         </ul>
       </div>
     </nav>
