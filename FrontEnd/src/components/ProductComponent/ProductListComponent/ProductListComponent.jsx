@@ -31,6 +31,7 @@ function ProductList({ products, onProductDetail, isLoading }) {
             product={product}
             onDetail={() => onProductDetail(product)}
           />
+
         ))}
       </div>
     </>

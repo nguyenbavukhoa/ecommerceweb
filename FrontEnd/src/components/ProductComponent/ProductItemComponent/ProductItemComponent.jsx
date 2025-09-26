@@ -1,6 +1,13 @@
 import React from "react";
 
 function ProductItem({ product, onDetail }) {
+  if (!product) return null;
+
+  const name = product.name || "No name";
+  const price = product.priceBase ?? 0; // nếu undefined, đặt 0
+  const img = product.imgMain || "/images/default.png";
+
+
   return (
     <div className="col-product">
       <article className="card-product">
@@ -13,7 +20,8 @@ function ProductItem({ product, onDetail }) {
               onDetail(product.id);
             }}
           >
-            <img className="card-image" src={product.img} alt={product.title} />
+            <img className="card-image" src={img} alt={name} />
+
           </a>
         </div>
         <div className="food-info">
@@ -27,14 +35,16 @@ function ProductItem({ product, onDetail }) {
                   onDetail(product.id);
                 }}
               >
-                {product.title}
+                {name}
+
               </a>
             </div>
           </div>
           <div className="card-footer">
             <div className="product-price">
               <span className="current-price">
-                {product.price.toLocaleString("vi-VN")}₫
+                {price.toLocaleString("vi-VN")}₫
+
               </span>
             </div>
             <div className="product-buy">

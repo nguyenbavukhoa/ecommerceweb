@@ -1,8 +1,7 @@
 import logo from "../../assets/images/logo/logo.png";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { useCategory } from "../../Hooks/useCategory";
-import { useCategories } from "../../Hooks/useProducts";
+import { useCategory, useCategories } from "../../Hooks/useCategory";
 
 export default function HeaderComponent() {
   const searchProducts = () => {
@@ -121,12 +120,14 @@ export default function HeaderComponent() {
                   <ul className="header-middle-right-menu">
                     <li>
                       <a id="login" href="/auth?action=login">
+
                         <i className="fa-light fa-right-to-bracket"></i> Đăng
                         nhập
                       </a>
                     </li>
                     <li>
                       <a id="signup" href="/auth?action=register">
+
                         <i className="fa-light fa-user-plus"></i> Đăng ký
                       </a>
                     </li>
@@ -154,13 +155,12 @@ export default function HeaderComponent() {
 
 function HeaderBottom() {
   const [selectedCategory, showCategory] = useCategory();
-  const categories = useCategories();
+  const { data: categories = [] } = useCategories(); // mặc định mảng rỗng
   const location = useLocation();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const handleCategoryChange = (e, cat) => {
-    e.preventDefault(); // chặn reload mặc định của <a>
+    e.preventDefault();
     showCategory(cat);
 
     if (location.pathname === "/") {
@@ -171,30 +171,7 @@ function HeaderBottom() {
       navigate(`/`);
     }
   };
-  // const handleCategoryChange = (e, cat) => {
-  //   e.preventDefault();
-  //   showCategory(cat);
 
-  //   if (
-  //     location.pathname === "/" ||
-  //     location.pathname.startsWith("/products")
-  //   ) {
-  //     // Nếu đang ở trang chủ hoặc products thì scroll
-  //     document
-  //       .getElementById("home-service")
-  //       ?.scrollIntoView({ behavior: "smooth" });
-
-  //     // Nếu chưa ở products thì đổi query param
-  //     if (location.pathname !== "/products") {
-  //       navigate(`/products?category=${cat}`);
-  //     } else {
-  //       navigate(`/products?category=${cat}`, { replace: true });
-  //     }
-  //   } else {
-  //     // Nếu ở chỗ khác nữa thì điều hướng về home
-  //     navigate(`/products?category=${cat}`);
-  //   }
-  // };
 
   return (
     <nav className="header-bottom">
@@ -207,25 +184,27 @@ function HeaderBottom() {
                 selectedCategory === "all" ? "active" : ""
               }`}
               onClick={(e) => handleCategoryChange(e, "all")}
+
             >
               Trang chủ
             </a>
           </li>
 
-          {/* Render categories từ products */}
-          {categories.map((category) => (
-            <li key={category} className="menu-list-item">
+
+          {categories.map((cat) => (
+            <li key={cat.id} className="menu-list-item">
               <a
-                href={`/products?category=${category}`}
+                href={`/products?category=${cat.name}`}
                 className={`menu-link ${
-                  selectedCategory === category ? "active" : ""
+                  selectedCategory === cat.id ? "active" : ""
                 }`}
-                onClick={(e) => handleCategoryChange(e, category)}
+                onClick={(e) => handleCategoryChange(e, cat.id)}
               >
-                {category}
+                {cat.name}
               </a>
             </li>
           ))}
+
         </ul>
       </div>
     </nav>

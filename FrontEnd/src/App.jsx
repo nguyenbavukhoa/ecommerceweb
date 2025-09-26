@@ -11,11 +11,13 @@ import { CategoryProvider } from "./Hooks/useCategory";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
 
+
 // Import custom CSS
 import "./css/category.css";
 
 function App() {
   return (
+
     <AuthProvider>
       <ToastProvider>
         <div>
@@ -24,9 +26,11 @@ function App() {
               <Routes>
                 {/* Redirect "/" sang "/about" */}
                 {/* <Route
+
               path="/"
               element={<Navigate to="/user-info-detail" replace />}
             /> */}
+
 
                 {routes.map((route) => {
                   const Page = route.page;
@@ -51,6 +55,7 @@ function App() {
         </div>
       </ToastProvider>
     </AuthProvider>
+
   );
 }
 

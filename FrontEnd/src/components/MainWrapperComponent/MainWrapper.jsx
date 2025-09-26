@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCategory } from "../../Hooks/useCategory";
 import { useProducts } from "../../Hooks/useProducts";
 
+
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";
 import banner4 from "../../assets/images/banner-4.png";
@@ -13,20 +14,20 @@ const banners = [banner2, banner3, banner4, banner5];
 export default function MainComponent({ onProductDetail }) {
   const [current, setCurrent] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 12;
 
   // Get the selected category from the context
   const [selectedCategory] = useCategory();
 
   // Sử dụng useProducts với selectedCategory
-  const { data: products, isLoading, error } = useProducts(selectedCategory);
+  const { data, isLoading, error } = useProducts(selectedCategory, currentPage);
 
-  // Page pagination
-  const start = (currentPage - 1) * perPage;
-  const end = start + perPage;
-  const currentProducts = (products || []).slice(start, end);
+  const { products, totalPages } = data || { products: [] };
 
-  const totalPages = Math.ceil((products || []).length / perPage);
+  // Mỗi khi category thay đổi => reset về page 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
 
   // Auto slide
   useEffect(() => {
@@ -99,11 +100,8 @@ export default function MainComponent({ onProductDetail }) {
             </div>
           </div>
         </div>
+        <ProductList products={products} onProductDetail={onProductDetail} />
 
-        <ProductList
-          products={currentProducts}
-          onProductDetail={onProductDetail}
-        />
 
         <div className="page-nav">
           <ul className="page-nav-list">

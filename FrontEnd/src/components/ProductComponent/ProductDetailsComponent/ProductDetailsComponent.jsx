@@ -44,6 +44,7 @@
 // };
 
 // export default ProductDetailsComponent;
+
 import React, { useState, useEffect } from "react";
 import { vnd } from "../../../utils/vnd";
 
@@ -55,11 +56,11 @@ const ProductDetailsComponent = ({
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
-  const [totalPrice, setTotalPrice] = useState(product?.price || 0);
+  const [totalPrice, setTotalPrice] = useState(product?.priceBase || 0);
 
   useEffect(() => {
     if (product) {
-      setTotalPrice(product.price * quantity);
+      setTotalPrice(product.priceBase * quantity);
     }
   }, [quantity, product]);
 
@@ -73,16 +74,22 @@ const ProductDetailsComponent = ({
 
   if (!product) return null;
 
+  // console.log(product);
+
   return (
     <>
       <div className="modal-header">
-        <img className="product-image" src={product.img} alt={product.title} />
+        <img
+          className="product-image"
+          src={product.imgMain}
+          alt={product.name}
+        />
       </div>
       <div className="modal-body">
-        <h2 className="product-title">{product.title}</h2>
+        <h2 className="product-title">{product.name}</h2>
         <div className="product-control">
           <div className="priceBox">
-            <span className="current-price">{vnd(product.price)}</span>
+            <span className="current-price">{vnd(product.priceBase)}</span>
           </div>
           <div className="buttons_added">
             <input
@@ -110,7 +117,7 @@ const ProductDetailsComponent = ({
             />
           </div>
         </div>
-        <p className="product-description">{product.desc}</p>
+        <p className="product-description">{product.description}</p>
       </div>
       <div className="notebox">
         <p className="notebox-title">Ghi chú</p>
@@ -149,3 +156,4 @@ const ProductDetailsComponent = ({
 };
 
 export default ProductDetailsComponent;
+
