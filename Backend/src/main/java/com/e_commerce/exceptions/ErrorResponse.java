@@ -29,6 +29,7 @@ public enum ErrorResponse {
     ACCOUNT_DISABLED(1008, "Account is disabled", HttpStatus.FORBIDDEN),
     ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED(1009, "Maximum login attempts exceeded. Please try again later.", HttpStatus.FORBIDDEN),
     ACCOUNT_LOCKED_TOO_MANY_ATTEMPTS(1010, "Account is locked due to too many failed login attempts. Please try again later.", HttpStatus.FORBIDDEN),
+    FRAUDULENT_LOGIN_DETECTED(1011, "Multiple failed login attempts from different IP addresses detected. Please try again later.", HttpStatus.FORBIDDEN),
 
     // Category Errors
     CATEGORY_NOT_FOUND(2001, "Category not found", HttpStatus.NOT_FOUND),

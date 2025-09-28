@@ -35,4 +35,5 @@ public interface AccountService extends UserDetailsService {
     OtpVerificationResponseDTO verifyOtp(OtpVerificationRequestDTO request);
 
     void resetPassword(ResetPasswordDTO request);
+
 }

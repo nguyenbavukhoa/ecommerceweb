@@ -19,6 +19,7 @@ import com.e_commerce.util.JwtUtil;
 
 import com.e_commerce.util.LoginAttemptService;
 import com.e_commerce.util.OtpUtil;
+import com.e_commerce.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,6 +30,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -64,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = CustomException.class)
     @Override
     public AuthenticationDTO signIn(LoginForm loginForm) {
         Account account = accountRepository.findByEmail(loginForm.getEmail())
@@ -79,22 +81,41 @@ public class AccountServiceImpl implements AccountService {
             throw new CustomException(ErrorResponse.ACCOUNT_LOCKED);
         }
 
-        if (loginAttemptService.isBlocked(loginForm.getEmail())) {
-            throw new CustomException(ErrorResponse.ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED);
-        }
 
         if (!passwordEncoder.matches(loginForm.getPassword(), account.getPassword())) {
             loginAttemptService.loginFailed(loginForm.getEmail());
             int remaining = loginAttemptService.getRemainingAttempts(loginForm.getEmail());
 
+
             if (remaining <= 0) {
-                account.setActive(false);
-                accountRepository.save(account);
-                throw new CustomException(ErrorResponse.ACCOUNT_LOCKED);
+                loginAttemptService.lockTemporarily(loginForm.getEmail());
+
+                long fraudCount = loginAttemptService.incrementFraud(loginForm.getEmail());
+
+                if (fraudCount >= 3) {
+                    account.setActive(false);
+                    accountRepository.save(account);
+
+                    loginAttemptService.clearLoginState(loginForm.getEmail());
+
+                    throw new CustomException(List.of(ErrorResponse.FRAUDULENT_LOGIN_DETECTED),
+                            "Phát hiện nhiều lần đăng nhập thất bại. Tài khoản đã bị khóa vĩnh viễn. Vui lòng liên hệ hỗ trợ.");
+                }
+
+                long lockTimeRemaining = loginAttemptService.getLockTimeRemaining(loginForm.getEmail());
+                throw new CustomException(List.of(ErrorResponse.ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED),
+                        "Tài khoản bị khóa trong " + lockTimeRemaining + " phút.");
             }
             String message = "Invalid credentials. You have " + remaining + " attempt(s) left.";
             throw new CustomException(List.of(ErrorResponse.ACCOUNT_PASSWORD_MISMATCH),message);
         }
+
+        if (loginAttemptService.isBlocked(loginForm.getEmail())) {
+            long lockTimeRemaining = loginAttemptService.getLockTimeRemaining(loginForm.getEmail());
+            String message = "Your account is locked due to multiple failed login attempts. Please try again in " + lockTimeRemaining + " minute(s).";
+            throw new CustomException(List.of(ErrorResponse.ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED), message);
+        }
+
 
         loginAttemptService.loginSucceeded(loginForm.getEmail());
         String jwtToken = jwtUtil.generateToken(account);
