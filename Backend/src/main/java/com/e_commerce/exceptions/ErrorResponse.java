@@ -135,6 +135,7 @@ public enum ErrorResponse {
     OTP_MAX_ATTEMPTS_EXCEEDED(10002, "Maximum OTP attempts exceeded", HttpStatus.FORBIDDEN),
     OTP_ALREADY_SENT(10004, "OTP has already been sent. Please wait before requesting a new one.", HttpStatus.TOO_MANY_REQUESTS),
     OTP_REQUIRED(10005, "OTP is required", HttpStatus.BAD_REQUEST),
+    OTP_RATE_LIMIT_EXCEEDED(10006, "OTP request rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS),
     ;
     private final int code;
     private final String message;
