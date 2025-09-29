@@ -195,12 +195,10 @@ public class AccountServiceImpl implements AccountService {
 
             String newAccessToken = jwtUtil.generateToken((UserDetails) account);
             String newRefreshToken = jwtUtil.generateRefreshToken((UserDetails) account);
-
-            // logic xóa refresh-token cũ
+            tokenService.generateRefreshToken(account, newRefreshToken);
 
             return AuthenticationDTO.builder()
                     .accessToken(newAccessToken)
-                    .refreshToken(newRefreshToken)
                     .role(account.getRole().name())
                     .build();
         } catch (Exception e) {

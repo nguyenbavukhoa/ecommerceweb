@@ -136,6 +136,12 @@ public enum ErrorResponse {
     OTP_ALREADY_SENT(10004, "OTP has already been sent. Please wait before requesting a new one.", HttpStatus.TOO_MANY_REQUESTS),
     OTP_REQUIRED(10005, "OTP is required", HttpStatus.BAD_REQUEST),
     OTP_RATE_LIMIT_EXCEEDED(10006, "OTP request rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // Voucher Errors
+    VOUCHER_NOT_FOUND(11001, "Voucher not found", HttpStatus.NOT_FOUND),
+    VOUCHER_ALREADY_EXISTS(11002, "Voucher already exists", HttpStatus.CONFLICT),
+    VOUCHER_CODE_INVALID(11003, "Invalid voucher code", HttpStatus.BAD_REQUEST),
+    VOUCHER_ENDDATE_BEFORE_STARTDATE(11004, "Voucher end date is before start date", HttpStatus.BAD_REQUEST),
     ;
     private final int code;
     private final String message;

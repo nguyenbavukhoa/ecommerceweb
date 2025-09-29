@@ -9,6 +9,5 @@ import lombok.*;
 public class AuthenticationDTO {
     private String accountName;
     private String accessToken;
-    private String refreshToken;
     private String role;
 }
