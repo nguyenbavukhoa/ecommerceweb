@@ -48,4 +48,12 @@ public class VoucherController {
                 new ApiResponse<>(true, "Delete voucher successfully", null, null, request.getRequestURI())
         );
     }
+
+    @GetMapping("/check/{code}")
+    public ResponseEntity<ApiResponse<?>> checkVoucher(@PathVariable("code") String code, HttpServletRequest request) {
+        var result = voucherService.checkVoucher(code);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Check voucher successfully", result , null, request.getRequestURI())
+        );
+    }
 }

@@ -14,4 +14,7 @@ public interface VoucherService {
     void deleteVoucher(Integer id);
 
     PageDTO<VoucherDTO> getAllVouchers(int page, int size, VoucherFilter voucherFilter);
+
+    VoucherCheck checkVoucher(String voucherCode);
+
 }

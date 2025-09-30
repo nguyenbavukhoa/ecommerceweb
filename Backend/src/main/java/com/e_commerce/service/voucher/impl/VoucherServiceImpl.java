@@ -1,6 +1,7 @@
 package com.e_commerce.service.voucher.impl;
 
 import com.e_commerce.dto.PageDTO;
+import com.e_commerce.dto.voucher.VoucherCheck;
 import com.e_commerce.dto.voucher.VoucherCreateForm;
 import com.e_commerce.dto.voucher.VoucherDTO;
 import com.e_commerce.dto.voucher.VoucherFilter;
@@ -67,5 +68,31 @@ public class VoucherServiceImpl implements VoucherService {
         Specification<Voucher> specification = VoucherSpecification.filterVoucher(voucherFilter);
         Pageable pageable = PageRequest.of(page-1, size);
         return voucherMapper.convertEntityPageToDTOPage(voucherRepository.findAll(specification, pageable));
+    }
+
+    @Override
+    public VoucherCheck checkVoucher(String voucherCode) {
+        Voucher voucher = voucherRepository.findByCode(voucherCode)
+                        .orElseThrow(() -> new CustomException(ErrorResponse.VOUCHER_NOT_FOUND));
+
+        if (!voucher.getActive()) {
+            return VoucherCheck.builder()
+                    .valid(false)
+                    .message("Voucher is inactive")
+                    .build();
+        }
+
+        if (voucher.getEndDate().isBefore(java.time.LocalDateTime.now())) {
+            return VoucherCheck.builder()
+                    .valid(false)
+                    .message("Voucher has expired")
+                    .build();
+        }
+
+        return VoucherCheck.builder()
+                .valid(true)
+                .message("Voucher is valid")
+                .voucher(voucherMapper.convertEntityToDTO(voucher))
+                .build();
     }
 }
