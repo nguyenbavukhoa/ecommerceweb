@@ -142,6 +142,11 @@ public enum ErrorResponse {
     VOUCHER_ALREADY_EXISTS(11002, "Voucher already exists", HttpStatus.CONFLICT),
     VOUCHER_CODE_INVALID(11003, "Invalid voucher code", HttpStatus.BAD_REQUEST),
     VOUCHER_ENDDATE_BEFORE_STARTDATE(11004, "Voucher end date is before start date", HttpStatus.BAD_REQUEST),
+
+    // Invoice Errors
+    INVOICE_NOT_FOUND(12001, "Invoice not found", HttpStatus.NOT_FOUND),
+    INVOICE_ALREADY_EXISTS(12002, "Invoice already exists", HttpStatus.CONFLICT),
+    INVOICE_ALREADY_EXISTS_FOR_ORDER(12003, "Invoice already exists for this order", HttpStatus.CONFLICT),
     ;
     private final int code;
     private final String message;

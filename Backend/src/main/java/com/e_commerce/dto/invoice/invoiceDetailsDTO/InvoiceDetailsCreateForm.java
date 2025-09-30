@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class InvoiceDetailsCreateForm {
-
     @NotNull(message = "ProductVariantsId cannot be null")
     private Integer productVariantsId;
 
@@ -22,5 +21,6 @@ public class InvoiceDetailsCreateForm {
     @NotNull(message = "Quantity cannot be null")
     private Integer quantity;
 
+    @NotNull(message = "UnitPrice cannot be null")
     private BigDecimal unitPrice;
 }

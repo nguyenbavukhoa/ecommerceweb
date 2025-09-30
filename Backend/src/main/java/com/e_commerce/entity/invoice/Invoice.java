@@ -1,7 +1,11 @@
 package com.e_commerce.entity.invoice;
 
+import com.e_commerce.entity.Voucher;
 import com.e_commerce.entity.account.Account;
+import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.order.Orders;
+import com.e_commerce.entity.payment.Payment;
+import com.e_commerce.entity.payment.PaymentMethod;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,6 +42,14 @@ public class Invoice extends Timestamped {
     @JoinColumn(name = "staff_id", nullable = true)
     private Account staff;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_information_id", nullable = false)
+    private UserInformation userInformation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_method_id", nullable = false)
+    private PaymentMethod paymentMethod;
+
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 
@@ -49,6 +61,10 @@ public class Invoice extends Timestamped {
 
     @Column(name = "shipping_fee", nullable = false)
     private BigDecimal shippingFee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id", nullable = true)
+    private Voucher voucher;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InvoiceDetails> invoiceDetails;
