@@ -112,6 +112,14 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
 
+        if (variantValues != null) {
+            log.info("Variant value price: {}", variantValues.getPrice());
+            log.info("Product variant price: {}", productVariants.getPrice());
+            log.info("Total price: {}", productVariants.getPrice().add(variantValues.getPrice()));
+            cartItems.setPrice(productVariants.getPrice().add(variantValues.getPrice()));
+        } else {
+            cartItems.setPrice(productVariants.getPrice());
+        }
 
         return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }

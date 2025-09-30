@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Builder
@@ -38,4 +40,7 @@ public class CartItems extends Timestamped {
 
     @Column(name = "selected", nullable = false, columnDefinition = "boolean default true")
     private boolean selected;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 }

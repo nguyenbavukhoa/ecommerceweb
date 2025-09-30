@@ -17,7 +17,7 @@ public class OrderItemMapper {
                 .orderId(orderItem.getOrder().getId())
                 .imgUrl(orderItem.getProductVariant().getImgUrl())
                 .productName(orderItem.getProductVariant().getProduct().getName())
-                .price(orderItem.getProductVariant().getPrice())
+                .price(orderItem.getUnitPrice())
                 .note(orderItem.getNote())
                 .build();
     }

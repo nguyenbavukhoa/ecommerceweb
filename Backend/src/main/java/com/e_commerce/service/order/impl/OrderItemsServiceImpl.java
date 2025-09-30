@@ -56,6 +56,14 @@ public class OrderItemsServiceImpl implements OrderItemsService {
                 orderItemsCreateForm.getNote()
         );
 
+        orderItems.setId(IdGenerator.getGenerationId());
+
+        if (variantValues != null){
+            orderItems.setUnitPrice(productVariants.getPrice().add(variantValues.getPrice()));
+        }else {
+            orderItems.setUnitPrice(productVariants.getPrice());
+        }
+
         return orderItemMapper.convertEntityToDTO(orderItemsRepository.save(orderItems));
     }
 
@@ -102,6 +110,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
             price = price.add(variantValues.getPrice());
         }
 
+        log.info("Building order item with price: {}", price);
         OrderItems orderItem = new OrderItems();
         orderItem.setId(IdGenerator.getGenerationId());
         orderItem.setOrder(order);
@@ -110,6 +119,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         orderItem.setUnitPrice(price);
         orderItem.setQuantity(quantity);
         orderItem.setNote(note);
+
 
         return orderItem;
     }
