@@ -43,5 +43,12 @@ public class OrderController {
     }
 
 
+    @PostMapping("createOrderByAdmin")
+    public ResponseEntity<ApiResponse<OrderDTO>> createOrderByAdmin(@RequestBody @Valid OrderCreateForm orderCreateForm, HttpServletRequest request){
+        OrderDTO orders = orderService.createOrder(orderCreateForm);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(true,"Create order successfully",orders,null,request.getRequestURI()));
+    }
 
 }

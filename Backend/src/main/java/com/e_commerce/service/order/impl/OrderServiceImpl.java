@@ -199,7 +199,8 @@ public class OrderServiceImpl implements OrderService {
                 emailService.sendOrderStatusEmail(OrderStatus.REJECTED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
             }
         }
-        return ordersMapper.convertEntityToDTO(ordersRepository.save(order));
+        savedOrder.setOrderStatus(status);
+        return ordersMapper.convertEntityToDTO(ordersRepository.save(savedOrder));
     }
 
     @Override

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ public class EmailServiceImpl implements EmailService {
         this.fromEmail = fromEmail;
     }
 
+    @Async("otpTaskExecutor")
     @Override
     public void sendEmailOTP(String email, String otp, int otpExpirationMinutes) {
         String subject = "Password Reset OTP - SGU Enterprise";
@@ -134,6 +136,7 @@ public class EmailServiceImpl implements EmailService {
                 """.formatted(customerName, orderId, transactionId);
     }
 
+    @Async
     @Override
     public void sendPaymentSuccessEmail(String customerEmail, String customerName, String orderId, String transactionId, BigDecimal amount) {
         String subject = "Payment Successful - Order #" + orderId;
@@ -141,6 +144,7 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(customerEmail, subject, body);
     }
 
+    @Async
     @Override
     public void sendPaymentFailedEmail(String customerEmail, String customerName, String orderId, String transactionId) {
         String subject = "Payment Failed - Order #" + orderId;
@@ -245,6 +249,7 @@ public class EmailServiceImpl implements EmailService {
                 """.formatted(customerName, orderId, statusDescription);
     }
 
+    @Async
     @Override
     public void sendOrderStatusEmail(OrderStatus status, String customerEmail, String customerName, String orderId, BigDecimal amount) {
         String subject = "Order Update - #" + orderId;
@@ -262,6 +267,7 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(customerEmail, subject, body);
     }
 
+    @Async
     @Override
     public void sendRegistrationUserConfirm(String email) {
         Account account = accountService.getAccountByEmail(email);

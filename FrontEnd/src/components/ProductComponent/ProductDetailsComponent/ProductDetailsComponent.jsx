@@ -44,6 +44,7 @@
 // };
 
 // export default ProductDetailsComponent;
+
 import React, { useState, useEffect } from "react";
 import { vnd } from "../../../utils/vnd";
 
@@ -155,3 +156,4 @@ const ProductDetailsComponent = ({
 };
 
 export default ProductDetailsComponent;
+
