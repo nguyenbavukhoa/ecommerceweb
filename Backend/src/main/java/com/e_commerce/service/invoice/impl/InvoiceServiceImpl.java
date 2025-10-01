@@ -25,6 +25,7 @@ import com.e_commerce.service.payment.PaymentService;
 import com.e_commerce.service.voucher.VoucherService;
 import com.e_commerce.specification.InvoiceSpecification;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,6 +40,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final InvoiceMapper invoiceMapper;
@@ -75,8 +77,13 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .shippingFee(invoiceCreateForm.getShippingFee() != null
                         ? invoiceCreateForm.getShippingFee()
                         : BigDecimal.ZERO)
+                .discountAmount(BigDecimal.ZERO)
+                .subTotal(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.ZERO)
                 .order(order)
                 .build();
+
+        invoiceRepository.save(invoice);
 
         // Tạo chi tiết hóa đơn từ chi tiết đơn hàng
         List<InvoiceDetails> invoiceDetailsList = invoiceDetailsService.createInvoiceDetailsFromOrder(order.getId(), invoice);
@@ -99,7 +106,16 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
 
-        return invoiceMapper.convertEntityToDTO(savedInvoice);
+        InvoiceDTO invoiceDTO = invoiceMapper.convertEntityToDTO(savedInvoice);
+        invoiceDTO.setTotalQuantity(
+                invoiceDetailsService.calculateTotalQuantityByInvoiceId(savedInvoice.getId())
+        );
+        invoiceDTO.setItems(
+                invoiceDetailsService.getInvoiceDetailsDTOByInvoiceId(savedInvoice.getId())
+        );
+
+        log.info("Created invoice: {}", invoiceDTO);
+        return invoiceDTO;
     }
 
     @Override

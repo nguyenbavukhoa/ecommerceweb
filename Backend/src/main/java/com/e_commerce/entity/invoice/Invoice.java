@@ -54,13 +54,13 @@ public class Invoice extends Timestamped {
     private BigDecimal totalAmount;
 
     @Column(name = "sub_total", nullable = false)
-    private BigDecimal subTotal;
+    private BigDecimal subTotal = BigDecimal.ZERO;
 
     @Column(name = "discount_amount", nullable = false)
-    private BigDecimal discountAmount;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "shipping_fee", nullable = false)
-    private BigDecimal shippingFee;
+    private BigDecimal shippingFee = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id", nullable = true)

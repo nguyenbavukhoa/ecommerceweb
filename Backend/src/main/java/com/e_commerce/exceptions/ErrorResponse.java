@@ -147,6 +147,9 @@ public enum ErrorResponse {
     INVOICE_NOT_FOUND(12001, "Invoice not found", HttpStatus.NOT_FOUND),
     INVOICE_ALREADY_EXISTS(12002, "Invoice already exists", HttpStatus.CONFLICT),
     INVOICE_ALREADY_EXISTS_FOR_ORDER(12003, "Invoice already exists for this order", HttpStatus.CONFLICT),
+
+    // Invoice Details Errors
+    INVOICE_DETAILS_NOT_FOUND(12101, "Invoice details not found", HttpStatus.NOT_FOUND),
     ;
     private final int code;
     private final String message;

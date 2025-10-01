@@ -1,9 +1,12 @@
 package com.e_commerce.service.invoice.impl;
 
+import com.e_commerce.dto.invoice.invoiceDetailsDTO.InvoiceDetailsDTO;
 import com.e_commerce.entity.invoice.Invoice;
 import com.e_commerce.entity.invoice.InvoiceDetails;
 import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
+import com.e_commerce.exceptions.CustomException;
+import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.invoice.InvoiceDetailsMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.invoice.InvoiceDetailsRepository;
@@ -49,5 +52,21 @@ public class InvoiceDetailsServiceImpl implements InvoiceDetailsService {
             invoiceDetailsList.add(invoiceDetails);
         }
         return invoiceDetailsRepository.saveAll(invoiceDetailsList);
+    }
+
+    @Override
+    public List<InvoiceDetailsDTO> getInvoiceDetailsDTOByInvoiceId(Integer invoiceId) {
+        List<InvoiceDetails> invoiceDetails = invoiceDetailsRepository.findByInvoiceId(invoiceId);
+
+        if (invoiceDetails.isEmpty()) {
+            throw new CustomException(ErrorResponse.INVOICE_DETAILS_NOT_FOUND);
+        }
+        return invoiceDetailsMapper.convertPageToList(invoiceDetails);
+    }
+
+    @Override
+    public Integer calculateTotalQuantityByInvoiceId(Integer invoiceId) {
+        List<InvoiceDetailsDTO> invoiceDetails = getInvoiceDetailsDTOByInvoiceId(invoiceId);
+        return invoiceDetails.stream().mapToInt(InvoiceDetailsDTO::getQuantity).sum();
     }
 }

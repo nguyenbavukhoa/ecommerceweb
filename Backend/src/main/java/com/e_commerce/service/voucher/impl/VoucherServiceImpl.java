@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
@@ -82,12 +83,20 @@ public class VoucherServiceImpl implements VoucherService {
                     .build();
         }
 
-        if (voucher.getEndDate().isBefore(java.time.LocalDateTime.now())) {
+        if (voucher.getStartDate() != null && LocalDateTime.now().isBefore(voucher.getStartDate())) {
+            return VoucherCheck.builder()
+                    .valid(false)
+                    .message("Voucher is not valid yet")
+                    .build();
+        }
+
+        if (voucher.getEndDate().isBefore(LocalDateTime.now())) {
             return VoucherCheck.builder()
                     .valid(false)
                     .message("Voucher has expired")
                     .build();
         }
+
 
         return VoucherCheck.builder()
                 .valid(true)
