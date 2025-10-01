@@ -164,6 +164,14 @@ public class AccountServiceImpl implements AccountService {
             Account account = accountRepository.findByEmail(email)
                     .orElseThrow(() -> new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND));
 
+            Token storedRefreshToken = tokenService.getTokenByAccountIdAndTokenType(account.getId(), TokenType.REFRESH_TOKEN.name());
+
+            if (storedRefreshToken == null || !storedRefreshToken.getToken().equals(refreshToken)) {
+                throw new CustomException(ErrorResponse.INVALID_REFRESH_TOKEN);
+            }
+
+            tokenService.deleteToken(refreshToken, TokenType.REFRESH_TOKEN.name());
+
             String newAccessToken = jwtUtil.generateToken((UserDetails) account);
             String newRefreshToken = jwtUtil.generateRefreshToken((UserDetails) account);
 
