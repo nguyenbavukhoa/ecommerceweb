@@ -106,7 +106,7 @@ export function useProducts(category = "all", page = 1) {
         url += "?isActive=true&page=" + page;
       } else {
         // Nếu khác all thì dùng ?productCategoriesId=<id>
-        url += `?productCategoriesId=${category}"&page=` + page;
+        url += `?productCategoriesId=${category}&page=` + page;
       }
 
       const res = await fetch(url);
