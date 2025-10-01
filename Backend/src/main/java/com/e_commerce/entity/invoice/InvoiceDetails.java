@@ -1,46 +1,41 @@
-package com.e_commerce.entity.order;
+package com.e_commerce.entity.invoice;
 
 import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.orther.Timestamped;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
 @EqualsAndHashCode(callSuper = false)
+@Entity
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class CartItems extends Timestamped {
+public class InvoiceDetails extends Timestamped {
     @Id
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Carts cart;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_variants_id", nullable = false)
     private ProductVariants productVariant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_values_id", nullable = true)
-    @JsonBackReference
     private VariantValues variantValue;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
 
-    @Column(name = "note")
-    private String note;
+    @Column(name = "unit_price", nullable = false)
+    private BigDecimal unitPrice;
 
-    @Column(name = "selected", nullable = false, columnDefinition = "boolean default true")
-    private boolean selected;
-
-    @Column(name = "price", nullable = false)
-    private BigDecimal price;
+    @Column(name = "line_total", nullable = false)
+    private BigDecimal lineTotal;
 }
