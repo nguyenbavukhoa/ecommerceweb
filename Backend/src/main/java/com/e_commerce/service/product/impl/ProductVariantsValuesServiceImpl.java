@@ -3,6 +3,7 @@ package com.e_commerce.service.product.impl;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpdateDTO;
+import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
 import com.e_commerce.entity.product.ProductVariantValues;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -14,6 +15,8 @@ import com.e_commerce.service.product.ProductVariantsValuesService;
 import com.e_commerce.service.product.VariantValuesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -65,5 +68,11 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
         if (result == 0) {
             throw new CustomException(ErrorResponse.PRODUCT_VARIANT_VALUE_OUT_OF_STOCK);
         }
+    }
+
+    @Override
+    public List<VariantValuesDTO> getVariantValuesByProductVariantId(Integer variantId) {
+        List<ProductVariantValues> productVariantValuesList = productVariantValuesRepository.findByProductVariants_Id(variantId);
+        return productVariantsValueMapper.convertListEntityToListVariantValueDTO(productVariantValuesList);
     }
 }

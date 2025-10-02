@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface ProductVariantValuesRepository extends JpaRepository<ProductVariantValues, Integer> {
     @Query("""
         SELECT pvv.quantity
@@ -29,6 +31,7 @@ public interface ProductVariantValuesRepository extends JpaRepository<ProductVar
             "AND pvv.quantity >= :quantity")
     int decreaseStock(@Param("productVariantId") Integer productVariantId,
                       @Param("variantValueId") Integer variantValueId,
-                      @Param("quantity") Integer quantity);
+    @Param("quantity") Integer quantity);
 
+    List<ProductVariantValues> findByProductVariants_Id(Integer variantId);
 }

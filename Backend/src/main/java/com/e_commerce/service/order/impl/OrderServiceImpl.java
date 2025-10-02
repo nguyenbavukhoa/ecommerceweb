@@ -13,6 +13,7 @@ import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
+import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -83,8 +84,10 @@ public class OrderServiceImpl implements OrderService {
         for (CartItems cartItem : selectedCartItems ) {
             BigDecimal itemPrice = cartItem.getProductVariant().getPrice();
 
-            if (cartItem.getVariantValue() != null) {
-                itemPrice = itemPrice.add(cartItem.getVariantValue().getPrice());
+            if (cartItem.getVariantValue() != null && !cartItem.getVariantValue().isEmpty()) {
+                for (VariantValues variantValue : cartItem.getVariantValue()) {
+                    itemPrice = itemPrice.add(variantValue.getPrice());
+                }
             }
             total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
@@ -163,8 +166,10 @@ public class OrderServiceImpl implements OrderService {
         for (CartItems cartItem : cartItems) {
             productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
 
-            if (cartItem.getVariantValue() != null) {
-                productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getVariantValue().getId(), cartItem.getQuantity());
+            if (cartItem.getVariantValue() != null && !cartItem.getVariantValue().isEmpty()) {
+                for (VariantValues variantValue : cartItem.getVariantValue()) {
+                    productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), variantValue.getId(), cartItem.getQuantity());
+                }
             }
         }
 

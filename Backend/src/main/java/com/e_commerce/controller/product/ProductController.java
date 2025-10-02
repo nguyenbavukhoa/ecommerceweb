@@ -2,10 +2,7 @@ package com.e_commerce.controller.product;
 
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.PageDTO;
-import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
-import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
-import com.e_commerce.dto.product.productDTO.ProductDTO;
-import com.e_commerce.dto.product.productDTO.ProductFilter;
+import com.e_commerce.dto.product.productDTO.*;
 import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
 import com.e_commerce.service.product.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,4 +52,11 @@ public class ProductController {
         );
     }
 
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<ApiResponse<ProductDetailDTO>> getProductDetail(@PathVariable Integer id, HttpServletRequest request) {
+        ProductDetailDTO productDetail = productService.getProductDetail(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get product detail successfully", productDetail, null, request.getRequestURI())
+        );
+    }
 }

@@ -45,12 +45,13 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     public OrderItemsDTO createOrderItems(OrderItemsCreateForm orderItemsCreateForm) {
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(orderItemsCreateForm.getProductVariantsId());
 
-        VariantValues variantValues = orderItemsCreateForm.getVariantValueId() != null
-                ? variantValuesService.getVariantValueEntityById(orderItemsCreateForm.getVariantValueId())
+        List<VariantValues> variantValues = (orderItemsCreateForm.getVariantValueId() != null && !orderItemsCreateForm.getVariantValueId().isEmpty())
+                ? variantValuesService.getVariantValueEntitiesById(orderItemsCreateForm.getVariantValueId())
                 : null;
+
         OrderItems orderItems = buildOrderItem(
                 productVariants,
-                variantValues,
+                variantValues != null ? variantValues : List.of(),
                 orderItemsCreateForm.getQuantity(),
                 null,
                 orderItemsCreateForm.getNote()
@@ -58,11 +59,16 @@ public class OrderItemsServiceImpl implements OrderItemsService {
 
         orderItems.setId(IdGenerator.getGenerationId());
 
-        if (variantValues != null){
-            orderItems.setUnitPrice(productVariants.getPrice().add(variantValues.getPrice()));
-        }else {
-            orderItems.setUnitPrice(productVariants.getPrice());
+        BigDecimal unitPrice = productVariants.getPrice();
+
+        if (variantValues != null && !variantValues.isEmpty()) {
+            BigDecimal extraPrice = variantValues.stream()
+                    .map(VariantValues::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            unitPrice = unitPrice.add(extraPrice);
         }
+
+        orderItems.setUnitPrice(unitPrice);
 
         return orderItemMapper.convertEntityToDTO(orderItemsRepository.save(orderItems));
     }
@@ -95,19 +101,37 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         }
     }
 
-    private OrderItems buildOrderItem(ProductVariants productVariants, VariantValues variantValues, Integer quantity, Orders order, String note) {
-        int availableQuantity = (variantValues != null)
-                ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
-                : productVariantsService.checkProductVariantAvailability(productVariants.getId());
+    private OrderItems buildOrderItem(ProductVariants productVariants, List<VariantValues> variantValues, Integer quantity, Orders order, String note) {
+//        int availableQuantity = (variantValues != null)
+//                ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
+//                : productVariantsService.checkProductVariantAvailability(productVariants.getId());
 
-        if (availableQuantity < quantity) {
-            String stockInfo = "Available: " + availableQuantity + ", Requested: " + quantity;
-            throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
+        if (variantValues.isEmpty()) {
+            // Không có VariantValues → check trực tiếp stock ProductVariant
+            int availableQuantity = productVariantsService.checkProductVariantAvailability(productVariants.getId());
+
+            if (availableQuantity < quantity) {
+                String stockInfo = "Available: " + availableQuantity + ", Requested: " + quantity;
+                throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
+            }
+        }else {
+            // Có nhiều VariantValues → check từng cái
+            for (VariantValues value : variantValues) {
+                int availableQuantity = productVariantsValuesService.isVariantValueAvailable(
+                        productVariants.getId(),
+                        value.getId()
+                );
+            }
         }
 
+
+
         BigDecimal price = productVariants.getPrice();
-        if (variantValues != null) {
-            price = price.add(variantValues.getPrice());
+        if (!variantValues.isEmpty()) {
+            BigDecimal extraPrice = variantValues.stream()
+                    .map(VariantValues::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            price = price.add(extraPrice);
         }
 
         log.info("Building order item with price: {}", price);

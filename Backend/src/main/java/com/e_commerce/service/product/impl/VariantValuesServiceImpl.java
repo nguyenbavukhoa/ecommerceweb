@@ -46,4 +46,9 @@ public class VariantValuesServiceImpl implements VariantValuesService {
         return variantValuesMapper.convertEntityToDTO(variantValuesRepository.save(existingVariantValue));
 
     }
+
+    @Override
+    public List<VariantValues> getVariantValueEntitiesById(List<Integer> id) {
+        return variantValuesRepository.findAllById(id);
+    }
 }

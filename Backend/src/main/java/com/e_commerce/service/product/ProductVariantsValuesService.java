@@ -3,9 +3,12 @@ package com.e_commerce.service.product;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpdateDTO;
+import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
 import com.e_commerce.entity.product.ProductVariantValues;
 import com.e_commerce.entity.product.ProductVariants;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface ProductVariantsValuesService {
@@ -18,4 +21,6 @@ public interface ProductVariantsValuesService {
     Integer isVariantValueAvailable(Integer variantId, Integer valueId);
 
     void decreaseStock(Integer productVariantId, Integer variantValueId, Integer quantity);
+
+    List<VariantValuesDTO> getVariantValuesByProductVariantId(Integer variantId);
 }

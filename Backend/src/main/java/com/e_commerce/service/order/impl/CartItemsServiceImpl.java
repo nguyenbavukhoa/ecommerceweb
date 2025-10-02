@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,15 +64,16 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
 
-        VariantValues variantValues = cartItemCreateForm.getVariantValuesId() != null
-                ? variantValuesService.getVariantValueEntityById(cartItemCreateForm.getVariantValuesId())
-                : null;
+        List<VariantValues> variantValues = (cartItemCreateForm.getVariantValuesId() != null && !cartItemCreateForm.getVariantValuesId().isEmpty())
+                ? variantValuesService.getVariantValueEntitiesById(cartItemCreateForm.getVariantValuesId())
+                : List.of();
 
 
-        Optional<CartItems> existingCartItem = cartItemsRepository.findByCartIdAndProductVariantIdAndVariantValueId(
+        Optional<CartItems> existingCartItem = cartItemsRepository.findByCartIdAndProductVariantIdAndVariantValues(
                 carts.getId(),
                 productVariants.getId(),
-                variantValues != null ? variantValues.getId() : null
+                cartItemCreateForm.getVariantValuesId(),
+                cartItemCreateForm.getVariantValuesId() != null ? cartItemCreateForm.getVariantValuesId().size() : 0
         );
 
         log.info("Existing cart item: {}", existingCartItem);
@@ -82,21 +84,43 @@ public class CartItemsServiceImpl implements CartItemsService {
         log.info("Existing quantity: {}, New quantity: {}, Total requested quantity: {}",
                 existingQuantity, cartItemCreateForm.getQuantity(), totalRequestedQuantity);
 
-        int availableQuantity = (variantValues != null)
-                ? productVariantsValuesService.isVariantValueAvailable(
-                productVariants.getId(),
-                variantValues.getId()
-        )
-                : productVariantsService.checkProductVariantAvailability(
-                productVariants.getId()
-        );
-
-        log.info("Available quantity: {}, Total requested quantity: {}", availableQuantity, totalRequestedQuantity);
-
-        if(availableQuantity < totalRequestedQuantity || availableQuantity <= 0) {
-            String stockInfo = "Available: " + availableQuantity + ", Requested: " + totalRequestedQuantity;
-            throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
+        if (variantValues.isEmpty()) {
+            // Không có VariantValues → check trực tiếp stock ProductVariant
+            int availableQuantity = productVariantsService.checkProductVariantAvailability(productVariants.getId());
+            if (availableQuantity < totalRequestedQuantity) {
+                throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK),
+                        "Available: " + availableQuantity + ", Requested: " + totalRequestedQuantity);
+            }
+        }else {
+            // Có nhiều VariantValues → check từng cái
+            for (VariantValues value : variantValues) {
+                int availableQuantity = productVariantsValuesService.isVariantValueAvailable(
+                        productVariants.getId(),
+                        value.getId()
+                );
+                if (availableQuantity < totalRequestedQuantity) {
+                    throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK),
+                            "VariantValue " + value.getValue() +
+                                    " available: " + availableQuantity +
+                                    ", requested: " + totalRequestedQuantity);
+                }
+            }
         }
+//        int availableQuantity = (variantValues != null)
+//                ? productVariantsValuesService.isVariantValueAvailable(
+//                productVariants.getId(),
+//                variantValues.getId()
+//        )
+//                : productVariantsService.checkProductVariantAvailability(
+//                productVariants.getId()
+//        );
+
+//        log.info("Available quantity: {}, Total requested quantity: {}", availableQuantity, totalRequestedQuantity);
+//
+//        if(availableQuantity < totalRequestedQuantity || availableQuantity <= 0) {
+//            String stockInfo = "Available: " + availableQuantity + ", Requested: " + totalRequestedQuantity;
+//            throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
+//        }
 
         if (existingCartItem.isPresent()) {
             CartItems existingCartItemEntity = existingCartItem.get();
@@ -113,14 +137,16 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
 
-        if (variantValues != null) {
-            log.info("Variant value price: {}", variantValues.getPrice());
-            log.info("Product variant price: {}", productVariants.getPrice());
-            log.info("Total price: {}", productVariants.getPrice().add(variantValues.getPrice()));
-            cartItems.setPrice(productVariants.getPrice().add(variantValues.getPrice()));
-        } else {
-            cartItems.setPrice(productVariants.getPrice());
+        BigDecimal totalPrice = productVariants.getPrice();
+
+        if (!variantValues.isEmpty()) {
+            BigDecimal extraPrice = variantValues.stream()
+                    .map(VariantValues::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            totalPrice = totalPrice.add(extraPrice);
         }
+
+        cartItems.setPrice(totalPrice);
 
         return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }

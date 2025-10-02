@@ -35,9 +35,16 @@ public class InvoiceDetailsServiceImpl implements InvoiceDetailsService {
         List<InvoiceDetails> invoiceDetailsList = new ArrayList<>();
 
         for (OrderItems item : orderItems) {
-            BigDecimal unitPrice = item.getVariantValue() != null
-                    ? item.getProductVariant().getPrice().add(item.getVariantValue().getPrice())
-                    : item.getProductVariant().getPrice();
+            BigDecimal unitPrice = item.getProductVariant().getPrice();
+            if (item.getVariantValue() != null && !item.getVariantValue().isEmpty()) {
+                BigDecimal extraPrice = item.getVariantValue().stream()
+                        .map(v -> v.getPrice() != null ? v.getPrice() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                unitPrice = unitPrice.add(extraPrice);
+            }
+////            BigDecimal unitPrice = item.getVariantValue() != null
+//                    ? item.getProductVariant().getPrice().add(item.getVariantValue().getPrice())
+//                    : item.getProductVariant().getPrice();
 
             InvoiceDetails invoiceDetails = InvoiceDetails.builder()
                     .id(IdGenerator.getGenerationId())

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -27,10 +28,14 @@ public class CartItems extends Timestamped {
     @JoinColumn(name = "product_variants_id", nullable = false)
     private ProductVariants productVariant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_values_id", nullable = true)
+    @ManyToMany
+    @JoinTable(
+            name = "cart_item_variant_values",
+            joinColumns = @JoinColumn(name = "cart_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "variant_value_id")
+    )
     @JsonBackReference
-    private VariantValues variantValue;
+    private List<VariantValues> variantValue;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;

@@ -6,6 +6,8 @@ import com.e_commerce.dto.product.productVariants.ProductVariantsUpdateDTO;
 import com.e_commerce.entity.product.ProductVariants;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface ProductVariantsService {
     ProductVariants getProductVariantEntityById(Integer id);
@@ -17,4 +19,6 @@ public interface ProductVariantsService {
     Integer checkProductVariantAvailability(Integer productVariantId);
 
     void decreaseStock(Integer productVariantId, Integer quantity);
+
+    List<ProductVariantsDTO> getProductVariantsByProductId(Integer productId);
 }

@@ -12,6 +12,7 @@ import java.util.List;
 public class VariantOptionsMapper {
     public VariantOptionsDTO convertEntityToDTO(VariantOptions variantOptions) {
         return VariantOptionsDTO.builder()
+                .id(variantOptions.getId())
                 .name(variantOptions.getName())
                 .build();
     }

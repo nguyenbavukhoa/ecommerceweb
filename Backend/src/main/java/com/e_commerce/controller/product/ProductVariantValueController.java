@@ -3,12 +3,15 @@ package com.e_commerce.controller.product;
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
+import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
 import com.e_commerce.service.product.ProductVariantsValuesService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,5 +25,21 @@ public class ProductVariantValueController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, "Product variant value created successfully", createdVariantValue, null, request.getRequestURI()));
+    }
+
+    @GetMapping("/is-available/{variantId}")
+    public ResponseEntity<ApiResponse<Integer>> isVariantValueAvailable(@PathVariable Integer variantId, @RequestParam Integer valueId, HttpServletRequest request) {
+        Integer availableQty = productVariantsValuesService.isVariantValueAvailable(variantId, valueId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Variant value availability checked successfully", availableQty, null, request.getRequestURI()));
+    }
+
+    @GetMapping("/values/{variantId}")
+    public ResponseEntity<ApiResponse<List<VariantValuesDTO>>> getVariantValues(@PathVariable Integer variantId, HttpServletRequest request) {
+        List<VariantValuesDTO> variantValues = productVariantsValuesService.getVariantValuesByProductVariantId(variantId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "Variant values retrieved successfully", variantValues, null, request.getRequestURI()));
     }
 }

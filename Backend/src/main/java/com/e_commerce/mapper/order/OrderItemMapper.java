@@ -3,9 +3,11 @@ package com.e_commerce.mapper.order;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsCreateForm;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsDTO;
 import com.e_commerce.entity.order.OrderItems;
+import com.e_commerce.entity.product.VariantValues;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderItemMapper {
@@ -33,7 +35,12 @@ public class OrderItemMapper {
                 .productVariantsId(orderItem.getProductVariant().getId())
                 .quantity(orderItem.getQuantity())
                 .note(orderItem.getNote())
-                .variantValueId(orderItem.getVariantValue() != null ? orderItem.getVariantValue().getId() : null)
+                .variantValueId(orderItem.getVariantValue() != null
+                        ? orderItem.getVariantValue()
+                        .stream().
+                        map(VariantValues::getId)
+                        .collect(Collectors.toList())
+                        : List.of())
                 .build();
     }
 

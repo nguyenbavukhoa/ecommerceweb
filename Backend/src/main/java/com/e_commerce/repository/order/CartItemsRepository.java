@@ -16,18 +16,20 @@ public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
     @Query("""
     SELECT ci
     FROM CartItems ci
+    JOIN ci.variantValue vv
     WHERE ci.cart.id = :cartId
       AND ci.productVariant.id = :productVariantId
-      AND (
-            (:variantValueId IS NULL AND ci.variantValue IS NULL)
-         OR (ci.variantValue.id = :variantValueId)
-      )
+      AND vv.id IN :variantValueIds
+    GROUP BY ci
+    HAVING COUNT(vv.id) = :variantValueCount
 """)
-    Optional<CartItems> findByCartIdAndProductVariantIdAndVariantValueId(
+    Optional<CartItems> findByCartIdAndProductVariantIdAndVariantValues(
             @Param("cartId") Integer cartId,
             @Param("productVariantId") Integer productVariantId,
-            @Param("variantValueId") Integer variantValueId
+            @Param("variantValueIds") List<Integer> variantValueIds,
+            @Param("variantValueCount") long variantValueCount
     );
+
 
     List<CartItems> findByCart_Account_Id(Integer id);
 

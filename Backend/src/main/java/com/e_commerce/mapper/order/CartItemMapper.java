@@ -3,18 +3,26 @@ package com.e_commerce.mapper.order;
 import com.e_commerce.dto.order.cartItemDTO.CartItemCreateForm;
 import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.entity.order.CartItems;
+import com.e_commerce.entity.product.VariantValues;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CartItemMapper {
     public CartItemDTO convertEntityToDTO(CartItems cartItem) {
         return CartItemDTO.builder()
+                .id(cartItem.getId())
                 .cartId(cartItem.getCart().getId())
                 .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
-                .variantValuesId(cartItem.getVariantValue() != null ? cartItem.getVariantValue().getId() : null)
+                .variantValuesId(cartItem.getVariantValue() != null
+                        ? cartItem.getVariantValue()
+                        .stream()
+                        .map(VariantValues::getId)
+                        .collect(Collectors.toList())
+                        : List.of())
                 .imgUrl(cartItem.getProductVariant().getImgUrl())
                 .productName(cartItem.getProductVariant().getProduct().getName())
                 .price(cartItem.getPrice())

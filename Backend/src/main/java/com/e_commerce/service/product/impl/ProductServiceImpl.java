@@ -3,14 +3,18 @@ package com.e_commerce.service.product.impl;
 import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.product.productDTO.*;
 import com.e_commerce.entity.product.Product;
+import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductMapper;
+import com.e_commerce.mapper.product.ProductVariantsMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
+import com.e_commerce.repository.product.ProductVariantRepository;
 import com.e_commerce.service.product.ProductCategoriesService;
 import com.e_commerce.service.product.ProductService;
+import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,6 +35,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final ProductCategoriesService productCategoriesService;
     private final CloudinaryService cloudinaryService;
+    private final ProductVariantRepository productVariantsRepository;
+    private final ProductVariantsMapper productVariantsMapper;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -97,5 +104,16 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(page-1, size);
 
         return productMapper.convertProductPageToDTO(productRepository.findAll(specification, pageable));
+    }
+
+    @Override
+    public ProductDetailDTO getProductDetail(Integer id) {
+        Product product = getProductEntityById(id);
+
+        List<ProductVariants> variants = productVariantsRepository.findByProductId(id);
+
+        ProductDetailDTO productDetailDTO = productMapper.toProductDetailDTO(product);
+        productDetailDTO.setVariants(productVariantsMapper.convertPageToListDTO(variants));
+        return productDetailDTO;
     }
 }

@@ -5,17 +5,20 @@ import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsUpdateDTO;
 import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.enums.ProductVariantsStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ProductVariantsMapper {
+    public final ProductMapper productMapper;
     public ProductVariantsDTO covertEntityToDTO(ProductVariants productVariants) {
         return ProductVariantsDTO.builder()
                 .id(productVariants.getId())
-                .productId(productVariants.getProduct().getId())
+                .product(productMapper.covertEntityToDTO(productVariants.getProduct()))
                 .sku(productVariants.getSku())
                 .price(productVariants.getPrice())
                 .stock(productVariants.getStockQuantity())

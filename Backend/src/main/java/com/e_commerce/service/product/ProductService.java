@@ -18,4 +18,6 @@ public interface ProductService {
 
 
     PageDTO<ProductDTO> getAllProductsAdmin(int page, int size, ProductFilter productFilter);
+
+   ProductDetailDTO getProductDetail(Integer id);
 }

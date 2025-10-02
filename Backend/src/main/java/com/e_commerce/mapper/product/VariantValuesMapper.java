@@ -4,17 +4,21 @@ import com.e_commerce.dto.product.variantValuesDTO.VariantValuesCreateDTO;
 import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
 import com.e_commerce.dto.product.variantValuesDTO.VariantValuesUpdateDTO;
 import com.e_commerce.entity.product.VariantValues;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class VariantValuesMapper {
+    private final VariantOptionsMapper variantOptionsMapper;
+
     public VariantValuesDTO convertEntityToDTO(VariantValues variantValues) {
         return VariantValuesDTO.builder()
                 .value(variantValues.getValue())
                 .price(variantValues.getPrice())
-                .variantOptions(variantValues.getVariantOptions())
+                .variantOptions(variantOptionsMapper.convertEntityToDTO(variantValues.getVariantOptions()))
                 .stockQuantity(variantValues.getStockQuantity())
                 .build();
     }

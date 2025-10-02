@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -26,9 +27,13 @@ public class OrderItems extends Timestamped {
     @JoinColumn(name = "product_variants_id", nullable = false)
     private ProductVariants productVariant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_values_id", nullable = true)
-    private VariantValues variantValue;
+    @ManyToMany
+    @JoinTable(
+            name = "order_item_variant_values",
+            joinColumns = @JoinColumn(name = "order_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "variant_value_id")
+    )
+    private List<VariantValues> variantValue;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;

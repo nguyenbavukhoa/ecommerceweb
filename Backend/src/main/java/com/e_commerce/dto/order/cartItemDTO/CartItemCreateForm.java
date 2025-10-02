@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +18,7 @@ public class CartItemCreateForm {
     private Integer productVariantsId;
 
     @NotNull(message = "VariantValuesId cannot be null")
-    private Integer variantValuesId;
+    private List<Integer> variantValuesId;
 
     @NotNull(message = "Quantity cannot be null")
     @Min(value = 1, message = "Quantity must be at least 1")

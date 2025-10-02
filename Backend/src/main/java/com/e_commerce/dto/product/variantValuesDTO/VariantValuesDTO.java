@@ -1,5 +1,6 @@
 package com.e_commerce.dto.product.variantValuesDTO;
 
+import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
 import com.e_commerce.entity.product.VariantOptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,5 @@ public class VariantValuesDTO {
 
     private Integer stockQuantity;
 
-    private VariantOptions variantOptions;
+    private VariantOptionsDTO variantOptions;
 }

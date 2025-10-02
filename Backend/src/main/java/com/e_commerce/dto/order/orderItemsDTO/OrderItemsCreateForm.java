@@ -23,5 +23,5 @@ public class OrderItemsCreateForm {
 
     private String note;
 
-    private Integer variantValueId;
+    private List<Integer> variantValueId;
 }

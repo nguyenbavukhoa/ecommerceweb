@@ -1,10 +1,7 @@
 package com.e_commerce.mapper.product;
 
 import com.e_commerce.dto.PageDTO;
-import com.e_commerce.dto.product.productDTO.ProductCreateDTO;
-import com.e_commerce.dto.product.productDTO.ProductDTO;
-import com.e_commerce.dto.product.productDTO.ProductUpdateDTO;
-import com.e_commerce.dto.product.productDTO.ProductUserViewDTO;
+import com.e_commerce.dto.product.productDTO.*;
 import com.e_commerce.entity.product.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +14,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductMapper {
     private final ProductCategoryMapper productCategoryMapper;
+
     public ProductDTO covertEntityToDTO(Product product) {
         return ProductDTO.builder()
                 .id(product.getId())
@@ -37,6 +35,17 @@ public class ProductMapper {
                 .isActive(product.isActive())
                 .priceBase(product.getPriceBase())
                 .imgMain(product.getImgMain())
+                .build();
+    }
+
+    public ProductDetailDTO toProductDetailDTO(Product product) {
+        return ProductDetailDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .basePrice(product.getPriceBase())
+                .imgUrl(product.getImgMain())
+                .active(product.isActive())
                 .build();
     }
 

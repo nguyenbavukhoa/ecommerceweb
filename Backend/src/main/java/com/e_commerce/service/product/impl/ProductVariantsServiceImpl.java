@@ -16,6 +16,7 @@ import com.e_commerce.service.product.VariantOptionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -87,5 +88,10 @@ public class ProductVariantsServiceImpl implements ProductVariantsService {
         if (result == 0) {
             throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
         }
+    }
+
+    @Override
+    public List<ProductVariantsDTO> getProductVariantsByProductId(Integer productId) {
+        return productVariantsMapper.convertPageToListDTO(productVariantRepository.findByProductId(productId));
     }
 }
