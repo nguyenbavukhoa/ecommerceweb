@@ -168,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        cartItemsService.deleteAllCartItemsByAccountId(order.getAccount().getId());
+        cartItemsService.deleteAllCartItemsByAccountId();
 
         order.setOrderStatus(OrderStatus.CONFIRMED);
         ordersRepository.save(order);

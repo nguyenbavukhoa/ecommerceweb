@@ -21,6 +21,7 @@ import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.product.ProductVariantsService;
 import com.e_commerce.service.product.ProductVariantsValuesService;
 import com.e_commerce.service.product.VariantValuesService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -148,15 +149,19 @@ public class CartItemsServiceImpl implements CartItemsService {
         return cartItemMapper.convertPageToList(cartItemsRepository.findByCart_Account_Id(account.getId()));
     }
 
+    @Transactional
     @Override
     public void deleteCartItems(List<Integer> id) {
        cartItemsRepository.deleteAllByIdIn(id);
     }
 
+    @Transactional
     @Override
-    public void deleteAllCartItemsByAccountId(Integer accountId) {
-        cartItemsRepository.deleteAllByCart_Account_Id(accountId);
+    public void deleteAllCartItemsByAccountId() {
+        Account account = accountService.getAccountAuth();
+        cartItemsRepository.deleteAllByCart_Account_Id(account.getId());
     }
+
 
     @Override
     public List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId) {
