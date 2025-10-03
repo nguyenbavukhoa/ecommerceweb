@@ -1,6 +1,7 @@
 package com.e_commerce.dto.product.productDTO;
 
 import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
+import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,7 @@ public class ProductDetailDTO {
     private String imgUrl;
     private boolean active;
 
-    private List<ProductVariantsDTO> variants;
+    private List<ProductVariantsDTO> availableVariants;
+
+    private List<VariantOptionsDTO> variantOptions;
 }

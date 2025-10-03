@@ -50,7 +50,6 @@ public class ProductVariantsValueMapper {
                 .value(productVariantValues.getVariantValues().getValue())
                 .price(productVariantValues.getVariantValues().getPrice())
                 .stockQuantity(productVariantValues.getQuantity())
-                .variantOptions(variantOptionsMapper.convertEntityToDTO(productVariantValues.getVariantValues().getVariantOptions()))
                 .build();
     }
 

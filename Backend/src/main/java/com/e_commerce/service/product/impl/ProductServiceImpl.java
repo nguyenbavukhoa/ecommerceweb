@@ -8,6 +8,7 @@ import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductMapper;
 import com.e_commerce.mapper.product.ProductVariantsMapper;
+import com.e_commerce.mapper.product.VariantOptionsMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
@@ -15,6 +16,7 @@ import com.e_commerce.repository.product.ProductVariantRepository;
 import com.e_commerce.service.product.ProductCategoriesService;
 import com.e_commerce.service.product.ProductService;
 import com.e_commerce.service.product.ProductVariantsService;
+import com.e_commerce.service.product.VariantOptionsService;
 import com.e_commerce.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
     private final CloudinaryService cloudinaryService;
     private final ProductVariantRepository productVariantsRepository;
     private final ProductVariantsMapper productVariantsMapper;
+    private final VariantOptionsService variantOptionsService;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -110,10 +113,11 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailDTO getProductDetail(Integer id) {
         Product product = getProductEntityById(id);
 
-        List<ProductVariants> variants = productVariantsRepository.findByProductId(id);
+//        List<ProductVariants> variants = productVariantsRepository.findByProductId(id);
 
         ProductDetailDTO productDetailDTO = productMapper.toProductDetailDTO(product);
-        productDetailDTO.setVariants(productVariantsMapper.convertPageToListDTO(variants));
+//        productDetailDTO.setAvailableVariants(productVariantsMapper.convertPageToListDTO(variants));
+        productDetailDTO.setVariantOptions(variantOptionsService.getVariantOptionByProductCategoryId(id));
         return productDetailDTO;
     }
 }

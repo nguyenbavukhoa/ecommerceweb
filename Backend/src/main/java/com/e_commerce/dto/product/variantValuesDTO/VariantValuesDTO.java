@@ -21,6 +21,4 @@ public class VariantValuesDTO {
     private BigDecimal price;
 
     private Integer stockQuantity;
-
-    private VariantOptionsDTO variantOptions;
 }

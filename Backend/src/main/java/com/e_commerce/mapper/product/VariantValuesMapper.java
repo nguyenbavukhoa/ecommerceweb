@@ -12,13 +12,12 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class VariantValuesMapper {
-    private final VariantOptionsMapper variantOptionsMapper;
 
     public VariantValuesDTO convertEntityToDTO(VariantValues variantValues) {
         return VariantValuesDTO.builder()
+                .id(variantValues.getId())
                 .value(variantValues.getValue())
                 .price(variantValues.getPrice())
-                .variantOptions(variantOptionsMapper.convertEntityToDTO(variantValues.getVariantOptions()))
                 .stockQuantity(variantValues.getStockQuantity())
                 .build();
     }

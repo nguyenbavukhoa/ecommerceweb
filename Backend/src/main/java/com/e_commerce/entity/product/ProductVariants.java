@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -40,4 +41,7 @@ public class ProductVariants extends Timestamped {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "variant_option_id")
     private VariantOptions variantOption;
+
+    @OneToMany(mappedBy = "productVariants", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductVariantValues> productVariantValues;
 }

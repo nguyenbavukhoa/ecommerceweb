@@ -17,4 +17,6 @@ public interface VariantValuesService {
     VariantValuesDTO updateVariantValue(VariantValuesUpdateDTO variantValuesUpdateDTO, Integer id);
 
     List<VariantValues> getVariantValueEntitiesById(List<Integer> id);
+
+    List<VariantValuesDTO> getVariantValuesByVariantOptionId(Integer id);
 }

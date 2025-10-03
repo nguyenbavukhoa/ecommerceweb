@@ -14,14 +14,19 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ProductVariantsMapper {
-    public final ProductMapper productMapper;
+    private final ProductVariantsValueMapper productVariantsValueMapper;
     public ProductVariantsDTO covertEntityToDTO(ProductVariants productVariants) {
         return ProductVariantsDTO.builder()
                 .id(productVariants.getId())
-                .product(productMapper.covertEntityToDTO(productVariants.getProduct()))
+                .imgUrl(productVariants.getImgUrl())
                 .sku(productVariants.getSku())
                 .price(productVariants.getPrice())
                 .stock(productVariants.getStockQuantity())
+                .stockQuantity(productVariants.getStockQuantity())
+                .variantValues(productVariants.getProductVariantValues() != null
+                        ? productVariantsValueMapper.convertListEntityToListVariantValueDTO(productVariants.getProductVariantValues())
+                        : null)
+                .status(productVariants.getProductVariantsStatus())
                 .build();
     }
 

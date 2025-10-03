@@ -51,4 +51,9 @@ public class VariantValuesServiceImpl implements VariantValuesService {
     public List<VariantValues> getVariantValueEntitiesById(List<Integer> id) {
         return variantValuesRepository.findAllById(id);
     }
+
+    @Override
+    public List<VariantValuesDTO> getVariantValuesByVariantOptionId(Integer id) {
+        return variantValuesMapper.convertPageToListDTO(variantValuesRepository.findByVariantOptionId(id));
+    }
 }

@@ -13,6 +13,8 @@ import com.e_commerce.service.product.VariantOptionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class VariantOptionsServiceImpl implements VariantOptionsService {
@@ -38,5 +40,10 @@ public class VariantOptionsServiceImpl implements VariantOptionsService {
             existingVariantOption.setName(variantOptionsUpdateDTO.getName());
         }
         return variantOptionsMapper.convertEntityToDTO(variantOptionsRepository.save(existingVariantOption));
+    }
+
+    @Override
+    public List<VariantOptionsDTO> getVariantOptionByProductCategoryId(Integer id) {
+        return variantOptionsMapper.convertPageToListDTO(variantOptionsRepository.findByProductCategoryId(id));
     }
 }
