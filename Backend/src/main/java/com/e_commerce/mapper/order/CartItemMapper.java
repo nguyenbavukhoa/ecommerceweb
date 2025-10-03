@@ -27,6 +27,7 @@ public class CartItemMapper {
                 .productName(cartItem.getProductVariant().getProduct().getName())
                 .price(cartItem.getPrice())
                 .note(cartItem.getNote())
+                .selected(cartItem.isSelected())
                 .build();
     }
 

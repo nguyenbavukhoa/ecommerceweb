@@ -30,4 +30,6 @@ public class CartItemDTO {
     private BigDecimal price;
 
     private String note;
+
+    private boolean selected;
 }
