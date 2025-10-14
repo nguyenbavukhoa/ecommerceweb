@@ -14,22 +14,17 @@ import java.util.List;
 @Builder
 public class CartItemDTO {
     private Integer id;
-
     private Integer productId;
-
-    private Integer quantity;
-
-    private Integer cartId;
-
-    private List<Integer> optionValueId;
-
+    private String productName;
     private String imgUrl;
 
-    private String productName;
-
+    private Integer quantity;
     private BigDecimal price;
+    private BigDecimal totalPrice;
 
+    private List<String> optionValueNames;
     private String note;
 
+    private Integer cartId;
     private boolean selected;
 }

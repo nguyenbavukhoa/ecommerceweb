@@ -3,6 +3,8 @@ package com.e_commerce.mapper.order;
 import com.e_commerce.dto.order.cartItemDTO.CartItemCreateForm;
 import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.entity.order.CartItems;
+import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.mapper.product.OptionsValuesMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,18 +13,20 @@ import java.util.stream.Collectors;
 
 @Component
 public class CartItemMapper {
-
     public CartItemDTO convertEntityToDTO(CartItems cartItem) {
         return CartItemDTO.builder()
                 .id(cartItem.getId())
                 .cartId(cartItem.getCart().getId())
                 .productId(cartItem.getProduct().getId())
+                .productName(cartItem.getProduct().getName())
                 .quantity(cartItem.getQuantity())
                 .imgUrl(cartItem.getProduct().getImgMain())
-                .productName(cartItem.getProduct().getName())
                 .price(cartItem.getPrice())
                 .note(cartItem.getNote())
                 .selected(cartItem.isSelected())
+                .optionValueNames(cartItem.getSelectedOptions().stream()
+                        .map(OptionValues::getName)
+                        .collect(Collectors.toList()))
                 .build();
     }
 

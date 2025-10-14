@@ -4,7 +4,6 @@ import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.product.productVariants.ProductVariantsCreateDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
 
-import com.e_commerce.service.product.ProductVariantsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

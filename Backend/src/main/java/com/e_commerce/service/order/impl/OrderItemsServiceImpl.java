@@ -12,9 +12,7 @@ import com.e_commerce.mapper.order.OrderItemMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrderItemsRepository;
 import com.e_commerce.service.order.OrderItemsService;
-import com.e_commerce.service.product.ProductVariantsService;
-import com.e_commerce.service.product.ProductVariantsValuesService;
-import com.e_commerce.service.product.VariantValuesService;
+import com.e_commerce.service.product.OptionsValuesService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +28,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     private final OrderItemMapper orderItemMapper;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductVariantsService productVariantsService;
-    private final VariantValuesService variantValuesService;
+    private final OptionsValuesService optionsValuesService;
     private final ProductVariantsValuesService productVariantsValuesService;
 
     @Override
@@ -44,7 +42,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(orderItemsCreateForm.getProductVariantsId());
 
         List<VariantValues> variantValues = (orderItemsCreateForm.getVariantValueId() != null && !orderItemsCreateForm.getVariantValueId().isEmpty())
-                ? variantValuesService.getVariantValueEntitiesById(orderItemsCreateForm.getVariantValueId())
+                ? optionsValuesService.getVariantValueEntitiesById(orderItemsCreateForm.getVariantValueId())
                 : null;
 
         OrderItems orderItems = buildOrderItem(

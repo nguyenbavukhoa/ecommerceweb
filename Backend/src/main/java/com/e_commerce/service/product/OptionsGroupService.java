@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public interface VariantOptionsService {
+public interface OptionsGroupService {
     OptionGroup getVariantOptionEntityById(Integer id);
 
     OptionsGroupDTO createVariantOption(OptionsGroupCreateDTO optionsGroupCreateDTO);

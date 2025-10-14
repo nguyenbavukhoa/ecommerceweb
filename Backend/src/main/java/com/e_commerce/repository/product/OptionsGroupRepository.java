@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface VariantOptionsRepository extends JpaRepository<OptionGroup, Integer> {
-    @Query("SELECT v FROM OptionGroup v WHERE v.productCategories.id = :id")
+public interface OptionsGroupRepository extends JpaRepository<OptionGroup, Integer> {
+    @Query("SELECT v FROM OptionGroup v WHERE v.product.id = :id")
     List<OptionGroup> findByProductCategoryId(@Param("id") Integer id);
 }

@@ -9,10 +9,8 @@ import com.e_commerce.mapper.product.ProductMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
-import com.e_commerce.repository.product.ProductVariantRepository;
-import com.e_commerce.service.product.ProductCategoriesService;
 import com.e_commerce.service.product.ProductService;
-import com.e_commerce.service.product.VariantOptionsService;
+import com.e_commerce.service.product.OptionsGroupService;
 import com.e_commerce.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final CloudinaryService cloudinaryService;
     private final ProductVariantRepository productVariantsRepository;
     private final ProductVariantsMapper productVariantsMapper;
-    private final VariantOptionsService variantOptionsService;
+    private final OptionsGroupService optionsGroupService;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -112,7 +110,7 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetailDTO productDetailDTO = productMapper.toProductDetailDTO(product);
         productDetailDTO.setAvailableVariants(productVariantsMapper.convertPageToListDTO(variants));
-        productDetailDTO.setVariantOptions(variantOptionsService.getVariantOptionByProductCategoryId(id));
+        productDetailDTO.setVariantOptions(optionsGroupService.getVariantOptionByProductCategoryId(id));
         return productDetailDTO;
     }
 }

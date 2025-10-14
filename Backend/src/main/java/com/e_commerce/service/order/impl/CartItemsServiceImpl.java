@@ -15,9 +15,7 @@ import com.e_commerce.repository.order.CartItemsRepository;
 import com.e_commerce.service.account.AccountService;
 import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
-import com.e_commerce.service.product.ProductVariantsService;
-import com.e_commerce.service.product.ProductVariantsValuesService;
-import com.e_commerce.service.product.VariantValuesService;
+import com.e_commerce.service.product.OptionsValuesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +34,7 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final CartsService cartsService;
     private final ProductVariantsService productVariantsService;
     private final ProductVariantsValuesService productVariantsValuesService;
-    private final VariantValuesService variantValuesService;
+    private final OptionsValuesService optionsValuesService;
     private final AccountService accountService;
 
     @Override
@@ -61,7 +59,7 @@ public class CartItemsServiceImpl implements CartItemsService {
         ProductVariants productVariants = productVariantsService.getProductVariantEntityById(cartItemCreateForm.getProductVariantsId());
 
         List<VariantValues> variantValues = (cartItemCreateForm.getVariantValuesId() != null && !cartItemCreateForm.getVariantValuesId().isEmpty())
-                ? variantValuesService.getVariantValueEntitiesById(cartItemCreateForm.getVariantValuesId())
+                ? optionsValuesService.getVariantValueEntitiesById(cartItemCreateForm.getVariantValuesId())
                 : List.of();
 
 
