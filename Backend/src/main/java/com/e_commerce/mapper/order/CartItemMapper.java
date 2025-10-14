@@ -17,12 +17,7 @@ public class CartItemMapper {
                 .cartId(cartItem.getCart().getId())
                 .productVariantsId(cartItem.getProductVariant().getId())
                 .quantity(cartItem.getQuantity())
-                .variantValuesId(cartItem.getVariantValue() != null
-                        ? cartItem.getVariantValue()
-                        .stream()
-                        .map(VariantValues::getId)
-                        .collect(Collectors.toList())
-                        : List.of())
+
                 .imgUrl(cartItem.getProductVariant().getImgUrl())
                 .productName(cartItem.getProductVariant().getProduct().getName())
                 .price(cartItem.getPrice())

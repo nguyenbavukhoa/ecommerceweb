@@ -23,8 +23,8 @@ public class ProductCreateDTO {
 
     private boolean isActive;
 
-    @NotNull(message = "Product category is required")
-    private Integer productCategoryId;
+    @NotNull(message = "Category is required")
+    private Integer categoryId;
 
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;

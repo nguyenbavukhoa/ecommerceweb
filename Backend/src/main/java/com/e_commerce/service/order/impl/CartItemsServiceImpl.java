@@ -1,14 +1,11 @@
 package com.e_commerce.service.order.impl;
 
-import com.e_commerce.dto.order.cartDTO.CartDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemCreateForm;
 import com.e_commerce.dto.order.cartItemDTO.CartItemDTO;
 import com.e_commerce.dto.order.cartItemDTO.CartItemUpdateForm;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
-import com.e_commerce.entity.product.ProductVariantValues;
-import com.e_commerce.entity.product.ProductVariants;
 import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -24,7 +21,6 @@ import com.e_commerce.service.product.VariantValuesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

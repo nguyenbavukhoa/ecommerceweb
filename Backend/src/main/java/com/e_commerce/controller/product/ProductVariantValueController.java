@@ -3,7 +3,7 @@ package com.e_commerce.controller.product;
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import com.e_commerce.service.product.ProductVariantsValuesService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +36,8 @@ public class ProductVariantValueController {
     }
 
     @GetMapping("/values/{variantId}")
-    public ResponseEntity<ApiResponse<List<VariantValuesDTO>>> getVariantValues(@PathVariable Integer variantId, HttpServletRequest request) {
-        List<VariantValuesDTO> variantValues = productVariantsValuesService.getVariantValuesByProductVariantId(variantId);
+    public ResponseEntity<ApiResponse<List<OptionValuesDTO>>> getVariantValues(@PathVariable Integer variantId, HttpServletRequest request) {
+        List<OptionValuesDTO> variantValues = productVariantsValuesService.getVariantValuesByProductVariantId(variantId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Variant values retrieved successfully", variantValues, null, request.getRequestURI()));

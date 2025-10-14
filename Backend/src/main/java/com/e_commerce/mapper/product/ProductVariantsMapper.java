@@ -3,12 +3,9 @@ package com.e_commerce.mapper.product;
 import com.e_commerce.dto.product.productVariants.ProductVariantsCreateDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsUpdateDTO;
-import com.e_commerce.entity.product.ProductVariants;
-import com.e_commerce.enums.ProductVariantsStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Component

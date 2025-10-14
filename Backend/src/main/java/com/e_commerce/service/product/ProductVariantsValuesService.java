@@ -3,9 +3,7 @@ package com.e_commerce.service.product;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpdateDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
-import com.e_commerce.entity.product.ProductVariantValues;
-import com.e_commerce.entity.product.ProductVariants;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,5 +20,5 @@ public interface ProductVariantsValuesService {
 
     void decreaseStock(Integer productVariantId, Integer variantValueId, Integer quantity);
 
-    List<VariantValuesDTO> getVariantValuesByProductVariantId(Integer variantId);
+    List<OptionValuesDTO> getVariantValuesByProductVariantId(Integer variantId);
 }

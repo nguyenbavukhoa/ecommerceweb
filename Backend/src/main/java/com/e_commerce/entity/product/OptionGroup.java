@@ -1,10 +1,9 @@
 package com.e_commerce.entity.product;
 
+import com.e_commerce.enums.SelectionType;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -12,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class VariantOptions extends Timestamped {
+public class OptionGroup extends Timestamped {
     @Id
     private Integer id;
 
@@ -20,9 +19,10 @@ public class VariantOptions extends Timestamped {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_categories_id", nullable = false)
-    private ProductCategories productCategories;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @OneToMany(mappedBy = "variantOptions", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<VariantValues> values;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "selection_type", nullable = false)
+    private SelectionType selectionType;
 }

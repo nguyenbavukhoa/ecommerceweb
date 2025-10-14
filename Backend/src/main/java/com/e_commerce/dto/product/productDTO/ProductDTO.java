@@ -1,7 +1,5 @@
 package com.e_commerce.dto.product.productDTO;
 
-import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryDTO;
-import com.e_commerce.entity.product.ProductCategories;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +19,6 @@ public class ProductDTO {
     private boolean isActive;
 
     private BigDecimal priceBase;
-
-    private ProductCategoryDTO productCategoryDTO;
 
     private String description;
 

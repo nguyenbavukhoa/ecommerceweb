@@ -35,12 +35,7 @@ public class OrderItemMapper {
                 .productVariantsId(orderItem.getProductVariant().getId())
                 .quantity(orderItem.getQuantity())
                 .note(orderItem.getNote())
-                .variantValueId(orderItem.getVariantValue() != null
-                        ? orderItem.getVariantValue()
-                        .stream().
-                        map(VariantValues::getId)
-                        .collect(Collectors.toList())
-                        : List.of())
+
                 .build();
     }
 

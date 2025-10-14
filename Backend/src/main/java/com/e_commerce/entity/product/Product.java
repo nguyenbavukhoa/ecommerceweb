@@ -32,7 +32,10 @@ public class Product extends Timestamped {
     @Column(name = "price_base", nullable = false)
     private BigDecimal priceBase;
 
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_categories_id", nullable = false)
-    private ProductCategories productCategory;
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 }

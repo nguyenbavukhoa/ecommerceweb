@@ -1,7 +1,7 @@
 package com.e_commerce.controller.product;
 
 import com.e_commerce.dto.ApiResponse;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import com.e_commerce.service.product.VariantValuesService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class VariantValuesController {
     private final VariantValuesService variantValuesService;
 
     @GetMapping("/variant-option/{optionId}")
-    public ResponseEntity<ApiResponse<List<VariantValuesDTO>>> getVariantValuesByVariantOptionId(@PathVariable Integer optionId, HttpServletRequest request) {
-        List<VariantValuesDTO> variantValues = variantValuesService.getVariantValuesByVariantOptionId(optionId);
+    public ResponseEntity<ApiResponse<List<OptionValuesDTO>>> getVariantValuesByVariantOptionId(@PathVariable Integer optionId, HttpServletRequest request) {
+        List<OptionValuesDTO> variantValues = variantValuesService.getVariantValuesByVariantOptionId(optionId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Variant values retrieved successfully", variantValues, null, request.getRequestURI()));

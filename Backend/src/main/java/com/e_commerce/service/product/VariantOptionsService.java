@@ -1,20 +1,20 @@
 package com.e_commerce.service.product;
 
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsCreateDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsUpdateDTO;
-import com.e_commerce.entity.product.VariantOptions;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupCreateDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupUpdateDTO;
+import com.e_commerce.entity.product.OptionGroup;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface VariantOptionsService {
-    VariantOptions getVariantOptionEntityById(Integer id);
+    OptionGroup getVariantOptionEntityById(Integer id);
 
-    VariantOptionsDTO createVariantOption(VariantOptionsCreateDTO variantOptionsCreateDTO);
+    OptionsGroupDTO createVariantOption(OptionsGroupCreateDTO optionsGroupCreateDTO);
 
-    VariantOptionsDTO updateVariantOption(VariantOptionsUpdateDTO variantOptionsUpdateDTO, Integer id);
+    OptionsGroupDTO updateVariantOption(OptionsGroupUpdateDTO optionsGroupUpdateDTO, Integer id);
 
-    List<VariantOptionsDTO> getVariantOptionByProductCategoryId(Integer id);
+    List<OptionsGroupDTO> getVariantOptionByProductCategoryId(Integer id);
 }

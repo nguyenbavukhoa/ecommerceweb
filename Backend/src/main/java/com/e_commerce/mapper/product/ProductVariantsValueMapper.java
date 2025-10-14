@@ -2,10 +2,7 @@ package com.e_commerce.mapper.product;
 
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
-import com.e_commerce.entity.product.ProductVariantValues;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +41,8 @@ public class ProductVariantsValueMapper {
                 .collect(Collectors.toList());
     }
 
-    public VariantValuesDTO convertEntityToVariantValueDTO(ProductVariantValues productVariantValues) {
-        return VariantValuesDTO.builder()
+    public OptionValuesDTO convertEntityToVariantValueDTO(ProductVariantValues productVariantValues) {
+        return OptionValuesDTO.builder()
                 .id(productVariantValues.getVariantValues().getId())
                 .value(productVariantValues.getVariantValues().getValue())
                 .price(productVariantValues.getVariantValues().getPrice())
@@ -53,7 +50,7 @@ public class ProductVariantsValueMapper {
                 .build();
     }
 
-    public List<VariantValuesDTO> convertListEntityToListVariantValueDTO(List<ProductVariantValues> productVariantValuesList) {
+    public List<OptionValuesDTO> convertListEntityToListVariantValueDTO(List<ProductVariantValues> productVariantValuesList) {
         return productVariantValuesList.stream()
                 .map(this::convertEntityToVariantValueDTO)
                 .collect(Collectors.toList());

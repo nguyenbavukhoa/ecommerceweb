@@ -15,13 +15,13 @@ import java.util.List;
 public class CartItemDTO {
     private Integer id;
 
-    private Integer productVariantsId;
+    private Integer productId;
 
     private Integer quantity;
 
     private Integer cartId;
 
-    private List<Integer> variantValuesId;
+    private List<Integer> optionValueId;
 
     private String imgUrl;
 

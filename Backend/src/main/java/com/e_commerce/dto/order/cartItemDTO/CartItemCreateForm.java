@@ -14,11 +14,11 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class CartItemCreateForm {
-    @NotNull(message = "ProductVariantsId cannot be null")
-    private Integer productVariantsId;
+    @NotNull(message = "ProductId cannot be null")
+    private Integer productId;
 
-    @NotNull(message = "VariantValuesId cannot be null")
-    private List<Integer> variantValuesId;
+    @NotNull(message = "OptionValueId cannot be null")
+    private List<Integer> optionValueId;
 
     @NotNull(message = "Quantity cannot be null")
     @Min(value = 1, message = "Quantity must be at least 1")

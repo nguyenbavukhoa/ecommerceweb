@@ -1,7 +1,7 @@
 package com.e_commerce.entity.order;
 
-import com.e_commerce.entity.product.ProductVariants;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.entity.product.Product;
 import com.e_commerce.orther.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -25,17 +25,17 @@ public class CartItems extends Timestamped {
     private Carts cart;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_variants_id", nullable = false)
-    private ProductVariants productVariant;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "cart_item_variant_values",
+            name = "cart_item_option_values",
             joinColumns = @JoinColumn(name = "cart_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "variant_value_id")
+            inverseJoinColumns = @JoinColumn(name = "option_value_id")
     )
     @JsonBackReference
-    private List<VariantValues> variantValue;
+    private List<OptionValues> selectedOptions;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;

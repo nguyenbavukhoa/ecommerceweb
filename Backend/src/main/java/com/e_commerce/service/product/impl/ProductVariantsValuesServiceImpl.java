@@ -3,8 +3,7 @@ package com.e_commerce.service.product.impl;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueCreateDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueDTO;
 import com.e_commerce.dto.product.productVariantValueDTO.ProductVariantValueUpdateDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
-import com.e_commerce.entity.product.ProductVariantValues;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductVariantsValueMapper;
@@ -71,7 +70,7 @@ public class ProductVariantsValuesServiceImpl implements ProductVariantsValuesSe
     }
 
     @Override
-    public List<VariantValuesDTO> getVariantValuesByProductVariantId(Integer variantId) {
+    public List<OptionValuesDTO> getVariantValuesByProductVariantId(Integer variantId) {
         List<ProductVariantValues> productVariantValuesList = productVariantValuesRepository.findByProductVariants_Id(variantId);
         return productVariantsValueMapper.convertListEntityToListVariantValueDTO(productVariantValuesList);
     }

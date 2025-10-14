@@ -1,9 +1,9 @@
 package com.e_commerce.mapper.product;
 
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsCreateDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsUpdateDTO;
-import com.e_commerce.entity.product.VariantOptions;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupCreateDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupUpdateDTO;
+import com.e_commerce.entity.product.OptionGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,28 +13,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VariantOptionsMapper {
     private final VariantValuesMapper variantValuesMapper;
-    public VariantOptionsDTO convertEntityToDTO(VariantOptions variantOptions) {
-        return VariantOptionsDTO.builder()
-                .id(variantOptions.getId())
-                .name(variantOptions.getName())
-                .values(variantValuesMapper.convertPageToListDTO(variantOptions.getValues()))
+    public OptionsGroupDTO convertEntityToDTO(OptionGroup optionGroup) {
+        return OptionsGroupDTO.builder()
+                .id(optionGroup.getId())
+                .name(optionGroup.getName())
+                .values(variantValuesMapper.convertPageToListDTO(optionGroup.getValues()))
                 .build();
     }
 
-    public VariantOptions convertCreateDTOToEntity(VariantOptionsCreateDTO variantOptionsCreateDTO) {
-        return VariantOptions.builder()
-                .name(variantOptionsCreateDTO.getName())
+    public OptionGroup convertCreateDTOToEntity(OptionsGroupCreateDTO optionsGroupCreateDTO) {
+        return OptionGroup.builder()
+                .name(optionsGroupCreateDTO.getName())
                 .build();
     }
 
-    public VariantOptions convertUpdateDTOToEntity(VariantOptionsUpdateDTO variantOptionsUpdateDTO) {
-        return VariantOptions.builder()
-                .name(variantOptionsUpdateDTO.getName())
+    public OptionGroup convertUpdateDTOToEntity(OptionsGroupUpdateDTO optionsGroupUpdateDTO) {
+        return OptionGroup.builder()
+                .name(optionsGroupUpdateDTO.getName())
                 .build();
     }
 
-    public List<VariantOptionsDTO> convertPageToListDTO(List<VariantOptions> variantOptionsList) {
-        return variantOptionsList.stream()
+    public List<OptionsGroupDTO> convertPageToListDTO(List<OptionGroup> optionGroupList) {
+        return optionGroupList.stream()
                 .map(this::convertEntityToDTO)
                 .toList();
     }

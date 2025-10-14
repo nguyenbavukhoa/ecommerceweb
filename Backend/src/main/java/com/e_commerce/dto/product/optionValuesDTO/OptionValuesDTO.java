@@ -1,7 +1,5 @@
-package com.e_commerce.dto.product.variantValuesDTO;
+package com.e_commerce.dto.product.optionValuesDTO;
 
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
-import com.e_commerce.entity.product.VariantOptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VariantValuesDTO {
+public class OptionValuesDTO {
     private Integer id;
 
     private String value;

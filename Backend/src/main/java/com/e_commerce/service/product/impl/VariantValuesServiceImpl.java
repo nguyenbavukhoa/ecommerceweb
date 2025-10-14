@@ -1,8 +1,8 @@
 package com.e_commerce.service.product.impl;
 
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesCreateDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesUpdateDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesCreateDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesUpdateDTO;
 import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -28,20 +28,20 @@ public class VariantValuesServiceImpl implements VariantValuesService {
     }
 
     @Override
-    public VariantValuesDTO createVariantValue(VariantValuesCreateDTO variantValuesCreateDTO) {
-        VariantValues variantValues = variantValuesMapper.convertCreateDTOToEntity(variantValuesCreateDTO);
+    public OptionValuesDTO createVariantValue(OptionValuesCreateDTO optionValuesCreateDTO) {
+        VariantValues variantValues = variantValuesMapper.convertCreateDTOToEntity(optionValuesCreateDTO);
         variantValues.setId(IdGenerator.getGenerationId());
         return variantValuesMapper.convertEntityToDTO(variantValuesRepository.save(variantValues));
     }
 
     @Override
-    public VariantValuesDTO updateVariantValue(VariantValuesUpdateDTO variantValuesUpdateDTO, Integer id) {
+    public OptionValuesDTO updateVariantValue(OptionValuesUpdateDTO optionValuesUpdateDTO, Integer id) {
         VariantValues existingVariantValue = getVariantValueEntityById(id);
-        if(variantValuesUpdateDTO.getValue() != null) {
-            existingVariantValue.setValue(variantValuesUpdateDTO.getValue());
+        if(optionValuesUpdateDTO.getValue() != null) {
+            existingVariantValue.setValue(optionValuesUpdateDTO.getValue());
         }
-        if(variantValuesUpdateDTO.getPrice() != null) {
-            existingVariantValue.setPrice(variantValuesUpdateDTO.getPrice());
+        if(optionValuesUpdateDTO.getPrice() != null) {
+            existingVariantValue.setPrice(optionValuesUpdateDTO.getPrice());
         }
         return variantValuesMapper.convertEntityToDTO(variantValuesRepository.save(existingVariantValue));
 
@@ -53,7 +53,7 @@ public class VariantValuesServiceImpl implements VariantValuesService {
     }
 
     @Override
-    public List<VariantValuesDTO> getVariantValuesByVariantOptionId(Integer id) {
+    public List<OptionValuesDTO> getVariantValuesByVariantOptionId(Integer id) {
         return variantValuesMapper.convertPageToListDTO(variantValuesRepository.findByVariantOptionId(id));
     }
 }

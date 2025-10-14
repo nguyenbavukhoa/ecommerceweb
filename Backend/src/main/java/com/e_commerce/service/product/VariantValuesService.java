@@ -1,8 +1,8 @@
 package com.e_commerce.service.product;
 
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesCreateDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesDTO;
-import com.e_commerce.dto.product.variantValuesDTO.VariantValuesUpdateDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesCreateDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesUpdateDTO;
 import com.e_commerce.entity.product.VariantValues;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +12,11 @@ import java.util.List;
 public interface VariantValuesService {
     VariantValues getVariantValueEntityById(Integer id);
 
-    VariantValuesDTO createVariantValue(VariantValuesCreateDTO variantValuesCreateDTO);
+    OptionValuesDTO createVariantValue(OptionValuesCreateDTO optionValuesCreateDTO);
 
-    VariantValuesDTO updateVariantValue(VariantValuesUpdateDTO variantValuesUpdateDTO, Integer id);
+    OptionValuesDTO updateVariantValue(OptionValuesUpdateDTO optionValuesUpdateDTO, Integer id);
 
     List<VariantValues> getVariantValueEntitiesById(List<Integer> id);
 
-    List<VariantValuesDTO> getVariantValuesByVariantOptionId(Integer id);
+    List<OptionValuesDTO> getVariantValuesByVariantOptionId(Integer id);
 }

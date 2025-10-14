@@ -2,10 +2,8 @@ package com.e_commerce.controller.product;
 
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryDTO;
-import com.e_commerce.entity.product.ProductCategories;
 import com.e_commerce.service.product.ProductCategoriesService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

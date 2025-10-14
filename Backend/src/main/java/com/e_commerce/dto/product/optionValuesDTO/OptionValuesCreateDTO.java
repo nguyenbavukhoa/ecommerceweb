@@ -1,4 +1,4 @@
-package com.e_commerce.dto.product.variantValuesDTO;
+package com.e_commerce.dto.product.optionValuesDTO;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VariantValuesCreateDTO {
+public class OptionValuesCreateDTO {
     @NotBlank(message = "Value is mandatory")
     private String value;
 
@@ -25,6 +25,6 @@ public class VariantValuesCreateDTO {
     @NotNull(message = "StockQuantity is required")
     private Integer stockQuantity;
 
-    @NotNull(message = "VariantOptionsId is required")
-    private Integer variantOptionsId;
+    @NotNull(message = "OptionsGroupId is required")
+    private Integer optionsGroupId;
 }

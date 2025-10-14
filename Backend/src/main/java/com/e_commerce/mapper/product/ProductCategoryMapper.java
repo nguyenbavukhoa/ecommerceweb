@@ -3,7 +3,6 @@ package com.e_commerce.mapper.product;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryCreateDTO;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryDTO;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryUpdateDTO;
-import com.e_commerce.entity.product.ProductCategories;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

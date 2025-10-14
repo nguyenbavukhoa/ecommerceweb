@@ -12,20 +12,20 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class VariantValues extends Timestamped {
+public class OptionValues extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "value")
-    private String value;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "price", nullable = false)
-    private BigDecimal price;
-
-    @Column(name = "stock_quantity", nullable = false, columnDefinition = "int default 0")
-    private int stockQuantity;
+    @Column(name = "additional_price", nullable = false)
+    private BigDecimal additionalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_options_id", nullable = false)
-    private VariantOptions variantOptions;
+    private OptionGroup optionGroup;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 }

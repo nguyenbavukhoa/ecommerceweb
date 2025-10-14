@@ -1,9 +1,9 @@
 package com.e_commerce.service.product.impl;
 
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsCreateDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsDTO;
-import com.e_commerce.dto.product.variantOptionsDTO.VariantOptionsUpdateDTO;
-import com.e_commerce.entity.product.VariantOptions;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupCreateDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupDTO;
+import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupUpdateDTO;
+import com.e_commerce.entity.product.OptionGroup;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.VariantOptionsMapper;
@@ -21,29 +21,29 @@ public class VariantOptionsServiceImpl implements VariantOptionsService {
     private final VariantOptionsMapper variantOptionsMapper;
     private final VariantOptionsRepository variantOptionsRepository;
     @Override
-    public VariantOptions getVariantOptionEntityById(Integer id) {
+    public OptionGroup getVariantOptionEntityById(Integer id) {
         return variantOptionsRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorResponse.VARIANT_OPTION_NOT_FOUND));
     }
 
     @Override
-    public VariantOptionsDTO createVariantOption(VariantOptionsCreateDTO variantOptionsCreateDTO) {
-        VariantOptions variantOptions = variantOptionsMapper.convertCreateDTOToEntity(variantOptionsCreateDTO);
-        variantOptions.setId(IdGenerator.getGenerationId());
-        return variantOptionsMapper.convertEntityToDTO(variantOptionsRepository.save(variantOptions));
+    public OptionsGroupDTO createVariantOption(OptionsGroupCreateDTO optionsGroupCreateDTO) {
+        OptionGroup optionGroup = variantOptionsMapper.convertCreateDTOToEntity(optionsGroupCreateDTO);
+        optionGroup.setId(IdGenerator.getGenerationId());
+        return variantOptionsMapper.convertEntityToDTO(variantOptionsRepository.save(optionGroup));
     }
 
     @Override
-    public VariantOptionsDTO updateVariantOption(VariantOptionsUpdateDTO variantOptionsUpdateDTO, Integer id) {
-        VariantOptions existingVariantOption = getVariantOptionEntityById(id);
-        if(variantOptionsUpdateDTO.getName() != null) {
-            existingVariantOption.setName(variantOptionsUpdateDTO.getName());
+    public OptionsGroupDTO updateVariantOption(OptionsGroupUpdateDTO optionsGroupUpdateDTO, Integer id) {
+        OptionGroup existingVariantOption = getVariantOptionEntityById(id);
+        if(optionsGroupUpdateDTO.getName() != null) {
+            existingVariantOption.setName(optionsGroupUpdateDTO.getName());
         }
         return variantOptionsMapper.convertEntityToDTO(variantOptionsRepository.save(existingVariantOption));
     }
 
     @Override
-    public List<VariantOptionsDTO> getVariantOptionByProductCategoryId(Integer id) {
+    public List<OptionsGroupDTO> getVariantOptionByProductCategoryId(Integer id) {
         return variantOptionsMapper.convertPageToListDTO(variantOptionsRepository.findByProductCategoryId(id));
     }
 }
