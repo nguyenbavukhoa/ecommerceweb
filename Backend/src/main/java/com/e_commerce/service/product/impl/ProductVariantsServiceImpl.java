@@ -5,7 +5,6 @@ import com.e_commerce.dto.product.productVariants.ProductVariantsDTO;
 import com.e_commerce.dto.product.productVariants.ProductVariantsUpdateDTO;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
-import com.e_commerce.mapper.product.ProductVariantsMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductVariantRepository;

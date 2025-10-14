@@ -3,7 +3,6 @@ package com.e_commerce.mapper.order;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsCreateForm;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsDTO;
 import com.e_commerce.entity.order.OrderItems;
-import com.e_commerce.entity.product.VariantValues;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,11 +13,11 @@ public class OrderItemMapper {
     public OrderItemsDTO convertEntityToDTO(OrderItems orderItem) {
         return OrderItemsDTO.builder()
                 .id(orderItem.getId())
-                .productVariantsId(orderItem.getProductVariant().getId())
+                .productVariantsId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .orderId(orderItem.getOrder().getId())
-                .imgUrl(orderItem.getProductVariant().getImgUrl())
-                .productName(orderItem.getProductVariant().getProduct().getName())
+                .imgUrl(orderItem.getProduct().getImgMain())
+                .productName(orderItem.getProduct().getName())
                 .price(orderItem.getUnitPrice())
                 .note(orderItem.getNote())
                 .build();
@@ -32,22 +31,21 @@ public class OrderItemMapper {
 
     public OrderItemsCreateForm convertEntityToCreateDTO(OrderItems orderItem) {
         return OrderItemsCreateForm.builder()
-                .productVariantsId(orderItem.getProductVariant().getId())
+                .productId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .note(orderItem.getNote())
-
                 .build();
     }
 
     public List<OrderItemsDTO> convertPageToList(List<OrderItems> orderItems) {
         return orderItems.stream()
                 .map(this::convertEntityToDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<OrderItems> convertCreateDTOListToEntityList(List<OrderItemsCreateForm> orderItemDTOs) {
         return orderItemDTOs.stream()
                 .map(this::convertCreateDTOToEntity)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

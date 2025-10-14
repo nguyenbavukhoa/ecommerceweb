@@ -15,8 +15,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class OptionValuesCreateDTO {
-    @NotBlank(message = "Value is mandatory")
-    private String value;
+    @NotBlank(message = "Name is mandatory")
+    private String name;
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")

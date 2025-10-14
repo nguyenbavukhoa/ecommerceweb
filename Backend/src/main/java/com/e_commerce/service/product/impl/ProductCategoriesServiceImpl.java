@@ -5,7 +5,6 @@ import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryDTO;
 import com.e_commerce.dto.product.productCategoryDTO.ProductCategoryUpdateDTO;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
-import com.e_commerce.mapper.product.ProductCategoryMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductCategoryRepository;
 import com.e_commerce.service.product.CategoryService;

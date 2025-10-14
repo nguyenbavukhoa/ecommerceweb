@@ -1,5 +1,6 @@
 package com.e_commerce.dto.product.productDTO;
 
+import com.e_commerce.enums.AvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class ProductUpdateDTO {
 
     private MultipartFile image;
 
-    private boolean isActive;
+    private AvailabilityStatus status;
 
     private String description;
 }

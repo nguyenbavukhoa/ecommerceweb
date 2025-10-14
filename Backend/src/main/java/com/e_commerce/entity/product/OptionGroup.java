@@ -5,6 +5,8 @@ import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Builder
@@ -25,4 +27,7 @@ public class OptionGroup extends Timestamped {
     @Enumerated(EnumType.STRING)
     @Column(name = "selection_type", nullable = false)
     private SelectionType selectionType;
+
+    @OneToMany(mappedBy = "optionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OptionValues> values;
 }

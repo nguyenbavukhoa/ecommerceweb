@@ -1,6 +1,7 @@
 package com.e_commerce.dto.product.productDTO;
 
 import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupDTO;
+import com.e_commerce.enums.AvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class ProductDetailDTO {
     private String description;
     private BigDecimal basePrice;
     private String imgUrl;
-    private boolean active;
+    private AvailabilityStatus status;
 
     private List<OptionsGroupDTO> optionGroups;
 }

@@ -11,13 +11,13 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class VariantOptionsMapper {
-    private final VariantValuesMapper variantValuesMapper;
+public class OptionsGroupMapper {
+    private final OptionsValuesMapper optionsValuesMapper;
     public OptionsGroupDTO convertEntityToDTO(OptionGroup optionGroup) {
         return OptionsGroupDTO.builder()
                 .id(optionGroup.getId())
                 .name(optionGroup.getName())
-                .values(variantValuesMapper.convertPageToListDTO(optionGroup.getValues()))
+                .values(optionsValuesMapper.convertPageToListDTO(optionGroup.getValues()))
                 .build();
     }
 

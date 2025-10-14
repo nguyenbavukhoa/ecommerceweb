@@ -13,16 +13,12 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ProductMapper {
-    private final ProductCategoryMapper productCategoryMapper;
-
     public ProductDTO covertEntityToDTO(Product product) {
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .isActive(product.isActive())
+                .status(product.getStatus())
                 .priceBase(product.getPriceBase())
-                .productCategoryDTO(product.getProductCategory() != null ?
-                        productCategoryMapper.convertEntityToDTO(product.getProductCategory()) : null)
                 .description(product.getDescription())
                 .imgMain(product.getImgMain())
                 .build();
@@ -32,7 +28,7 @@ public class ProductMapper {
         return ProductUserViewDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .isActive(product.isActive())
+                .status(product.getStatus())
                 .priceBase(product.getPriceBase())
                 .imgMain(product.getImgMain())
                 .build();
@@ -45,7 +41,7 @@ public class ProductMapper {
                 .description(product.getDescription())
                 .basePrice(product.getPriceBase())
                 .imgUrl(product.getImgMain())
-                .active(product.isActive())
+                .status(product.getStatus())
                 .build();
     }
 
@@ -53,10 +49,8 @@ public class ProductMapper {
             return Product.builder()
                 .id(productDTO.getId())
                 .name(productDTO.getName())
-                .isActive(productDTO.isActive())
+                .status(productDTO.getStatus())
                 .priceBase(productDTO.getPriceBase())
-                .productCategory(productDTO.getProductCategoryDTO() != null ?
-                        productCategoryMapper.convertDTOToEntity(productDTO.getProductCategoryDTO()) : null)
                 .description(productDTO.getDescription())
                 .imgMain(productDTO.getImgMain())
                 .build();
@@ -65,7 +59,6 @@ public class ProductMapper {
     public Product covertCreateDTOToEntity(ProductCreateDTO productCreateDTO) {
         return Product.builder()
                 .name(productCreateDTO.getName())
-                .isActive(true)
                 .priceBase(productCreateDTO.getPriceBase())
                 .description(productCreateDTO.getDescription())
                 .build();
@@ -74,8 +67,7 @@ public class ProductMapper {
     public Product convertUpdateDTOToEntity(ProductUpdateDTO productUpdateDTO) {
         return Product.builder()
                 .name(productUpdateDTO.getName())
-                .isActive(productUpdateDTO.isActive())
-                .productCategory(productUpdateDTO.getProductCategory())
+                .status(productUpdateDTO.getStatus())
                 .description(productUpdateDTO.getDescription())
                 .imgMain(productUpdateDTO.getImage() != null ? productUpdateDTO.getImage().getOriginalFilename() : null)
                 .build();

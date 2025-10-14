@@ -6,7 +6,6 @@ import com.e_commerce.entity.product.Product;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductMapper;
-import com.e_commerce.mapper.product.ProductVariantsMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;

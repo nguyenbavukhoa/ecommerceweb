@@ -6,7 +6,7 @@ import com.e_commerce.dto.product.optionValuesDTO.OptionValuesUpdateDTO;
 import com.e_commerce.entity.product.VariantValues;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
-import com.e_commerce.mapper.product.VariantValuesMapper;
+import com.e_commerce.mapper.product.OptionsValuesMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.VariantValuesRepository;
 import com.e_commerce.service.product.VariantValuesService;
@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class VariantValuesServiceImpl implements VariantValuesService {
-    private final VariantValuesMapper variantValuesMapper;
+    private final OptionsValuesMapper optionsValuesMapper;
     private final VariantValuesRepository variantValuesRepository;
 
     @Override
@@ -29,9 +29,9 @@ public class VariantValuesServiceImpl implements VariantValuesService {
 
     @Override
     public OptionValuesDTO createVariantValue(OptionValuesCreateDTO optionValuesCreateDTO) {
-        VariantValues variantValues = variantValuesMapper.convertCreateDTOToEntity(optionValuesCreateDTO);
+        VariantValues variantValues = optionsValuesMapper.convertCreateDTOToEntity(optionValuesCreateDTO);
         variantValues.setId(IdGenerator.getGenerationId());
-        return variantValuesMapper.convertEntityToDTO(variantValuesRepository.save(variantValues));
+        return optionsValuesMapper.convertEntityToDTO(variantValuesRepository.save(variantValues));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class VariantValuesServiceImpl implements VariantValuesService {
         if(optionValuesUpdateDTO.getPrice() != null) {
             existingVariantValue.setPrice(optionValuesUpdateDTO.getPrice());
         }
-        return variantValuesMapper.convertEntityToDTO(variantValuesRepository.save(existingVariantValue));
+        return optionsValuesMapper.convertEntityToDTO(variantValuesRepository.save(existingVariantValue));
 
     }
 
@@ -54,6 +54,6 @@ public class VariantValuesServiceImpl implements VariantValuesService {
 
     @Override
     public List<OptionValuesDTO> getVariantValuesByVariantOptionId(Integer id) {
-        return variantValuesMapper.convertPageToListDTO(variantValuesRepository.findByVariantOptionId(id));
+        return optionsValuesMapper.convertPageToListDTO(variantValuesRepository.findByVariantOptionId(id));
     }
 }
