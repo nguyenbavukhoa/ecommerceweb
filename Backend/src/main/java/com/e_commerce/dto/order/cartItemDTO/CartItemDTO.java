@@ -20,7 +20,6 @@ public class CartItemDTO {
 
     private Integer quantity;
     private BigDecimal price;
-    private BigDecimal totalPrice;
 
     private List<String> optionValueNames;
     private String note;

@@ -12,6 +12,7 @@ import com.e_commerce.repository.product.OptionsValuesRepository;
 import com.e_commerce.service.product.OptionsValuesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class OptionsValuesServiceImpl implements OptionsValuesService {
     @Override
     public OptionValues getVariantValueEntityById(Integer id) {
         return optionsValuesRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorResponse.VARIANT_VALUE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorResponse.OPTIONS_VALUE_NOT_FOUND));
     }
 
     @Override
@@ -55,5 +56,14 @@ public class OptionsValuesServiceImpl implements OptionsValuesService {
     @Override
     public List<OptionValuesDTO> getVariantValuesByVariantOptionId(Integer id) {
         return optionsValuesMapper.convertPageToListDTO(optionsValuesRepository.findByVariantOptionId(id));
+    }
+
+    @Transactional
+    @Override
+    public void decreaseStock(Integer optionValueId, int quantity) {
+        int result = optionsValuesRepository.decreaseStock(optionValueId, quantity);
+        if(result == 0) {
+            throw new CustomException(ErrorResponse.OPTIONS_VALUE_OUT_OF_STOCK);
+        }
     }
 }

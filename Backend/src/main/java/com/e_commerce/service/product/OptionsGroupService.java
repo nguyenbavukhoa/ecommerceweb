@@ -16,5 +16,5 @@ public interface OptionsGroupService {
 
     OptionsGroupDTO updateVariantOption(OptionsGroupUpdateDTO optionsGroupUpdateDTO, Integer id);
 
-    List<OptionsGroupDTO> getVariantOptionByProductCategoryId(Integer id);
+    List<OptionsGroupDTO> getOptionGroupsByProductId(Integer id);
 }

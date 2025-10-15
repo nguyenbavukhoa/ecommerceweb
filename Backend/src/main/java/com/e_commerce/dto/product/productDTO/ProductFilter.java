@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Data
 public class ProductFilter {
+    private Integer categoryId;
 
     private Integer productId;
 

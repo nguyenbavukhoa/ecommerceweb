@@ -12,7 +12,7 @@ import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.entity.product.OptionValues;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -26,6 +26,8 @@ import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.order.OrderService;
+import com.e_commerce.service.product.OptionsValuesService;
+import com.e_commerce.service.product.ProductService;
 import com.e_commerce.specification.OrderSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,9 +52,9 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemsService cartItemsService;
     private final OrderItemsService orderItemsService;
     private final UserInformationService userInformationService;
-    private final ProductVariantsService productVariantsService;
-    private final ProductVariantsValuesService productVariantsValuesService;
     private final EmailService emailService;
+    private final ProductService productService;
+    private final OptionsValuesService optionsValuesService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -79,14 +81,8 @@ public class OrderServiceImpl implements OrderService {
         // Tính toán tổng tiền những sản phẩm trong giỏ hàng đã chọn
         BigDecimal total = BigDecimal.ZERO;
         for (CartItems cartItem : selectedCartItems ) {
-            BigDecimal itemPrice = cartItem.getProductVariant().getPrice();
-
-            if (cartItem.getVariantValue() != null && !cartItem.getVariantValue().isEmpty()) {
-                for (VariantValues variantValue : cartItem.getVariantValue()) {
-                    itemPrice = itemPrice.add(variantValue.getPrice());
-                }
-            }
-            total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            BigDecimal itemPrice = cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            total = total.add(itemPrice);
         }
 
 
@@ -104,19 +100,6 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItems);
 
         order = ordersRepository.save(order);
-
-        // Cập nhật số lượng tồn kho của từng sản phẩm trong giỏ hàng đã chọn
-//        for (CartItems cartItem : selectedCartItems) {
-//            productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
-//
-//            if (cartItem.getVariantValue() != null) {
-//                productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getVariantValue().getId(), cartItem.getQuantity());
-//            }
-//        }
-
-        // Xóa các CartItems đã chọn khỏi giỏ hàng
-//        cartItemsService.deleteCartItems(selectedCartItems.stream().map(CartItems::getId).collect(Collectors.toList()));
-
         return ordersMapper.convertEntityToDTO(order);
     }
 
@@ -161,11 +144,11 @@ public class OrderServiceImpl implements OrderService {
         List<CartItems> cartItems = cartItemsService.getCartItemsByCartId(carts.getId());
 
         for (CartItems cartItem : cartItems) {
-            productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
+            productService.decreaseStock(cartItem.getProduct().getId(), cartItem.getQuantity());
 
-            if (cartItem.getVariantValue() != null && !cartItem.getVariantValue().isEmpty()) {
-                for (VariantValues variantValue : cartItem.getVariantValue()) {
-                    productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), variantValue.getId(), cartItem.getQuantity());
+            if (cartItem.getSelectedOptions() != null && !cartItem.getSelectedOptions().isEmpty()) {
+                for (OptionValues values : cartItem.getSelectedOptions()) {
+                    optionsValuesService.decreaseStock(values.getId(), cartItem.getQuantity());
                 }
             }
         }
@@ -173,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
         cartItemsService.deleteAllCartItemsByAccountId();
 
         order.setOrderStatus(OrderStatus.CONFIRMED);
+
         ordersRepository.save(order);
 
         emailService.sendOrderStatusEmail(OrderStatus.CONFIRMED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());

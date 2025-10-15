@@ -4,7 +4,6 @@ import com.e_commerce.dto.product.optionValuesDTO.OptionValuesCreateDTO;
 import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import com.e_commerce.dto.product.optionValuesDTO.OptionValuesUpdateDTO;
 import com.e_commerce.entity.product.OptionValues;
-import com.e_commerce.entity.product.VariantValues;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,4 +19,6 @@ public interface OptionsValuesService {
     List<OptionValues> getVariantValueEntitiesById(List<Integer> id);
 
     List<OptionValuesDTO> getVariantValuesByVariantOptionId(Integer id);
+
+    void decreaseStock(Integer optionValueId, int quantity);
 }

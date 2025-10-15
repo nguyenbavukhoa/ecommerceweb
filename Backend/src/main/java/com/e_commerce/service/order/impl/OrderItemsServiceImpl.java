@@ -5,7 +5,8 @@ import com.e_commerce.dto.order.orderItemsDTO.OrderItemsDTO;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.entity.product.Product;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.order.OrderItemMapper;
@@ -13,6 +14,7 @@ import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.order.OrderItemsRepository;
 import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.product.OptionsValuesService;
+import com.e_commerce.service.product.ProductService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,9 +29,8 @@ import java.util.List;
 public class OrderItemsServiceImpl implements OrderItemsService {
     private final OrderItemMapper orderItemMapper;
     private final OrderItemsRepository orderItemsRepository;
-    private final ProductVariantsService productVariantsService;
+    private final ProductService productService;
     private final OptionsValuesService optionsValuesService;
-    private final ProductVariantsValuesService productVariantsValuesService;
 
     @Override
     public OrderItems getOrderItemsEntityById(Integer id) {
@@ -39,15 +40,15 @@ public class OrderItemsServiceImpl implements OrderItemsService {
 
     @Override
     public OrderItemsDTO createOrderItems(OrderItemsCreateForm orderItemsCreateForm) {
-        ProductVariants productVariants = productVariantsService.getProductVariantEntityById(orderItemsCreateForm.getProductVariantsId());
+        Product product = productService.getProductEntityById(orderItemsCreateForm.getProductId());
 
-        List<VariantValues> variantValues = (orderItemsCreateForm.getVariantValueId() != null && !orderItemsCreateForm.getVariantValueId().isEmpty())
-                ? optionsValuesService.getVariantValueEntitiesById(orderItemsCreateForm.getVariantValueId())
+        List<OptionValues> selectedOptions = (orderItemsCreateForm.getOptionValueId() != null && !orderItemsCreateForm.getOptionValueId().isEmpty())
+                ? optionsValuesService.getVariantValueEntitiesById(orderItemsCreateForm.getOptionValueId())
                 : null;
 
         OrderItems orderItems = buildOrderItem(
-                productVariants,
-                variantValues != null ? variantValues : List.of(),
+                product,
+                selectedOptions,
                 orderItemsCreateForm.getQuantity(),
                 null,
                 orderItemsCreateForm.getNote()
@@ -55,15 +56,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
 
         orderItems.setId(IdGenerator.getGenerationId());
 
-        BigDecimal unitPrice = productVariants.getPrice();
-
-        if (variantValues != null && !variantValues.isEmpty()) {
-            BigDecimal extraPrice = variantValues.stream()
-                    .map(VariantValues::getPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            unitPrice = unitPrice.add(extraPrice);
-        }
-
+        BigDecimal unitPrice = calculateTotalUnitPrice(product, selectedOptions);
         orderItems.setUnitPrice(unitPrice);
 
         return orderItemMapper.convertEntityToDTO(orderItemsRepository.save(orderItems));
@@ -74,8 +67,8 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         List<OrderItems> orderItems = new ArrayList<>();
         for (CartItems cartItem : cartItems) {
             OrderItems orderItem = buildOrderItem(
-                    cartItem.getProductVariant(),
-                    cartItem.getVariantValue(),
+                    cartItem.getProduct(),
+                    cartItem.getSelectedOptions(),
                     cartItem.getQuantity(),
                     order,
                     cartItem.getNote()
@@ -86,61 +79,51 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         return orderItemsRepository.saveAll(orderItems);
     }
 
-    @Override
-    public void validateCartItemsStock(List<CartItems> cartItems) {
-        for (CartItems cartItem : cartItems) {
-            ProductVariants productVariant = cartItem.getProductVariant();
-            if (productVariant.getStockQuantity() < cartItem.getQuantity()) {
-                throw new CustomException(ErrorResponse.PRODUCT_VARIANT_OUT_OF_STOCK);
-            }
+    private OrderItems buildOrderItem(Product product, List<OptionValues> selectedOptions, Integer quantity, Orders order, String note) {
 
-        }
-    }
+        if (selectedOptions.isEmpty()) {
 
-    private OrderItems buildOrderItem(ProductVariants productVariants, List<VariantValues> variantValues, Integer quantity, Orders order, String note) {
-//        int availableQuantity = (variantValues != null)
-//                ? productVariantsValuesService.isVariantValueAvailable(productVariants.getId(), variantValues.getId())
-//                : productVariantsService.checkProductVariantAvailability(productVariants.getId());
-
-        if (variantValues.isEmpty()) {
-            // Không có VariantValues → check trực tiếp stock ProductVariant
-            int availableQuantity = productVariantsService.checkProductVariantAvailability(productVariants.getId());
-
-            if (availableQuantity < quantity) {
-                String stockInfo = "Available: " + availableQuantity + ", Requested: " + quantity;
+            if (product.getId() < quantity) {
+                String stockInfo = "Available: " + product.getId() + ", Requested: " + quantity;
                 throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
             }
         }else {
-            // Có nhiều VariantValues → check từng cái
-            for (VariantValues value : variantValues) {
-                int availableQuantity = productVariantsValuesService.isVariantValueAvailable(
-                        productVariants.getId(),
-                        value.getId()
-                );
+            for (OptionValues option : selectedOptions) {
+                if (option.getStockQuantity() < quantity) {
+                    String stockInfo = "Option '" + option.getName() + "' available: " + option.getStockQuantity() +
+                            ", requested: " + quantity;
+                    throw new CustomException(List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK), stockInfo);
+                }
             }
         }
 
 
-
-        BigDecimal price = productVariants.getPrice();
-        if (!variantValues.isEmpty()) {
-            BigDecimal extraPrice = variantValues.stream()
-                    .map(VariantValues::getPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            price = price.add(extraPrice);
-        }
+        BigDecimal price = calculateTotalUnitPrice(product, selectedOptions);
 
         log.info("Building order item with price: {}", price);
         OrderItems orderItem = new OrderItems();
         orderItem.setId(IdGenerator.getGenerationId());
         orderItem.setOrder(order);
-        orderItem.setProductVariant(productVariants);
-        orderItem.setVariantValue(variantValues);
+        orderItem.setProduct(product);
+        orderItem.setSelectedOptions(selectedOptions);
         orderItem.setUnitPrice(price);
         orderItem.setQuantity(quantity);
         orderItem.setNote(note);
 
 
         return orderItem;
+    }
+
+    private BigDecimal calculateTotalUnitPrice(Product product, List<OptionValues> selectedOptions) {
+        BigDecimal price = product.getPriceBase();
+
+        if (selectedOptions != null && !selectedOptions.isEmpty()) {
+            BigDecimal extra = selectedOptions.stream()
+                    .map(OptionValues::getAdditionalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            price = price.add(extra);
+        }
+
+        return price;
     }
 }

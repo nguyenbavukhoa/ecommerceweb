@@ -23,11 +23,11 @@ public interface CartItemsRepository extends JpaRepository<CartItems, Integer> {
                 GROUP BY ci
                 HAVING COUNT(ov.id) = :optionValueCount
             """)
-    Optional<CartItems> findByCartIdAndProductVariantIdAndVariantValues(
+    Optional<CartItems> findByCartIdAndProductIdAndOptionValues(
             @Param("cartId") Integer cartId,
-            @Param("productVariantId") Integer productVariantId,
-            @Param("variantValueIds") List<Integer> variantValueIds,
-            @Param("variantValueCount") long variantValueCount
+            @Param("productId") Integer productId,
+            @Param("optionValueIds") List<Integer> optionValueIds,
+            @Param("optionValueCount") long optionValueCount
     );
 
 

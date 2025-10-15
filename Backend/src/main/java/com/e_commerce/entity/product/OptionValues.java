@@ -24,7 +24,7 @@ public class OptionValues extends Timestamped {
     private BigDecimal additionalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_options_id", nullable = false)
+    @JoinColumn(name = "options_group_id", nullable = false)
     private OptionGroup optionGroup;
 
     @Enumerated(EnumType.STRING)

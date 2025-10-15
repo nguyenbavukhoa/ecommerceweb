@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/variant-values")
+@RequestMapping("/options-values")
 @RequiredArgsConstructor
-public class VariantValuesController {
+public class OptionsValuesController {
     private final OptionsValuesService optionsValuesService;
 
     @GetMapping("/variant-option/{optionId}")

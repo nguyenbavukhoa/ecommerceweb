@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/variant-options")
+@RequestMapping("/options-group")
 @RequiredArgsConstructor
-public class VariantOptionsController {
+public class OptionsGroupController {
     private final OptionsGroupService optionsGroupService;
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<ApiResponse<List<OptionsGroupDTO>>> getVariantOptionsByCategoryId(@PathVariable Integer categoryId, HttpServletRequest request) {
-        List<OptionsGroupDTO> variantOptions = optionsGroupService.getVariantOptionByProductCategoryId(categoryId);
+        List<OptionsGroupDTO> variantOptions = optionsGroupService.getOptionGroupsByProductId(categoryId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponse<>(true, "Variant options retrieved successfully", variantOptions, null, request.getRequestURI()));

@@ -23,7 +23,7 @@ public class OptionsGroupServiceImpl implements OptionsGroupService {
     @Override
     public OptionGroup getVariantOptionEntityById(Integer id) {
         return optionsGroupRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorResponse.VARIANT_OPTION_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorResponse.OPTIONS_GROUP_NOT_FOUND));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class OptionsGroupServiceImpl implements OptionsGroupService {
     }
 
     @Override
-    public List<OptionsGroupDTO> getVariantOptionByProductCategoryId(Integer id) {
+    public List<OptionsGroupDTO> getOptionGroupsByProductId(Integer id) {
         return optionsGroupMapper.convertPageToListDTO(optionsGroupRepository.findByProductCategoryId(id));
     }
 }

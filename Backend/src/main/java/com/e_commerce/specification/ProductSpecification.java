@@ -15,9 +15,9 @@ public class ProductSpecification {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Filter theo productCategoriesId
-            if (productFilter.getProductCategoriesId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("productCategory").get("id"), productFilter.getProductCategoriesId()));
+            // Filter theo categoryId
+            if (productFilter.getCategoryId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), productFilter.getCategoryId()));
             }
 
             // Filter theo trạng thái isActive
