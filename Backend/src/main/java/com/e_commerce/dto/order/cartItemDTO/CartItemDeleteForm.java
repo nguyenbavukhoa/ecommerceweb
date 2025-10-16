@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemDeleteForm {
-    private Integer productVariantsId;
+    private Integer productId;
 
     private Integer cartId;
 }

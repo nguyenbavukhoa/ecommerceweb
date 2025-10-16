@@ -1,5 +1,6 @@
 package com.e_commerce.dto.product.productDTO;
 
+import com.e_commerce.enums.AvailabilityStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +22,8 @@ public class ProductCreateDTO {
     @Size(max = 1000, message = "Product name cannot exceed 1000 characters")
     private String name;
 
-    private boolean isActive;
-
-    @NotNull(message = "Product category is required")
-    private Integer productCategoryId;
+    @NotNull(message = "Category is required")
+    private Integer categoryId;
 
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;

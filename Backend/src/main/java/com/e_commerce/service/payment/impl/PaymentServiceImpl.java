@@ -1,8 +1,8 @@
 package com.e_commerce.service.payment.impl;
 
 import com.e_commerce.configuration.VNPAYConfig;
+import com.e_commerce.dto.invoice.invoiceDTO.InvoiceCreateForm;
 import com.e_commerce.dto.payment.PaymentDTO.PaymentDTO;
-import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.order.Orders;
 import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.entity.payment.PaymentMethod;
@@ -13,6 +13,8 @@ import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.payment.PaymentRepository;
 import com.e_commerce.service.email.EmailService;
+import com.e_commerce.service.invoice.InvoiceService;
+import com.e_commerce.service.invoice.impl.InvoiceServiceImpl;
 import com.e_commerce.service.order.OrderService;
 import com.e_commerce.service.payment.PaymentMethodService;
 import com.e_commerce.service.payment.PaymentService;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -34,6 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMethodService paymentMethodService;
     private final EmailService emailService;
+    private final InvoiceService invoiceService;
 
     @Override
     public Payment getPaymentEntityById(Integer id) {
@@ -108,40 +112,6 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentUrl(paymentUrl).build();
     }
 
-//    @Override
-//    @Transactional
-//    public PaymentDTO createPayment(HttpServletRequest request) {
-//        long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
-//        String bankCode = request.getParameter("bankCode");
-//
-//        Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
-//        vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
-//
-//        vnpParamsMap.put("vnp_TxnRef",  VNPayUtil.getRandomNumber(8));
-//        vnpParamsMap.put("vnp_OrderInfo", "Thanh toan don hang:" +  VNPayUtil.getRandomNumber(8));
-//        if (bankCode != null && !bankCode.isEmpty()) {
-//            vnpParamsMap.put("vnp_BankCode", bankCode);
-//        }
-//        vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
-//
-//        //build query url
-//        String queryUrl = VNPayUtil.getPaymentURL(vnpParamsMap, true); // Có Encode ký tự
-//        String hashData = VNPayUtil.getPaymentURL(vnpParamsMap, false); // Không Encode ký tự
-//        String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getVnp_SecretKey()  , hashData);
-//
-//        queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
-//        String paymentUrl = vnPayConfig.getVnp_Url() + "?" + queryUrl;
-//
-//        log.info("Payment URL: {}", paymentUrl);
-//        log.info("Hash Data: {}", hashData);
-//        log.info("VNPay vnp_SecureHash: {}", vnpSecureHash);
-//
-//        return PaymentDTO.builder()
-//                .code("ok")
-//                .message("success")
-//                .paymentUrl(paymentUrl).build();
-//    }
-
     @Override
     @Transactional
     public void paymentCallback(HttpServletRequest request) {
@@ -155,6 +125,18 @@ public class PaymentServiceImpl implements PaymentService {
             paymentRepository.save(payment);
 
             orderService.confirmOrderAfterPayment(payment.getOrder());
+
+//            invoiceService.createInvoice(
+//                    new InvoiceCreateForm(
+//                            payment.getOrder().getId(),
+//                            null,
+//                            payment.getPaymentMethod().getId(),
+//                            null, // No voucher
+//                            BigDecimal.ZERO, // No shipping fee
+//                            payment.getOrder().getAccount().getId() // Staff ID (assuming the account itself is the staff)
+//                    )
+//            );
+
             emailService.sendPaymentSuccessEmail(
                     payment.getOrder().getAccount().getEmail(),
                     payment.getOrder().getAccount().getAccountName(),
@@ -162,6 +144,8 @@ public class PaymentServiceImpl implements PaymentService {
                     payment.getTransactionId(),
                     payment.getAmount()
             );
+
+
         } else {
             payment.setStatus(PaymentStatus.FAILED);
             payment.setTransactionId(transactionNo);
@@ -178,23 +162,4 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-//    @Transactional
-//    @Scheduled(fixedDelay = 60000) // Check every 1 minutes
-//    @Override
-//    public void checkPendingPayments() {
-//        List<Payment> pendingPayments = paymentRepository.findByStatus(PaymentStatus.PENDING);
-//        for (Payment payment : pendingPayments) {
-//            Orders order = payment.getOrder();
-//            log.info("Checking payment {} - paymentTime: {}, now: {}",
-//                    payment.getId(), payment.getPaymentTime(), LocalDateTime.now());
-//
-//            if (payment.getPaymentTime().plusMinutes(15).isBefore(LocalDateTime.now())) {
-//                payment.setStatus(PaymentStatus.FAILED);
-//                paymentRepository.save(payment);
-//
-//                orderService.updateOrderStatus(order.getId(), OrderStatus.CANCELLED);
-//                log.info("Cancelled order {} due to unpaid payment {}", order.getId(), payment.getId());
-//            }
-//        }
-//    }
 }

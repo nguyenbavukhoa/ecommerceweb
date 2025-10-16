@@ -1,11 +1,14 @@
 package com.e_commerce.entity.order;
 
-import com.e_commerce.entity.product.ProductVariants;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.entity.product.Product;
 import com.e_commerce.orther.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -22,13 +25,17 @@ public class CartItems extends Timestamped {
     private Carts cart;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_variants_id", nullable = false)
-    private ProductVariants productVariant;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_values_id", nullable = true)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "cart_item_option_values",
+            joinColumns = @JoinColumn(name = "cart_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "option_value_id")
+    )
     @JsonBackReference
-    private VariantValues variantValue;
+    private List<OptionValues> selectedOptions;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
@@ -38,4 +45,7 @@ public class CartItems extends Timestamped {
 
     @Column(name = "selected", nullable = false, columnDefinition = "boolean default true")
     private boolean selected;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 }

@@ -44,19 +44,19 @@ public class CartItemController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Get cart item successfully", cartItemDTO, null, request.getRequestURI()));
     }
 
-    @DeleteMapping("/account/{accountId}")
-    public ResponseEntity<ApiResponse<String>> deleteAllCartItemsByAccountId(@PathVariable Integer accountId, HttpServletRequest request) {
-        cartItemsService.deleteAllCartItemsByAccountId(accountId);
+    @DeleteMapping("/account")
+    public ResponseEntity<ApiResponse<String>> deleteAllCartItemsByAccountId( HttpServletRequest request) {
+        cartItemsService.deleteAllCartItemsByAccountId();
         return ResponseEntity.ok(new ApiResponse<>(true, "Clear cart items successfully", "Cart items cleared", null, request.getRequestURI()));
     }
 
-    @DeleteMapping("/{cartId}/product/{productVariantId}")
+    @DeleteMapping("/{cartId}")
     public ResponseEntity<ApiResponse<String>> deleteCartItem(@PathVariable List<Integer> cartId, HttpServletRequest request) {
         cartItemsService.deleteCartItems(cartId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Delete cart item successfully", "Cart item deleted", null, request.getRequestURI()));
     }
 
-    @PutMapping("/{id}/select")
+    @PutMapping("/select/{id}")
     public ResponseEntity<ApiResponse<CartItemDTO>> changeSelectedCartItem(@PathVariable Integer id, @RequestParam boolean selected, HttpServletRequest request) {
         CartItemDTO cartItemDTO = cartItemsService.changeSelectedCartItem(id, selected);
         return ResponseEntity.ok(new ApiResponse<>(true, "Change selected cart item successfully", cartItemDTO, null, request.getRequestURI()));
@@ -78,6 +78,12 @@ public class CartItemController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Get cart items successfully", cartItemDTO, null, request.getRequestURI())
         );
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<CartItemDTO>>> getAllCartItems(HttpServletRequest request) {
+        List<CartItemDTO> cartItemDTO = cartItemsService.getAll();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Get all cart items successfully", cartItemDTO, null, request.getRequestURI()));
     }
 
 }

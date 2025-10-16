@@ -29,6 +29,7 @@ public enum ErrorResponse {
     ACCOUNT_DISABLED(1008, "Account is disabled", HttpStatus.FORBIDDEN),
     ACCOUNT_MAX_LOGIN_ATTEMPTS_EXCEEDED(1009, "Maximum login attempts exceeded. Please try again later.", HttpStatus.FORBIDDEN),
     ACCOUNT_LOCKED_TOO_MANY_ATTEMPTS(1010, "Account is locked due to too many failed login attempts. Please try again later.", HttpStatus.FORBIDDEN),
+    FRAUDULENT_LOGIN_DETECTED(1011, "Multiple failed login attempts from different IP addresses detected. Please try again later.", HttpStatus.FORBIDDEN),
 
     // Category Errors
     CATEGORY_NOT_FOUND(2001, "Category not found", HttpStatus.NOT_FOUND),
@@ -49,29 +50,21 @@ public enum ErrorResponse {
     PRODUCT_DESCRIPTION_INVALID(3006, "Invalid product description", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_INVALID(3007, "Invalid product image", HttpStatus.BAD_REQUEST),
     PRODUCT_STATUS_INVALID(3008, "Invalid product status", HttpStatus.BAD_REQUEST),
+    PRODUCT_INSUFFICIENT_STOCK(3009, "Insufficient product stock", HttpStatus.CONFLICT),
 
-    // Product Variants Errors
-    PRODUCT_VARIANT_NOT_FOUND(3101, "Product variant not found", HttpStatus.NOT_FOUND),
-    PRODUCT_VARIANT_ALREADY_EXISTS(3102, "Product variant already exists", HttpStatus.CONFLICT),
-    PRODUCT_VARIANT_SKU_INVALID(3103, "Invalid product variant SKU", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_STOCK_INVALID(3104, "Invalid product variant stock quantity", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_PRICE_INVALID(3105, "Invalid product variant price", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_OUT_OF_STOCK(3106, "Product variant is out of stock", HttpStatus.CONFLICT),
-    PRODUCT_VARIANT_INACTIVE(3107, "Product variant is inactive", HttpStatus.BAD_REQUEST),
+    // Options Groups Errors
+    OPTIONS_GROUP_NOT_FOUND(4001, "Variant option not found", HttpStatus.NOT_FOUND),
+    OPTIONS_GROUP_ALREADY_EXISTS(4002, "Variant option already exists", HttpStatus.CONFLICT),
+    OPTIONS_GROUP_NAME_INVALID(4003, "Invalid variant option name", HttpStatus.BAD_REQUEST),
+    OPTIONS_GROUP_IN_USE(4004, "Variant option is in use and cannot be deleted", HttpStatus.CONFLICT),
 
-    // Variant Options Errors
-    VARIANT_OPTION_NOT_FOUND(4001, "Variant option not found", HttpStatus.NOT_FOUND),
-    VARIANT_OPTION_ALREADY_EXISTS(4002, "Variant option already exists", HttpStatus.CONFLICT),
-    VARIANT_OPTION_NAME_INVALID(4003, "Invalid variant option name", HttpStatus.BAD_REQUEST),
-    VARIANT_OPTION_IN_USE(4004, "Variant option is in use and cannot be deleted", HttpStatus.CONFLICT),
-
-    // Variant Values Errors
-    VARIANT_VALUE_NOT_FOUND(4101, "Variant value not found", HttpStatus.NOT_FOUND),
-    VARIANT_VALUE_ALREADY_EXISTS(4102, "Variant value already exists", HttpStatus.CONFLICT),
-    VARIANT_VALUE_INVALID(4103, "Invalid variant value", HttpStatus.BAD_REQUEST),
-    VARIANT_VALUE_PRICE_INVALID(4104, "Invalid variant value price", HttpStatus.BAD_REQUEST),
-    VARIANT_VALUE_STOCK_INVALID(4105, "Invalid variant value stock quantity", HttpStatus.BAD_REQUEST),
-    VARIANT_VALUE_OUT_OF_STOCK(4106, "Variant value is out of stock", HttpStatus.CONFLICT),
+    // Options Values Errors
+    OPTIONS_VALUE_NOT_FOUND(4101, "Variant value not found", HttpStatus.NOT_FOUND),
+    OPTIONS_VALUE_ALREADY_EXISTS(4102, "Variant value already exists", HttpStatus.CONFLICT),
+    OPTIONS_VALUE_INVALID(4103, "Invalid variant value", HttpStatus.BAD_REQUEST),
+    OPTIONS_VALUE_PRICE_INVALID(4104, "Invalid variant value price", HttpStatus.BAD_REQUEST),
+    OPTIONS_VALUE_STOCK_INVALID(4105, "Invalid variant value stock quantity", HttpStatus.BAD_REQUEST),
+    OPTIONS_VALUE_OUT_OF_STOCK(4106, "Variant value is out of stock", HttpStatus.CONFLICT),
 
     // Product Variant Values Errors
     PRODUCT_VARIANT_VALUE_NOT_FOUND(4201, "Product variant value not found", HttpStatus.NOT_FOUND),
@@ -134,6 +127,21 @@ public enum ErrorResponse {
     OTP_MAX_ATTEMPTS_EXCEEDED(10002, "Maximum OTP attempts exceeded", HttpStatus.FORBIDDEN),
     OTP_ALREADY_SENT(10004, "OTP has already been sent. Please wait before requesting a new one.", HttpStatus.TOO_MANY_REQUESTS),
     OTP_REQUIRED(10005, "OTP is required", HttpStatus.BAD_REQUEST),
+    OTP_RATE_LIMIT_EXCEEDED(10006, "OTP request rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // Voucher Errors
+    VOUCHER_NOT_FOUND(11001, "Voucher not found", HttpStatus.NOT_FOUND),
+    VOUCHER_ALREADY_EXISTS(11002, "Voucher already exists", HttpStatus.CONFLICT),
+    VOUCHER_CODE_INVALID(11003, "Invalid voucher code", HttpStatus.BAD_REQUEST),
+    VOUCHER_ENDDATE_BEFORE_STARTDATE(11004, "Voucher end date is before start date", HttpStatus.BAD_REQUEST),
+
+    // Invoice Errors
+    INVOICE_NOT_FOUND(12001, "Invoice not found", HttpStatus.NOT_FOUND),
+    INVOICE_ALREADY_EXISTS(12002, "Invoice already exists", HttpStatus.CONFLICT),
+    INVOICE_ALREADY_EXISTS_FOR_ORDER(12003, "Invoice already exists for this order", HttpStatus.CONFLICT),
+
+    // Invoice Details Errors
+    INVOICE_DETAILS_NOT_FOUND(12101, "Invoice details not found", HttpStatus.NOT_FOUND),
     ;
     private final int code;
     private final String message;

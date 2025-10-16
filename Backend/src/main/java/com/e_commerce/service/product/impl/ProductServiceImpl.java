@@ -9,17 +9,19 @@ import com.e_commerce.mapper.product.ProductMapper;
 import com.e_commerce.orther.CloudinaryService;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.ProductRepository;
-import com.e_commerce.service.product.ProductCategoriesService;
+import com.e_commerce.service.product.CategoryService;
 import com.e_commerce.service.product.ProductService;
+import com.e_commerce.service.product.OptionsGroupService;
 import com.e_commerce.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,8 +30,9 @@ import java.util.Map;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final ProductCategoriesService productCategoriesService;
+    private final CategoryService categoryService;
     private final CloudinaryService cloudinaryService;
+    private final OptionsGroupService optionsGroupService;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -39,14 +42,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductEntityById(Integer id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_ALREADY_EXISTS));
+                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_NOT_FOUND));
     }
 
     @Override
     public ProductDTO createProduct(ProductCreateDTO productCreateDTO) {
         Product product = productMapper.covertCreateDTOToEntity(productCreateDTO);
         product.setId(IdGenerator.getGenerationId());
-        product.setProductCategory(productCategoriesService.getProductCategoryEntityById(productCreateDTO.getProductCategoryId()));
+        product.setCategory(categoryService.getCategoryEntityById(productCreateDTO.getCategoryId()));
 
         if (productCreateDTO.getImgMain() != null && !productCreateDTO.getImgMain().isEmpty()) {
             Map<String, Object> imageUrl = cloudinaryService.uploadFile(productCreateDTO.getImgMain(), "product");
@@ -70,11 +73,7 @@ public class ProductServiceImpl implements ProductService {
             existingProduct.setDescription(productUpdateDTO.getDescription());
         }
 
-        existingProduct.setActive(productUpdateDTO.isActive());
-
-        if(productUpdateDTO.getProductCategory() != null) {
-            existingProduct.setProductCategory(productUpdateDTO.getProductCategory());
-        }
+        existingProduct.setStatus(productUpdateDTO.getStatus());
 
         if(productUpdateDTO.getImage() != null && !productUpdateDTO.getImage().isEmpty()) {
            if(existingProduct.getImgMain() != null && !existingProduct.getImgMain().isEmpty()) {
@@ -97,5 +96,23 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(page-1, size);
 
         return productMapper.convertProductPageToDTO(productRepository.findAll(specification, pageable));
+    }
+
+    @Override
+    public ProductDetailDTO getProductDetail(Integer id) {
+        Product product = getProductEntityById(id);
+
+        ProductDetailDTO productDetailDTO = productMapper.toProductDetailDTO(product);
+        productDetailDTO.setOptionGroups(optionsGroupService.getOptionGroupsByProductId(id));
+        return productDetailDTO;
+    }
+
+    @Transactional
+    @Override
+    public void decreaseStock(Integer productId, int quantity) {
+        int result = productRepository.decreaseStock(productId, quantity);
+        if (result == 0) {
+            throw new CustomException(ErrorResponse.PRODUCT_INSUFFICIENT_STOCK);
+        }
     }
 }

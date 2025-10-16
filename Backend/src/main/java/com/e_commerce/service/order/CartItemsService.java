@@ -22,7 +22,7 @@ public interface CartItemsService {
 
     void deleteCartItems(List<Integer> id);
 
-    void deleteAllCartItemsByAccountId(Integer accountId);
+    void deleteAllCartItemsByAccountId();
 
     List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId);
 

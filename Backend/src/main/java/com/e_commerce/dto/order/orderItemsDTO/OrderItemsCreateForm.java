@@ -15,13 +15,13 @@ import java.util.List;
 @Builder
 public class OrderItemsCreateForm {
 
-    @NotNull(message = "ProductVariantsId cannot be null")
-    private Integer productVariantsId;
+    @NotNull(message = "ProductId cannot be null")
+    private Integer productId;
 
     @NotNull(message = "Quantity cannot be null")
     private Integer quantity;
 
     private String note;
 
-    private Integer variantValueId;
+    private List<Integer> optionValueId;
 }
