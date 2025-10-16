@@ -7,7 +7,6 @@ function ProductItem({ product, onDetail }) {
   const price = product.priceBase ?? 0; // nếu undefined, đặt 0
   const img = product.imgMain || "/images/default.png";
 
-
   return (
     <div className="col-product">
       <article className="card-product">
@@ -21,7 +20,6 @@ function ProductItem({ product, onDetail }) {
             }}
           >
             <img className="card-image" src={img} alt={name} />
-
           </a>
         </div>
         <div className="food-info">
@@ -36,7 +34,6 @@ function ProductItem({ product, onDetail }) {
                 }}
               >
                 {name}
-
               </a>
             </div>
           </div>
@@ -44,7 +41,6 @@ function ProductItem({ product, onDetail }) {
             <div className="product-price">
               <span className="current-price">
                 {price.toLocaleString("vi-VN")}₫
-
               </span>
             </div>
             <div className="product-buy">

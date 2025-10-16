@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }) => {
         const userData = data.data;
 
         const authData = {
-          email, // từ input login
+          email,
           accountName: userData.accountName,
-          role: userData.role || "USER", // fallback nếu null
+          role: userData.role || "USER",
           accessToken: userData.accessToken,
           refreshToken: userData.refreshToken,
         };
@@ -51,8 +51,6 @@ export const AuthProvider = ({ children }) => {
   // --- SIGNUP ---
   const signupUser = async (email, password, accountName) => {
     try {
-      console.log(email, password, accountName);
-
       const res = await fetch("http://localhost:8080/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,7 +58,7 @@ export const AuthProvider = ({ children }) => {
           email,
           password,
           accountName,
-          role: "USER", // server mặc định cũng có, nhưng thêm cho chắc
+          role: "USER",
         }),
         credentials: "include",
       });
@@ -69,12 +67,11 @@ export const AuthProvider = ({ children }) => {
 
       if (!res.ok || !data.success) {
         const messages = [data.message, ...(data.errors || [])];
-        const err = new Error(messages.join(" | ")); // gộp nhiều lỗi
-        err.messages = messages; // giữ mảng đầy đủ
+        const err = new Error(messages.join(" | "));
+        err.messages = messages;
         throw err;
       }
 
-      // Không login ngay, chỉ báo user check email
       return {
         success: true,
         message: "Vui lòng xác thực email rồi đăng nhập",
@@ -117,6 +114,7 @@ export const AuthProvider = ({ children }) => {
         loginUser,
         signupUser,
         logout,
+        isLoggedIn: !!auth, // 👈 thêm dòng này
       }}
     >
       {children}

@@ -1,0 +1,72 @@
+.optionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionTitle {
+  background: #f0f0f0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #444;
+}
+
+.select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Checkbox list */
+.multiOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* để chữ bên trái, tick bên phải */
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  padding: 4px 0;
+}
+
+.optionLabel input[type="checkbox"] {
+  display: none;
+}
+
+.optionLabel span {
+  position: relative;
+  padding-right: 24px; /* chừa khoảng bên phải cho ô tick */
+  flex: 1;
+}
+
+.optionLabel span::after {
+  content: "";
+  position: absolute;
+  right: 0; /* đặt ô tick bên phải */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 1px solid #4caf50;
+  border-radius: 4px;
+  background: white;
+}
+
+.optionLabel input[type="checkbox"]:checked + span::after {
+  background: #4caf50;
+  content: "✓";
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}

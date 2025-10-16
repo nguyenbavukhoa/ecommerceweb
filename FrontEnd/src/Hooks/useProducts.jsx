@@ -103,7 +103,7 @@ export function useProducts(category = "all", page = 1) {
 
       // Nếu là "all" thì dùng ?isActive=true
       if (category === "all") {
-        url += "?isActive=true&page=" + page;
+        url += "?status=active&page=" + page;
       } else {
         // Nếu khác all thì dùng ?productCategoriesId=<id>
         url += `?productCategoriesId=${category}&page=` + page;

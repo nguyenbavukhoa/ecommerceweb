@@ -1,24 +1,18 @@
 import logo from "../../assets/images/logo/logo.png";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useCategory, useCategories } from "../../Hooks/useCategory";
+import { useCart } from "../../context/CartProvider";
+import { useAuth } from "../../context/AuthContext";
 
 export default function HeaderComponent() {
-  const searchProducts = () => {
-    console.log("Searching...");
-  };
+  // 1. LẤY HÀM `getAmountCart` TỪ CONTEXT
+  const { openCart, getAmountCart } = useCart();
+  const { auth, logout, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
 
-  const openSearchMb = () => {
-    console.log("Open mobile search");
-  };
-
-  const closeSearchMb = () => {
-    console.log("Close mobile search");
-  };
-
-  const openCart = () => {
-    console.log("Open cart");
-  };
+  // Gọi hàm để lấy tổng số lượng, nếu kết quả là null/undefined thì mặc định là 0
+  const totalAmount = getAmountCart() ?? 0;
 
   return (
     <>
@@ -80,7 +74,6 @@ export default function HeaderComponent() {
                   type="text"
                   className="form-search-input"
                   placeholder="Tìm kiếm món ăn..."
-                  onInput={searchProducts}
                 />
                 <button type="button" className="filter-btn">
                   <i className="fa-light fa-filter-list"></i>
@@ -92,54 +85,85 @@ export default function HeaderComponent() {
             {/* Right menu */}
             <div className="header-middle-right">
               <ul className="header-middle-right-list">
-                <li
-                  className="header-middle-right-item dnone open"
-                  onClick={openSearchMb}
-                >
-                  <div className="cart-icon-menu">
-                    <i className="fa-light fa-magnifying-glass"></i>
-                  </div>
-                </li>
-                <li
-                  className="header-middle-right-item close"
-                  onClick={closeSearchMb}
-                >
-                  <div className="cart-icon-menu">
-                    <i className="fa-light fa-circle-xmark"></i>
-                  </div>
-                </li>
+                {/* User */}
                 <li className="header-middle-right-item dropdown open">
                   <i className="fa-light fa-user"></i>
                   <div className="auth-container">
-                    <span className="text-dndk">Đăng nhập / Đăng ký</span>
-                    <span className="text-tk">
-                      Tài khoản{" "}
-                      <i className="fa-sharp fa-solid fa-caret-down"></i>
-                    </span>
+                    {!isLoggedIn ? (
+                      <>
+                        <span className="text-dndk">Đăng nhập / Đăng ký</span>
+                        <span className="text-tk">
+                          Tài khoản{" "}
+                          <i className="fa-sharp fa-solid fa-caret-down"></i>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-dndk">Tài khoản</span>
+                        <span className="text-tk">
+                          {auth.accountName}{" "}
+                          <i className="fa-sharp fa-solid fa-caret-down"></i>
+                        </span>
+                      </>
+                    )}
                   </div>
                   <ul className="header-middle-right-menu">
-                    <li>
-                      <a id="login" href="/auth?action=login">
-
-                        <i className="fa-light fa-right-to-bracket"></i> Đăng
-                        nhập
-                      </a>
-                    </li>
-                    <li>
-                      <a id="signup" href="/auth?action=register">
-
-                        <i className="fa-light fa-user-plus"></i> Đăng ký
-                      </a>
-                    </li>
+                    {!isLoggedIn ? (
+                      <>
+                        <li>
+                          <Link id="login" to="/auth?action=login">
+                            <i className="fa-light fa-right-to-bracket"></i>{" "}
+                            Đăng nhập
+                          </Link>
+                        </li>
+                        <li>
+                          <Link id="signup" to="/auth?action=register">
+                            <i className="fa-light fa-user-plus"></i> Đăng ký
+                          </Link>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li>
+                          <a href="#">
+                            <i className="fa-light fa-circle-user"></i> Tài
+                            khoản của tôi
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#">
+                            <i className="fa-regular fa-bags-shopping"></i> Đơn
+                            hàng đã mua
+                          </a>
+                        </li>
+                        <li className="border">
+                          <a
+                            id="logout"
+                            href="javascript:;"
+                            onClick={(e) => {
+                              e.preventDefault(); // chặn reload
+                              logout();
+                              navigate("/");
+                            }}
+                          >
+                            <i className="fa-light fa-right-from-bracket"></i>{" "}
+                            Thoát tài khoản
+                          </a>
+                        </li>
+                      </>
+                    )}
                   </ul>
                 </li>
+
+                {/* Cart */}
                 <li
                   className="header-middle-right-item open"
                   onClick={openCart}
                 >
                   <div className="cart-icon-menu">
                     <i className="fa-light fa-basket-shopping"></i>
-                    <span className="count-product-cart">0</span>
+                    {/* Hiển thị số lượng một cách an toàn */}
+                    <span className="count-product-cart">{totalAmount}</span>
                   </div>
                   <span>Giỏ hàng</span>
                 </li>
@@ -172,7 +196,6 @@ function HeaderBottom() {
     }
   };
 
-
   return (
     <nav className="header-bottom">
       <div className="container">
@@ -184,12 +207,10 @@ function HeaderBottom() {
                 selectedCategory === "all" ? "active" : ""
               }`}
               onClick={(e) => handleCategoryChange(e, "all")}
-
             >
               Trang chủ
             </a>
           </li>
-
 
           {categories.map((cat) => (
             <li key={cat.id} className="menu-list-item">
@@ -204,7 +225,6 @@ function HeaderBottom() {
               </a>
             </li>
           ))}
-
         </ul>
       </div>
     </nav>

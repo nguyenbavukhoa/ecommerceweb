@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import MainWrapperComponent from "../../components/MainWrapperComponent/MainWrapper";
 import ProductDetailsComponent from "../../components/ProductComponent/ProductDetailsComponent/ProductDetailsComponent";
 import { useToast } from "../../context/ToastContext";
-
+import CartModal from "../../components/CartComponent/CartModal";
 function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProductId, setSelectedProduct] = useState(undefined);
   const { showToast } = useToast();
 
-  const handleOpenProductDetail = (product) => {
-    setSelectedProduct(product);
+  const handleOpenProductDetail = (productId) => {
+    setSelectedProduct(productId);
     setModalOpen(true);
     document.body.style.overflow = "hidden";
   };
@@ -59,9 +59,9 @@ function HomePage() {
           <i className="fa-thin fa-xmark"></i>
         </button>
         <div className="modal-container mdl-cnt" id="product-detail-content">
-          {selectedProduct && (
+          {selectedProductId && (
             <ProductDetailsComponent
-              product={selectedProduct}
+              productId={selectedProductId}
               onClose={handleCloseModal}
               onAddToCart={handleAddToCart}
               onOrderNow={handleOrderNow}
@@ -69,6 +69,7 @@ function HomePage() {
           )}
         </div>
       </div>
+      <CartModal />
     </>
   );
 }

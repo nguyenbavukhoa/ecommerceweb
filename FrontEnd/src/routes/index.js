@@ -6,6 +6,7 @@ import OrderPage from "../pages/OrderPage/OrderPage";
 import ProductsPage from "../pages/ProductsPage/ProductsPage";
 import ProductDetailsPage from "../pages/ProductDetailsPage/ProductDetailsPage";
 import AuthPage from "../pages/AuthPage/AuthPage.jsx";
+import AdminLogin from "../pages/AdminLogin.jsx/AdminLogin.jsx";
 
 export const routes = [
   {
@@ -32,6 +33,11 @@ export const routes = [
     path: "/auth", // For signup and signin
     page: AuthPage,
     isShowHeader: true,
+  },
+  {
+    path: "/admin-login", // For signin admin
+    page: AdminLogin,
+    // isShowHeader: true,
   },
   {
     path: "*",
