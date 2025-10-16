@@ -1,5 +1,6 @@
 package com.e_commerce.dto.order.cartItemDTO;
 
+import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class CartItemDTO {
     private Integer quantity;
     private BigDecimal price;
 
-    private List<String> optionValueNames;
+    private List<OptionValuesDTO> optionValuesDTO;
     private String note;
 
     private Integer cartId;

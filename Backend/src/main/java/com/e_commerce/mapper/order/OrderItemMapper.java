@@ -13,11 +13,11 @@ public class OrderItemMapper {
     public OrderItemsDTO convertEntityToDTO(OrderItems orderItem) {
         return OrderItemsDTO.builder()
                 .id(orderItem.getId())
-                .productVariantsId(orderItem.getProduct().getId())
+                .productName(orderItem.getProduct().getName())
+                .productId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .orderId(orderItem.getOrder().getId())
                 .imgUrl(orderItem.getProduct().getImgMain())
-                .productName(orderItem.getProduct().getName())
                 .price(orderItem.getUnitPrice())
                 .note(orderItem.getNote())
                 .build();

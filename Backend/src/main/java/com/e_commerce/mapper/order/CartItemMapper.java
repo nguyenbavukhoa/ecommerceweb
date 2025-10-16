@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class CartItemMapper {
+    private final OptionsValuesMapper optionValuesMapper;
+
     public CartItemDTO convertEntityToDTO(CartItems cartItem) {
         return CartItemDTO.builder()
                 .id(cartItem.getId())
@@ -24,9 +27,7 @@ public class CartItemMapper {
                 .price(cartItem.getPrice())
                 .note(cartItem.getNote())
                 .selected(cartItem.isSelected())
-                .optionValueNames(cartItem.getSelectedOptions().stream()
-                        .map(OptionValues::getName)
-                        .collect(Collectors.toList()))
+                .optionValuesDTO(optionValuesMapper.convertPageToListDTO(cartItem.getSelectedOptions()))
                 .build();
     }
 

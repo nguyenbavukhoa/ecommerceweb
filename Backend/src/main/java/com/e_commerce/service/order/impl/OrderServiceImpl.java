@@ -91,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
         order.setAccount(account);
         order.setTotalPrice(total);
         order.setUserInformation(userInformation);
+        order.setNote(orderCreateForm.getNote());
 
         order = ordersRepository.save(order);
 
