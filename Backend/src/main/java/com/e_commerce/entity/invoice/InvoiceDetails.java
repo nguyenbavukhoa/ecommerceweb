@@ -30,8 +30,8 @@ public class InvoiceDetails extends Timestamped {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "cart_item_option_values",
-            joinColumns = @JoinColumn(name = "cart_item_id"),
+            name = "invoice_detail_option_values",
+            joinColumns = @JoinColumn(name = "invoice_detail_id"),
             inverseJoinColumns = @JoinColumn(name = "option_value_id")
     )
     @JsonBackReference

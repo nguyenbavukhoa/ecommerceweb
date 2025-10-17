@@ -55,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
     private final EmailService emailService;
     private final ProductService productService;
     private final OptionsValuesService optionsValuesService;
+    private final OrderStatusHistoryServiceImpl orderStatusHistoryService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -163,6 +164,7 @@ public class OrderServiceImpl implements OrderService {
         emailService.sendOrderStatusEmail(OrderStatus.CONFIRMED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
     }
 
+    @Transactional
     @Override
     public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
         Orders order = getOrderEntityById(orderId);
@@ -186,7 +188,8 @@ public class OrderServiceImpl implements OrderService {
                 emailService.sendOrderStatusEmail(OrderStatus.REJECTED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
             }
         }
-        savedOrder.setOrderStatus(status);
+        orderStatusHistoryService.save(order, "Change status to " + status);
+
         return ordersMapper.convertEntityToDTO(ordersRepository.save(savedOrder));
     }
 

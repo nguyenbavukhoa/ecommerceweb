@@ -10,7 +10,7 @@ public class ProductFilter {
 
     private Integer productId;
 
-    private Boolean isActive;
+    private String status;
 
     private String name;
 
