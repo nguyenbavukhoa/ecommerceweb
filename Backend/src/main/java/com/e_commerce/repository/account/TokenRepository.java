@@ -1,10 +1,12 @@
 package com.e_commerce.repository.account;
 
+import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.Token;
 import com.e_commerce.enums.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -20,4 +22,7 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
 
 
     void deleteByTokenAndTokenType(String token, TokenType tokenType);
+
+    @Transactional
+    void deleteAllByAccount(Account account);
 }
