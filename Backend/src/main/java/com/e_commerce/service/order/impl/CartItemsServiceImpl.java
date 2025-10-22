@@ -110,6 +110,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
+        cartItems.setSelectedOptions(selectedOptions);
 
         BigDecimal totalPrice = product.getPriceBase();
 
@@ -122,16 +123,9 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         cartItems.setPrice(totalPrice);
 
-        cartItems = cartItemsRepository.save(cartItems);
-//        log.info("Cart item after initial save: {}", cartItems);
-
-        cartItems.setSelectedOptions(selectedOptions);
-
-        cartItems = cartItemsRepository.save(cartItems);
-
 //        log.info("Added to cart: {}", cartItems);
 
-        return cartItemMapper.convertEntityToDTO(cartItems);
+        return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }
 
     @Override
