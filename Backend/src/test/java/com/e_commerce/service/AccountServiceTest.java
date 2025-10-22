@@ -112,4 +112,20 @@ public class AccountServiceTest {
         assertTrue(ex.getErrors().contains(ErrorResponse.ACCOUNT_DISABLED));
         verify(accountRepository).findByEmail(defaultLoginForm.getEmail());
     }
+
+    @Test
+    void signIn_ShouldThrowException_WhenAccountLocked() {
+        // Arrange
+        defaultAccount.setStatus(true);
+        defaultAccount.setActive(false);
+        when(accountRepository.findByEmail(defaultLoginForm.getEmail()))
+                .thenReturn(Optional.of(defaultAccount));
+
+        // Act & Assert
+        CustomException ex = assertThrows(CustomException.class,
+                () -> accountService.signIn(defaultLoginForm));
+
+        assertTrue(ex.getErrors().contains(ErrorResponse.ACCOUNT_LOCKED));
+        verify(accountRepository).findByEmail(defaultLoginForm.getEmail());
+    }
 }
