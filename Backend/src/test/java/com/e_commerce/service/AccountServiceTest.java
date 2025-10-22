@@ -124,6 +124,7 @@ public class AccountServiceTest {
         // Act & Assert
         CustomException ex = assertThrows(CustomException.class,
                 () -> accountService.signIn(defaultLoginForm));
+
         assertTrue(ex.getErrors().contains(ErrorResponse.ACCOUNT_LOCKED));
 
         verify(accountRepository).findByEmail(defaultLoginForm.getEmail());
