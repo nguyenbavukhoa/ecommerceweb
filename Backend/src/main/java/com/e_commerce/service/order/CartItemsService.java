@@ -31,4 +31,6 @@ public interface CartItemsService {
     CartItemDTO changeSelectedCartItem(Integer id, boolean selected);
 
     List<CartItemDTO> getCartItemsAllSelected();
+
+    CartItemDTO updateCartItemQuantity(Integer id, int newQuantity);
 }

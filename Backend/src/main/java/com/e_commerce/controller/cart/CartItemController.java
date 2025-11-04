@@ -86,4 +86,10 @@ public class CartItemController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Get all cart items successfully", cartItemDTO, null, request.getRequestURI()));
     }
 
+    @PutMapping("/{id}/quantity")
+    public ResponseEntity<ApiResponse<CartItemDTO>> updateCartItemQuantity(@PathVariable Integer id, @RequestParam int quantity, HttpServletRequest request) {
+        CartItemDTO cartItemDTO = cartItemsService.updateCartItemQuantity(id, quantity);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Update cart item quantity successfully", cartItemDTO, null, request.getRequestURI()));
+    }
+
 }

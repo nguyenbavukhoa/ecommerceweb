@@ -19,4 +19,6 @@ public interface TokenService {
     Token getTokenEntityById(int id);
 
     void deleteToken(String token, String tokenType);
+
+    void invalidateOldTokens(Account account);
 }

@@ -47,17 +47,17 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
-        log.info("Adding to cart: {}", cartItemCreateForm.getQuantity());
+//        log.info("Adding to cart: {}", cartItemCreateForm.getQuantity());
 
         if(cartItemCreateForm.getQuantity() == null || cartItemCreateForm.getQuantity() <= 0) {
-            log.info("Invalid quantity: {}", cartItemCreateForm.getQuantity());
+//            log.info("Invalid quantity: {}", cartItemCreateForm.getQuantity());
             throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
         }
 
         Product product = productService.getProductEntityById(cartItemCreateForm.getProductId());
 
         Carts carts = cartsService.createCarts();
-        log.info("Cart ID: {}", carts.getId());
+//        log.info("Cart ID: {}", carts.getId());
 
 
         List<OptionValues> selectedOptions = (cartItemCreateForm.getOptionValueId() != null && !cartItemCreateForm.getOptionValueId().isEmpty())
@@ -72,13 +72,13 @@ public class CartItemsServiceImpl implements CartItemsService {
                 cartItemCreateForm.getOptionValueId() != null ? cartItemCreateForm.getOptionValueId().size() : 0
         );
 
-        log.info("Existing cart item: {}", existingCartItem);
+//        log.info("Existing cart item: {}", existingCartItem);
 
         int existingQuantity = existingCartItem.map(CartItems::getQuantity).orElse(0);
         int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
 
-        log.info("Existing quantity: {}, New quantity: {}, Total requested quantity: {}",
-                existingQuantity, cartItemCreateForm.getQuantity(), totalRequestedQuantity);
+//        log.info("Existing quantity: {}, New quantity: {}, Total requested quantity: {}",
+//                existingQuantity, cartItemCreateForm.getQuantity(), totalRequestedQuantity);
 
         if (selectedOptions.isEmpty()) {
             if (product.getQuantity() < totalRequestedQuantity) {
@@ -110,6 +110,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
+        cartItems.setSelectedOptions(selectedOptions);
 
         BigDecimal totalPrice = product.getPriceBase();
 
@@ -122,16 +123,9 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         cartItems.setPrice(totalPrice);
 
-        cartItems = cartItemsRepository.save(cartItems);
-        log.info("Cart item after initial save: {}", cartItems);
+//        log.info("Added to cart: {}", cartItems);
 
-        cartItems.setSelectedOptions(selectedOptions);
-
-        cartItems = cartItemsRepository.save(cartItems);
-
-        log.info("Added to cart: {}", cartItems);
-
-        return cartItemMapper.convertEntityToDTO(cartItems);
+        return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
     }
 
     @Override
@@ -203,4 +197,44 @@ public class CartItemsServiceImpl implements CartItemsService {
         return cartItemMapper.convertPageToList(cartItemsRepository.findAllSelectedByCartId(carts.getId()));
     }
 
+    @Transactional
+    @Override
+    public CartItemDTO updateCartItemQuantity(Integer id, int newQuantity) {
+        if(newQuantity <= 0) {
+            throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
+        }
+
+        CartItems cartItems = getCartItemsById(id);
+
+        Product product = cartItems.getProduct();
+
+        List<OptionValues> selectedOptions = cartItems.getSelectedOptions();
+
+        validateStock(product, selectedOptions, newQuantity);
+
+        cartItems.setQuantity(newQuantity);
+
+        return cartItemMapper.convertEntityToDTO(cartItemsRepository.save(cartItems));
+    }
+
+    private void validateStock(Product product, List<OptionValues> selectedOptions, int totalRequestedQuantity) {
+        if (selectedOptions == null || selectedOptions.isEmpty()) {
+            if (product.getQuantity() < totalRequestedQuantity) {
+                throw new CustomException(
+                        List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK),
+                        "Available: " + product.getQuantity() + ", Requested: " + totalRequestedQuantity
+                );
+            }
+        } else {
+            for (OptionValues value : selectedOptions) {
+                if (value.getStockQuantity() < totalRequestedQuantity) {
+                    throw new CustomException(
+                            List.of(ErrorResponse.CART_ITEM_QUANTITY_EXCEEDS_STOCK),
+                            "Option '" + value.getName() + "' available: " + value.getStockQuantity() +
+                                    ", requested: " + totalRequestedQuantity
+                    );
+                }
+            }
+        }
+    }
 }

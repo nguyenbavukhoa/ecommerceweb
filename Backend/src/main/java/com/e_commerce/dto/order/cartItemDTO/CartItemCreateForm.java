@@ -17,7 +17,6 @@ public class CartItemCreateForm {
     @NotNull(message = "ProductId cannot be null")
     private Integer productId;
 
-    @NotNull(message = "OptionValueId cannot be null")
     private List<Integer> optionValueId;
 
     @NotNull(message = "Quantity cannot be null")

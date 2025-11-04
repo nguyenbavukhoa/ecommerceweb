@@ -117,12 +117,15 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     private BigDecimal calculateTotalUnitPrice(Product product, List<OptionValues> selectedOptions) {
         BigDecimal price = product.getPriceBase();
 
-        if (selectedOptions != null && !selectedOptions.isEmpty()) {
-            BigDecimal extra = selectedOptions.stream()
-                    .map(OptionValues::getAdditionalPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            price = price.add(extra);
+        if (selectedOptions == null || selectedOptions.isEmpty()) {
+            return price;
         }
+
+        BigDecimal extra = selectedOptions.stream()
+                .map(OptionValues::getAdditionalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        price = price.add(extra);
+
 
         return price;
     }

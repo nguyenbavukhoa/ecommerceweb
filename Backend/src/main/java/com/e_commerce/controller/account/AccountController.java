@@ -92,4 +92,10 @@ public class AccountController {
         OtpVerificationResponseDTO responseDTO = accountService.verifyOtp(otpVerificationDTO);
         return ResponseEntity.ok(new ApiResponse<>(true, "OTP verified successfully", responseDTO, null, request.getRequestURI()));
     }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerificationEmail(@RequestParam("email") String email, HttpServletRequest request) {
+        accountService.resendVerificationEmail(email);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Verification email resent successfully", null, null, request.getRequestURI()));
+    }
 }

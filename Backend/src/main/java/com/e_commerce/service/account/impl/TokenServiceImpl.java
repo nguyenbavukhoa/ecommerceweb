@@ -71,4 +71,9 @@ public class TokenServiceImpl implements TokenService {
     public void deleteToken(String token, String tokenType) {
         tokenRepository.deleteByTokenAndTokenType(token, TokenType.valueOf(tokenType));
     }
+
+    @Override
+    public void invalidateOldTokens(Account account) {
+        tokenRepository.deleteAllByAccount(account);
+    }
 }
