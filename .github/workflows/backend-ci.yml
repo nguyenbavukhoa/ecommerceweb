@@ -1,0 +1,47 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'Backend/**'
+  pull_request:
+    paths:
+      - 'Backend/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test (Maven)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Validate Maven Wrapper
+        run: |
+          chmod +x Backend/mvnw
+          Backend/mvnw -v
+
+      - name: Resolve dependencies
+        run: Backend/mvnw -B -f Backend/pom.xml dependency:go-offline
+
+      - name: Run tests
+        run: Backend/mvnw -B -f Backend/pom.xml test
+
+      - name: Package (skip tests)
+        if: always()
+        run: Backend/mvnw -B -f Backend/pom.xml -DskipTests package
+
+
