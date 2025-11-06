@@ -6,17 +6,18 @@ import com.e_commerce.entity.order.OrderItems;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderItemMapper {
     public OrderItemsDTO convertEntityToDTO(OrderItems orderItem) {
         return OrderItemsDTO.builder()
                 .id(orderItem.getId())
-                .productVariantsId(orderItem.getProductVariant().getId())
+                .productName(orderItem.getProduct().getName())
+                .productId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .orderId(orderItem.getOrder().getId())
-                .imgUrl(orderItem.getProductVariant().getImgUrl())
-                .productName(orderItem.getProductVariant().getProduct().getName())
+                .imgUrl(orderItem.getProduct().getImgMain())
                 .price(orderItem.getUnitPrice())
                 .note(orderItem.getNote())
                 .build();
@@ -30,22 +31,21 @@ public class OrderItemMapper {
 
     public OrderItemsCreateForm convertEntityToCreateDTO(OrderItems orderItem) {
         return OrderItemsCreateForm.builder()
-                .productVariantsId(orderItem.getProductVariant().getId())
+                .productId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .note(orderItem.getNote())
-                .variantValueId(orderItem.getVariantValue() != null ? orderItem.getVariantValue().getId() : null)
                 .build();
     }
 
     public List<OrderItemsDTO> convertPageToList(List<OrderItems> orderItems) {
         return orderItems.stream()
                 .map(this::convertEntityToDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<OrderItems> convertCreateDTOListToEntityList(List<OrderItemsCreateForm> orderItemDTOs) {
         return orderItemDTOs.stream()
                 .map(this::convertCreateDTOToEntity)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

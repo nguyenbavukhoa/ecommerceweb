@@ -1,12 +1,14 @@
 package com.e_commerce.entity.invoice;
 
-import com.e_commerce.entity.product.ProductVariants;
-import com.e_commerce.entity.product.VariantValues;
+import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.entity.product.Product;
 import com.e_commerce.orther.Timestamped;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -22,13 +24,18 @@ public class InvoiceDetails extends Timestamped {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_variants_id", nullable = false)
-    private ProductVariants productVariant;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_values_id", nullable = true)
-    private VariantValues variantValue;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "invoice_detail_option_values",
+            joinColumns = @JoinColumn(name = "invoice_detail_id"),
+            inverseJoinColumns = @JoinColumn(name = "option_value_id")
+    )
+    @JsonBackReference
+    private List<OptionValues> selectedOptions;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;

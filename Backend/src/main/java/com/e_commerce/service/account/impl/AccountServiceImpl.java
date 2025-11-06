@@ -304,6 +304,21 @@ public class AccountServiceImpl implements AccountService {
         otpUtil.clearOtp(account.getEmail());
     }
 
+    @Override
+    public void resendVerificationEmail(String email) {
+        Account account = getAccountByEmail(email);
+
+        if (account.isEnabled()) {
+            throw new CustomException(ErrorResponse.ACCOUNT_ALREADY_VERIFIED);
+        }
+
+        tokenService.invalidateOldTokens(account);
+
+        tokenService.generateToken(account);
+
+        eventPublisher.publishEvent(new RegistrationCompleteEvent(this, email));
+    }
+
     private AccountDTO convertToDTO(Account account) {
         UserInformation userInfo = account.getUserInformation().isEmpty() ? null : account.getUserInformation().get(0);
         String fullName = userInfo != null ? userInfo.getFullName() : null;

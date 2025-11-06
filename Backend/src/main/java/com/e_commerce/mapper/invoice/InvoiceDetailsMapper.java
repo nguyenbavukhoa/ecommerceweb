@@ -14,7 +14,7 @@ public class InvoiceDetailsMapper {
         return InvoiceDetailsDTO.builder()
                 .id(invoiceDetails.getId())
                 .invoiceId(invoiceDetails.getInvoice().getId())
-                .productName(invoiceDetails.getProductVariant().getProduct().getName())
+                .productName(invoiceDetails.getProduct().getName())
                 .quantity(invoiceDetails.getQuantity())
                 .unitPrice(invoiceDetails.getUnitPrice())
                 .lineTotal(invoiceDetails.getLineTotal())

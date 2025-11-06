@@ -35,15 +35,22 @@ public class InvoiceDetailsServiceImpl implements InvoiceDetailsService {
         List<InvoiceDetails> invoiceDetailsList = new ArrayList<>();
 
         for (OrderItems item : orderItems) {
-            BigDecimal unitPrice = item.getVariantValue() != null
-                    ? item.getProductVariant().getPrice().add(item.getVariantValue().getPrice())
-                    : item.getProductVariant().getPrice();
+            BigDecimal unitPrice = item.getProduct().getPriceBase();
+            if (item.getSelectedOptions() != null && !item.getSelectedOptions().isEmpty()) {
+                BigDecimal extraPrice = item.getSelectedOptions().stream()
+                        .map(v -> v.getAdditionalPrice() != null ? v.getAdditionalPrice() : BigDecimal.ZERO)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                unitPrice = unitPrice.add(extraPrice);
+            }
+////            BigDecimal unitPrice = item.getVariantValue() != null
+//                    ? item.getProductVariant().getPrice().add(item.getVariantValue().getPrice())
+//                    : item.getProductVariant().getPrice();
 
             InvoiceDetails invoiceDetails = InvoiceDetails.builder()
                     .id(IdGenerator.getGenerationId())
                     .invoice(invoice)
-                    .productVariant(item.getProductVariant())
-                    .variantValue(item.getVariantValue())
+                    .product(item.getProduct())
+                    .selectedOptions(item.getSelectedOptions())
                     .quantity(item.getQuantity())
                     .unitPrice(unitPrice)
                     .lineTotal(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())))

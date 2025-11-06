@@ -101,7 +101,7 @@ public class EmailServiceImpl implements EmailService {
                       <p>Dear <strong>%s</strong>,</p>
                       <p>We have successfully received your payment for order <strong>#%s</strong>.</p>
                       <p><strong>Transaction ID:</strong> %s</p>
-                      <p><strong>Amount Paid:</strong> $%s</p>
+                      <p><strong>Amount Paid:</strong> %s VND</p>
                       <p>Thank you for shopping with us!</p>
                     </div>
                     <div style="background: #f8f9fa; text-align: center; padding: 15px; font-size: 13px; color: #7f8c8d;">
@@ -169,7 +169,7 @@ public class EmailServiceImpl implements EmailService {
     <div style="padding: 20px; color: #2c3e50;">
       <p>Dear <strong>%s</strong>,</p>
       <p>Thank you for your order! Your order <strong>#%s</strong> has been placed successfully.</p>
-      <p><strong>Total Amount:</strong> $%s</p>
+      <p><strong>Total Amount:</strong> %s VND</p>
       <p>We will notify you once your order is shipped.</p>
       <p style="margin-top: 20px; font-size: 14px; color: #7f8c8d;">If you have any questions, please contact our support team.</p>
     </div>

@@ -22,7 +22,7 @@ public interface CartItemsService {
 
     void deleteCartItems(List<Integer> id);
 
-    void deleteAllCartItemsByAccountId(Integer accountId);
+    void deleteAllCartItemsByAccountId();
 
     List<CartItems> getSelectedCartItemsByCartIdAndId(List<Integer> cartItemId);
 
@@ -31,4 +31,6 @@ public interface CartItemsService {
     CartItemDTO changeSelectedCartItem(Integer id, boolean selected);
 
     List<CartItemDTO> getCartItemsAllSelected();
+
+    CartItemDTO updateCartItemQuantity(Integer id, int newQuantity);
 }

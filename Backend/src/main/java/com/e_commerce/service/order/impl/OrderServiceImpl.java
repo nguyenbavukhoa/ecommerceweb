@@ -6,13 +6,13 @@ import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderCreateFromCart;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.dto.order.orderDTO.OrderFilter;
-import com.e_commerce.dto.product.productDTO.ProductFilter;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.order.CartItems;
 import com.e_commerce.entity.order.Carts;
 import com.e_commerce.entity.order.OrderItems;
 import com.e_commerce.entity.order.Orders;
+import com.e_commerce.entity.product.OptionValues;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
@@ -26,8 +26,8 @@ import com.e_commerce.service.order.CartItemsService;
 import com.e_commerce.service.order.CartsService;
 import com.e_commerce.service.order.OrderItemsService;
 import com.e_commerce.service.order.OrderService;
-import com.e_commerce.service.product.ProductVariantsService;
-import com.e_commerce.service.product.ProductVariantsValuesService;
+import com.e_commerce.service.product.OptionsValuesService;
+import com.e_commerce.service.product.ProductService;
 import com.e_commerce.specification.OrderSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,9 +52,10 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemsService cartItemsService;
     private final OrderItemsService orderItemsService;
     private final UserInformationService userInformationService;
-    private final ProductVariantsService productVariantsService;
-    private final ProductVariantsValuesService productVariantsValuesService;
     private final EmailService emailService;
+    private final ProductService productService;
+    private final OptionsValuesService optionsValuesService;
+    private final OrderStatusHistoryServiceImpl orderStatusHistoryService;
 
     @Override
     public Orders getOrderEntityById(Integer id) {
@@ -81,12 +82,8 @@ public class OrderServiceImpl implements OrderService {
         // Tính toán tổng tiền những sản phẩm trong giỏ hàng đã chọn
         BigDecimal total = BigDecimal.ZERO;
         for (CartItems cartItem : selectedCartItems ) {
-            BigDecimal itemPrice = cartItem.getProductVariant().getPrice();
-
-            if (cartItem.getVariantValue() != null) {
-                itemPrice = itemPrice.add(cartItem.getVariantValue().getPrice());
-            }
-            total = total.add(itemPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            BigDecimal itemPrice = cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            total = total.add(itemPrice);
         }
 
 
@@ -95,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
         order.setAccount(account);
         order.setTotalPrice(total);
         order.setUserInformation(userInformation);
+        order.setNote(orderCreateForm.getNote());
 
         order = ordersRepository.save(order);
 
@@ -104,19 +102,6 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItems);
 
         order = ordersRepository.save(order);
-
-        // Cập nhật số lượng tồn kho của từng sản phẩm trong giỏ hàng đã chọn
-//        for (CartItems cartItem : selectedCartItems) {
-//            productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
-//
-//            if (cartItem.getVariantValue() != null) {
-//                productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getVariantValue().getId(), cartItem.getQuantity());
-//            }
-//        }
-
-        // Xóa các CartItems đã chọn khỏi giỏ hàng
-//        cartItemsService.deleteCartItems(selectedCartItems.stream().map(CartItems::getId).collect(Collectors.toList()));
-
         return ordersMapper.convertEntityToDTO(order);
     }
 
@@ -161,21 +146,25 @@ public class OrderServiceImpl implements OrderService {
         List<CartItems> cartItems = cartItemsService.getCartItemsByCartId(carts.getId());
 
         for (CartItems cartItem : cartItems) {
-            productVariantsService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getQuantity());
+            productService.decreaseStock(cartItem.getProduct().getId(), cartItem.getQuantity());
 
-            if (cartItem.getVariantValue() != null) {
-                productVariantsValuesService.decreaseStock(cartItem.getProductVariant().getId(), cartItem.getVariantValue().getId(), cartItem.getQuantity());
+            if (cartItem.getSelectedOptions() != null && !cartItem.getSelectedOptions().isEmpty()) {
+                for (OptionValues values : cartItem.getSelectedOptions()) {
+                    optionsValuesService.decreaseStock(values.getId(), cartItem.getQuantity());
+                }
             }
         }
 
-        cartItemsService.deleteAllCartItemsByAccountId(order.getAccount().getId());
+        cartItemsService.deleteAllCartItemsByAccountId();
 
         order.setOrderStatus(OrderStatus.CONFIRMED);
+
         ordersRepository.save(order);
 
         emailService.sendOrderStatusEmail(OrderStatus.CONFIRMED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
     }
 
+    @Transactional
     @Override
     public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
         Orders order = getOrderEntityById(orderId);
@@ -199,7 +188,8 @@ public class OrderServiceImpl implements OrderService {
                 emailService.sendOrderStatusEmail(OrderStatus.REJECTED, order.getAccount().getEmail(), order.getAccount().getAccountName(), String.valueOf(order.getId()), order.getTotalPrice());
             }
         }
-        savedOrder.setOrderStatus(status);
+        orderStatusHistoryService.save(order, "Change status to " + status);
+
         return ordersMapper.convertEntityToDTO(ordersRepository.save(savedOrder));
     }
 

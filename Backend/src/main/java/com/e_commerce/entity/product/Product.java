@@ -1,5 +1,6 @@
 package com.e_commerce.entity.product;
 
+import com.e_commerce.enums.AvailabilityStatus;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,8 +18,9 @@ public class Product extends Timestamped {
     @Id
     private Integer id;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AvailabilityStatus status = AvailabilityStatus.ACTIVE;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -32,7 +34,10 @@ public class Product extends Timestamped {
     @Column(name = "price_base", nullable = false)
     private BigDecimal priceBase;
 
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_categories_id", nullable = false)
-    private ProductCategories productCategory;
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 }
