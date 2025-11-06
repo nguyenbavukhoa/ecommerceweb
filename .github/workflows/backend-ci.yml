@@ -28,13 +28,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-
-      - name: Show Java environment
-        run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          java -version
-          javac -version
-          Backend/mvnw -v
+          check-latest: true
 
       - name: Force Maven toolchain to JDK 21
         run: |
@@ -56,19 +50,28 @@ jobs:
           </toolchains>
           EOF
 
+      - name: Show Java environment
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          which java || true
+          readlink -f "$(which java)" || true
+          java -version
+          javac -version
+          Backend/mvnw -v
+
       - name: Validate Maven Wrapper
         run: |
           chmod +x Backend/mvnw
           Backend/mvnw -v
 
       - name: Resolve dependencies
-        run: Backend/mvnw -B -f Backend/pom.xml dependency:go-offline
+        run: Backend/mvnw -B -e -X -f Backend/pom.xml -Djava.version=21 -Dmaven.compiler.release=21 -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 dependency:go-offline
 
       - name: Run tests
-        run: Backend/mvnw -B -f Backend/pom.xml test
+        run: Backend/mvnw -B -e -X -f Backend/pom.xml -Djava.version=21 -Dmaven.compiler.release=21 -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 test
 
       - name: Package (skip tests)
         if: always()
-        run: Backend/mvnw -B -f Backend/pom.xml -DskipTests package
+        run: Backend/mvnw -B -e -X -f Backend/pom.xml -Djava.version=21 -Dmaven.compiler.release=21 -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 -DskipTests package
 
 
