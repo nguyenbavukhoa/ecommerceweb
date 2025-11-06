@@ -1,0 +1,289 @@
+<mxfile host="app.diagrams.net" modified="2025-01-25" agent="mxgraph" version="22.0.8" editor="diagramly" type="device">
+  <diagram id="component" name="E-Commerce Component Architecture">
+    <mxGraphModel dx="1920" dy="1080" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- External Services -->
+        <mxCell id="vnpay" value="VNPay Payment Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="gmail" value="Gmail SMTP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="250" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cloudinary" value="Cloudinary CDN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="450" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="redis" value="Redis Cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="postgres" value="PostgreSQL Database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#ff0000;" vertex="1" parent="1">
+          <mxGeometry x="850" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Frontend Layer -->
+        <mxCell id="webapp" value="Web Application" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#00ff00;" vertex="1" parent="1">
+          <mxGeometry x="50" y="150" width="150" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="mobileapp" value="Mobile Application" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#00ff00;" vertex="1" parent="1">
+          <mxGeometry x="250" y="150" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- API Gateway -->
+        <mxCell id="apigateway" value="API Gateway&#xa;/api/v1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="450" y="150" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Security Layer -->
+        <mxCell id="jwtfilter" value="JWT Authentication Filter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="50" y="250" width="180" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="securityconfig" value="Web Security Configuration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="250" y="250" width="180" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="loginattempt" value="Login Attempt Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="450" y="250" width="180" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Controller Layer -->
+        <mxCell id="accountctrl" value="Account Controller&#xa;/auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="50" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="userinfctrl" value="User Information&#xa;Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="190" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="productctrl" value="Product Controller&#xa;/products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="330" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="categoryctrl" value="Category Controller&#xa;/categories" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="470" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="orderctrl" value="Order Controller&#xa;/orders" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="610" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cartctrl" value="Cart Controller&#xa;/cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="750" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="paymentctrl" value="Payment Controller&#xa;/payments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#0000ff;" vertex="1" parent="1">
+          <mxGeometry x="890" y="350" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Service Layer -->
+        <mxCell id="accountsvc" value="Account Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="50" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="userinfosvc" value="User Information&#xa;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="190" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="productsvc" value="Product Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="330" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="categorysvc" value="Category Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="470" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="ordersvc" value="Order Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="610" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cartsvc" value="Cart Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="750" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="paymentsvc" value="Payment Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="890" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="emailsvc" value="Email Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#ffff00;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="450" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Repository Layer -->
+        <mxCell id="accountrepo" value="Account Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="50" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="userinforepo" value="User Information&#xa;Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="190" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="productrepo" value="Product Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="330" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="categoryrepo" value="Category Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="470" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="orderrepo" value="Order Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="610" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cartrepo" value="Cart Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="750" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="paymentrepo" value="Payment Repository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffccff;strokeColor=#ff00ff;" vertex="1" parent="1">
+          <mxGeometry x="890" y="550" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Entity Layer -->
+        <mxCell id="accountentity" value="Account Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="50" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="userinfoentity" value="User Information&#xa;Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="190" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="productentity" value="Product Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="330" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="categoryentity" value="Category Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="470" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="orderentity" value="Order Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="610" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cartentity" value="Cart Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="750" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="paymententity" value="Payment Entity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffff;strokeColor=#00ffff;" vertex="1" parent="1">
+          <mxGeometry x="890" y="650" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Utility Services -->
+        <mxCell id="jwtutil" value="JWT Utility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="350" width="100" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="vnpayutil" value="VNPay Utility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="350" width="100" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cloudinaryutil" value="Cloudinary Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="350" width="100" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="idgen" value="ID Generator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="450" width="100" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="otputil" value="OTP Utility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="450" width="100" height="60" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="redisutil" value="Redis Key Utility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffeecc;strokeColor=#ff8800;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="450" width="100" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="webtoapi" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="webapp" target="apigateway">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="200" y="180" as="sourcePoint"/>
+            <mxPoint x="400" y="180" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="mobiletoapi" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="mobileapp" target="apigateway">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="180" as="sourcePoint"/>
+            <mxPoint x="400" y="180" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="apitojwt" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="apigateway" target="jwtfilter">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="210" as="sourcePoint"/>
+            <mxPoint x="140" y="250" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="jwttoaccount" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="jwtfilter" target="accountctrl">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="310" as="sourcePoint"/>
+            <mxPoint x="110" y="350" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="accountctrltosvc" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="accountctrl" target="accountsvc">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="410" as="sourcePoint"/>
+            <mxPoint x="110" y="450" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="accountsvctorepo" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="accountsvc" target="accountrepo">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="510" as="sourcePoint"/>
+            <mxPoint x="110" y="550" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="accountrepotoentity" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="accountrepo" target="accountentity">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="610" as="sourcePoint"/>
+            <mxPoint x="110" y="650" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="paymentsvctovnpay" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="paymentsvc" target="vnpay">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="950" y="450" as="sourcePoint"/>
+            <mxPoint x="125" y="110" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="emailsvctogmail" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="emailsvc" target="gmail">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1090" y="450" as="sourcePoint"/>
+            <mxPoint x="325" y="110" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="productsvctocloudinary" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="productsvc" target="cloudinary">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="450" as="sourcePoint"/>
+            <mxPoint x="525" y="110" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="accountsvctoredis" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="accountsvc" target="redis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="450" as="sourcePoint"/>
+            <mxPoint x="725" y="110" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="accountrepotopostgres" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="accountrepo" target="postgres">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="550" as="sourcePoint"/>
+            <mxPoint x="925" y="110" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

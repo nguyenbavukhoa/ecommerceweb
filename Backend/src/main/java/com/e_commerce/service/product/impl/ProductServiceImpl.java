@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,7 +94,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageDTO<ProductDTO> getAllProductsAdmin(int page, int size, ProductFilter productFilter) {
         Specification<Product> specification = ProductSpecification.filterProduct(productFilter);
-        Pageable pageable = PageRequest.of(page-1, size);
+
+        Sort sort = Sort.unsorted();
+        if (productFilter.getSortBy() != null && productFilter.getSortOrder() != null) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(productFilter.getSortOrder()) ?
+                    Sort.Direction.DESC : Sort.Direction.ASC;
+            sort = Sort.by(direction, productFilter.getSortBy());
+        }
+
+        Pageable pageable = PageRequest.of(page-1, size,sort);
 
         return productMapper.convertProductPageToDTO(productRepository.findAll(specification, pageable));
     }
