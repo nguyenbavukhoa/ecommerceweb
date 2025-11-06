@@ -18,7 +18,7 @@ public class ProductSpecification {
 
             // Filter theo categoryId
             if (productFilter.getCategoryId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), productFilter.getCategoryId()));
+                predicates.add(root.get("category").get("id").in(productFilter.getCategoryId()));
             }
 
             // Filter theo trạng thái status
