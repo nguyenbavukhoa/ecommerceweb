@@ -1,0 +1,236 @@
+@startuml ECommerce_Component_Diagram
+title E-Commerce Backend (Spring Boot) - Component Diagram with Ports & Interfaces
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam wrapWidth 200
+
+' Legend for interfaces
+legend left
+  () Provided Interface (lollipop)
+  (()) Required Interface (socket)
+  [port] Port on component
+endlegend
+
+' External clients
+actor WebApp as web
+actor MobileApp as mobile
+
+' API Layer (inbound HTTP port)
+component "API Gateway / LB" as apigw <<External>>
+
+component "Spring Boot Application" as app {
+  port "HTTP:8080 (/api/v1)" as p_http
+}
+
+web --> apigw
+mobile --> apigw
+apigw --> p_http
+
+' Security Layer
+package "Security Layer" {
+  component "JwtAuthenticationFilter" as jwtFilter
+  component "WebSecurityConfiguration" as webSec
+  interface IAuthN as IAuthN
+  interface IJwtUtil as IJwtUtil
+
+  p_http --> jwtFilter
+  jwtFilter --> webSec
+
+  ' Provided Authentication contract from Security to Controllers
+  webSec - IAuthN
+}
+
+' Controller Layer
+package "Controller Layer" {
+  component "AccountController (/auth)" as cAccount
+  component "ProductController (/products)" as cProduct
+  component "OrderController (/orders)" as cOrder
+  component "PaymentController (/payments)" as cPayment
+  component "InvoiceController (/invoices)" as cInvoice
+  component "CartController (/cart)" as cCart
+  component "VoucherController (/vouchers)" as cVoucher
+  component "OTPController (/otp)" as cOtp
+
+  interface IAccountService
+  interface IProductService
+  interface IOrderService
+  interface IPaymentService
+  interface IInvoiceService
+  interface ICartService
+  interface IVoucherService
+  interface IOTPService
+
+  ' Controllers require authentication and business services
+  (()) IAuthN -down- cAccount
+  (()) IAuthN -down- cProduct
+  (()) IAuthN -down- cOrder
+  (()) IAuthN -down- cPayment
+
+  (()) IAccountService - cAccount
+  (()) IProductService - cProduct
+  (()) IOrderService - cOrder
+  (()) IPaymentService - cPayment
+  (()) IInvoiceService - cInvoice
+  (()) ICartService - cCart
+  (()) IVoucherService - cVoucher
+  (()) IOTPService - cOtp
+}
+
+' Service Layer
+package "Service Layer" {
+  component "AccountService" as sAccount
+  component "ProductService" as sProduct
+  component "OrderService" as sOrder
+  component "PaymentService" as sPayment
+  component "InvoiceService" as sInvoice
+  component "CartService" as sCart
+  component "VoucherService" as sVoucher
+  component "OTPService" as sOtp
+  component "EmailService" as sEmail
+  component "LoginAttemptService" as sLoginAttempt
+
+  interface IAccountRepository
+  interface IProductRepository
+  interface IOrderRepository
+  interface IPaymentRepository
+  interface IInvoiceRepository
+  interface ICartRepository
+  interface IVoucherRepository
+  interface ITokenRepository
+
+  ' Services provide business interfaces consumed by controllers
+  sAccount - IAccountService
+  sProduct - IProductService
+  sOrder - IOrderService
+  sPayment - IPaymentService
+  sInvoice - IInvoiceService
+  sCart - ICartService
+  sVoucher - IVoucherService
+  sOtp - IOTPService
+
+  ' Services require repositories
+  (()) IAccountRepository - sAccount
+  (()) IProductRepository - sProduct
+  (()) IOrderRepository - sOrder
+  (()) IPaymentRepository - sPayment
+  (()) IInvoiceRepository - sInvoice
+  (()) ICartRepository - sCart
+  (()) IVoucherRepository - sVoucher
+  (()) ITokenRepository - sOtp
+}
+
+' Repository Layer
+package "Repository Layer (Spring Data JPA)" {
+  component "AccountRepository" as rAccount
+  component "ProductRepository" as rProduct
+  component "OrderRepository" as rOrder
+  component "PaymentRepository" as rPayment
+  component "InvoiceRepository" as rInvoice
+  component "CartRepository" as rCart
+  component "VoucherRepository" as rVoucher
+  component "TokenRepository" as rToken
+
+  interface IJDBC_JPA as IJPA
+
+  ' Repositories provide repo contracts and require DB/JPA
+  rAccount - IAccountRepository
+  rProduct - IProductRepository
+  rOrder - IOrderRepository
+  rPayment - IPaymentRepository
+  rInvoice - IInvoiceRepository
+  rCart - ICartRepository
+  rVoucher - IVoucherRepository
+  rToken - ITokenRepository
+
+  (()) IJPA - rAccount
+  (()) IJPA - rProduct
+  (()) IJPA - rOrder
+  (()) IJPA - rPayment
+  (()) IJPA - rInvoice
+  (()) IJPA - rCart
+  (()) IJPA - rVoucher
+  (()) IJPA - rToken
+}
+
+' Utility layer (JWT, VNPay helper, Cloudinary)
+package "Utilities" {
+  component "JwtUtil" as utilJwt
+  component "VNPayUtil" as utilVnpay
+  component "CloudinaryService" as utilCloudinary
+  component "OtpUtil" as utilOtp
+  component "RedisKeyUtil" as utilRedisKey
+
+  interface IJwtUtil
+
+  utilJwt - IJwtUtil
+  (()) IJwtUtil - jwtFilter
+}
+
+' External Systems with ports
+package "External Services" {
+  component "PostgreSQL" as db <<Database>> {
+    port "TCP:5432" as p_db
+  }
+
+  component "Redis" as redis <<Cache>> {
+    port "TCP:6379" as p_redis
+  }
+
+  component "VNPay Gateway" as vnpay <<3rd Party>> {
+    port "HTTPS:443" as p_vnpay
+  }
+
+  component "SMTP (Gmail)" as smtp <<3rd Party>> {
+    port "TLS:587" as p_smtp
+  }
+
+  component "Cloudinary" as cloud <<3rd Party>> {
+    port "HTTPS:443" as p_cloud
+  }
+}
+
+' Wiring service -> repo -> db
+IAccountRepository - rAccount
+IProductRepository - rProduct
+IOrderRepository - rOrder
+IPaymentRepository - rPayment
+IInvoiceRepository - rInvoice
+ICartRepository - rCart
+IVoucherRepository - rVoucher
+ITokenRepository - rToken
+
+rAccount --> p_db
+rProduct --> p_db
+rOrder --> p_db
+rPayment --> p_db
+rInvoice --> p_db
+rCart --> p_db
+rVoucher --> p_db
+rToken --> p_db
+
+' Redis usage
+sAccount --> p_redis
+sOtp --> p_redis
+sLoginAttempt --> p_redis
+
+' External APIs consumed
+sPayment --> p_vnpay
+sEmail --> p_smtp
+utilCloudinary --> p_cloud
+sProduct --> utilCloudinary
+
+' Connect app shell to internal layers
+p_http -[hidden]-> cAccount
+p_http -[hidden]-> cProduct
+p_http -[hidden]-> cOrder
+p_http -[hidden]-> cPayment
+p_http -[hidden]-> cInvoice
+p_http -[hidden]-> cCart
+p_http -[hidden]-> cVoucher
+p_http -[hidden]-> cOtp
+
+@enduml
+
+
