@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }) => {
   // --- SIGNUP ---
   const signupUser = async (email, password, accountName) => {
     try {
+      console.log(email, password, accountName);
+
       const res = await fetch("http://localhost:8080/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,7 +68,10 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Đăng ký thất bại!");
+        const messages = [data.message, ...(data.errors || [])];
+        const err = new Error(messages.join(" | ")); // gộp nhiều lỗi
+        err.messages = messages; // giữ mảng đầy đủ
+        throw err;
       }
 
       // Không login ngay, chỉ báo user check email
