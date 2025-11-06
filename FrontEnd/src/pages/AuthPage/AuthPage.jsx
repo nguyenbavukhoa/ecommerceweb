@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import { useNavigate } from "react-router-dom";
 import "./sign-login.css";
 
 function AuthPage() {
@@ -9,6 +10,7 @@ function AuthPage() {
   const action = searchParams.get("action");
   const { loginUser, signupUser } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const [isLoginActive, setIsLoginActive] = useState(action !== "register");
   const [fullname, setFullname] = useState("");
@@ -30,7 +32,7 @@ function AuthPage() {
         message: `Xin chào ${user.accountName || email}`,
         type: "success",
       });
-      // setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate("/"), 1000);
     } catch (err) {
       showToast({
         title: "Login Failed",
@@ -73,7 +75,7 @@ function AuthPage() {
 
     try {
       const result = await signupUser(email, password, fullname);
-      if (!result.success) throw new Error("Tài khoản đã tồn tại!");
+
       showToast({
         title: "Signup Success",
         message: result.message,
@@ -91,10 +93,13 @@ function AuthPage() {
         setAgreeTerms(false);
       }, 1500);
     } catch (err) {
-      showToast({
-        title: "Signup Failed",
-        message: err.message || "Đăng ký thất bại!",
-        type: "error",
+      // Ở đây sẽ nhận được err từ signupUser
+      (err.messages || [err.message]).forEach((msg) => {
+        showToast({
+          title: "Signup Failed",
+          message: msg,
+          type: "error",
+        });
       });
     }
   };
