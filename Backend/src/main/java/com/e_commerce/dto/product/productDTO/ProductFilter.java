@@ -3,10 +3,11 @@ package com.e_commerce.dto.product.productDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class ProductFilter {
-    private Integer categoryId;
+    private List<Integer> categoryId;
 
     private Integer productId;
 
@@ -17,4 +18,7 @@ public class ProductFilter {
     private BigDecimal minPrice;
 
     private BigDecimal maxPrice;
+
+    private String sortBy;
+    private String sortOrder;
 }
