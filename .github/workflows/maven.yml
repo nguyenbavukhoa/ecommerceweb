@@ -43,11 +43,13 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
+      working-directory: Backend
       env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ecommerce
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
-      run: mvn -B package --file Backend/pom.xml
+          SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      run: mvn clean verify -B
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
