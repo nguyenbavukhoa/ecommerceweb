@@ -14,12 +14,14 @@ public class ECommerceApplication {
 
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.configure()
-				.filename("local.env") // có thể đổi thành ".env" nếu bạn dùng tên đó
-				.load();
+		.directory("./Backend")
+		.filename("local.env")
+		.load();
+		
 
-		// Set các biến môi trường để Spring đọc được
 		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
-		SpringApplication.run(ECommerceApplication.class, args);
+
+        SpringApplication.run(ECommerceApplication.class, args);
 	}
 
 }
