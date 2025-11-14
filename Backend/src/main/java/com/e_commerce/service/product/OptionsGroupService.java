@@ -12,7 +12,7 @@ import java.util.List;
 public interface OptionsGroupService {
     OptionGroup getVariantOptionEntityById(Integer id);
 
-    OptionsGroupDTO createVariantOption(OptionsGroupCreateDTO optionsGroupCreateDTO);
+    OptionsGroupDTO createOptionGroup(OptionsGroupCreateDTO optionsGroupCreateDTO);
 
     OptionsGroupDTO updateVariantOption(OptionsGroupUpdateDTO optionsGroupUpdateDTO, Integer id);
 

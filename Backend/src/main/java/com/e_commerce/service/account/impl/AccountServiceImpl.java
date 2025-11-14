@@ -127,6 +127,8 @@ public class AccountServiceImpl implements AccountService {
         return AuthenticationDTO.builder()
                 .accessToken(jwtToken)
                 .accountName(account.getAccountName())
+                .role(account.getRole().name())
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -317,6 +319,23 @@ public class AccountServiceImpl implements AccountService {
         tokenService.generateToken(account);
 
         eventPublisher.publishEvent(new RegistrationCompleteEvent(this, email));
+    }
+
+    @Transactional
+    @Override
+    public void lockAccount(int accountId) {
+        Account account = getAccountEntityById(accountId);
+
+        account.setActive(false);
+        accountRepository.save(account);
+    }
+
+    @Override
+    public void unlockAccount(int accountId) {
+        Account account = getAccountEntityById(accountId);
+
+        account.setActive(true);
+        accountRepository.save(account);
     }
 
     private AccountDTO convertToDTO(Account account) {

@@ -12,7 +12,7 @@ import java.util.List;
 public interface OptionsValuesService {
     OptionValues getVariantValueEntityById(Integer id);
 
-    OptionValuesDTO createVariantValue(OptionValuesCreateDTO optionValuesCreateDTO);
+    OptionValuesDTO createOptionValues(OptionValuesCreateDTO optionValuesCreateDTO);
 
     OptionValuesDTO updateVariantValue(OptionValuesUpdateDTO optionValuesUpdateDTO, Integer id);
 

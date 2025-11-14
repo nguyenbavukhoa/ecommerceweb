@@ -28,5 +28,7 @@ public interface OrderService {
 
     OrderDTO updateOrderStatus(Integer orderId, OrderStatus status);
 
+    OrderDTO adminUpdateOrderStatus(Integer orderId, OrderStatus newStatus);
+
     PageDTO<OrderDTO> getAllOrders(int page, int size, OrderFilter orderFilter);
 }

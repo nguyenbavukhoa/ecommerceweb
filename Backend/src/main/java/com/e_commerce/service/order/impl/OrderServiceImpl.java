@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Orders getOrderEntityById(Integer id) {
         return ordersRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+                .orElseThrow(() -> new CustomException(ErrorResponse.ORDER_NOT_FOUND));
     }
 
     @Override
@@ -192,6 +192,79 @@ public class OrderServiceImpl implements OrderService {
 
         return ordersMapper.convertEntityToDTO(ordersRepository.save(savedOrder));
     }
+
+    @Override
+    public OrderDTO adminUpdateOrderStatus(Integer orderId, OrderStatus newStatus) {
+        Orders order = getOrderEntityById(orderId);
+        OrderStatus oldStatus = order.getOrderStatus();
+
+        // Không cho sửa trạng thái khi đơn đã hoàn tất hoặc huỷ
+        if (oldStatus == OrderStatus.COMPLETED || oldStatus == OrderStatus.CANCELLED) {
+            throw new CustomException(ErrorResponse.ORDER_STATUS_NOT_ALLOWED);
+        }
+
+        // Validate trạng thái hợp lệ
+        validateStatusTransition(oldStatus, newStatus);
+
+        // Nếu admin chuyển sang CONFIRMED => giảm kho
+        if (newStatus == OrderStatus.CONFIRMED) {
+            confirmStock(order);
+        }
+
+        // Cập nhật trạng thái
+        order.setOrderStatus(newStatus);
+        Orders savedOrder = ordersRepository.save(order);
+
+        // Lưu lịch sử trạng thái
+        orderStatusHistoryService.save(order, "Admin changed status from " + oldStatus + " to " + newStatus);
+
+        // Gửi email thông báo
+        emailService.sendOrderStatusEmail(
+                newStatus,
+                order.getAccount().getEmail(),
+                order.getAccount().getAccountName(),
+                order.getId().toString(),
+                order.getTotalPrice()
+        );
+
+        return ordersMapper.convertEntityToDTO(savedOrder);
+    }
+
+    private void validateStatusTransition(OrderStatus oldStatus, OrderStatus newStatus) {
+
+        switch (oldStatus) {
+            case PLACED -> {
+                if (newStatus == OrderStatus.COMPLETED)
+                    throw new CustomException(ErrorResponse.ORDER_STATUS_NOT_ALLOWED);
+            }
+            case CONFIRMED -> {
+                // Từ Confirmed không thể quay lại Pending
+                if (newStatus == OrderStatus.PLACED)
+                    throw new CustomException(ErrorResponse.ORDER_STATUS_NOT_ALLOWED);
+            }
+            case IN_PROGRESS -> {
+                // Không thể lùi trạng thái
+                if (newStatus == OrderStatus.PLACED || newStatus == OrderStatus.CONFIRMED)
+                    throw new CustomException(ErrorResponse.ORDER_STATUS_NOT_ALLOWED);
+            }
+            default -> {
+            }
+        }
+    }
+
+    private void confirmStock(Orders order) {
+        for (OrderItems item : order.getOrderItems()) {
+            productService.decreaseStock(item.getProduct().getId(), item.getQuantity());
+
+            if (item.getSelectedOptions() != null) {
+                for (OptionValues opt : item.getSelectedOptions()) {
+                    optionsValuesService.decreaseStock(opt.getId(), item.getQuantity());
+                }
+            }
+        }
+    }
+
+
 
     @Override
     public PageDTO<OrderDTO> getAllOrders(int page, int size, OrderFilter orderFilter) {

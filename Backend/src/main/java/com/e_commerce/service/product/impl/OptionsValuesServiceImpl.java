@@ -4,11 +4,13 @@ import com.e_commerce.dto.product.optionValuesDTO.OptionValuesCreateDTO;
 import com.e_commerce.dto.product.optionValuesDTO.OptionValuesDTO;
 import com.e_commerce.dto.product.optionValuesDTO.OptionValuesUpdateDTO;
 import com.e_commerce.entity.product.OptionValues;
+import com.e_commerce.enums.AvailabilityStatus;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.OptionsValuesMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.OptionsValuesRepository;
+import com.e_commerce.service.product.OptionsGroupService;
 import com.e_commerce.service.product.OptionsValuesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.List;
 public class OptionsValuesServiceImpl implements OptionsValuesService {
     private final OptionsValuesMapper optionsValuesMapper;
     private final OptionsValuesRepository optionsValuesRepository;
+    private final OptionsGroupService optionsGroupService;
 
     @Override
     public OptionValues getVariantValueEntityById(Integer id) {
@@ -29,10 +32,12 @@ public class OptionsValuesServiceImpl implements OptionsValuesService {
     }
 
     @Override
-    public OptionValuesDTO createVariantValue(OptionValuesCreateDTO optionValuesCreateDTO) {
-        OptionValues variantValues = optionsValuesMapper.convertCreateDTOToEntity(optionValuesCreateDTO);
-        variantValues.setId(IdGenerator.getGenerationId());
-        return optionsValuesMapper.convertEntityToDTO(optionsValuesRepository.save(variantValues));
+    public OptionValuesDTO createOptionValues(OptionValuesCreateDTO optionValuesCreateDTO) {
+        OptionValues optionValue = optionsValuesMapper.convertCreateDTOToEntity(optionValuesCreateDTO);
+        optionValue.setId(IdGenerator.getGenerationId());
+        optionValue.setOptionGroup(optionsGroupService.getVariantOptionEntityById(optionValuesCreateDTO.getOptionsGroupId()));
+        optionValue.setStatus(AvailabilityStatus.ACTIVE);
+        return optionsValuesMapper.convertEntityToDTO(optionsValuesRepository.save(optionValue));
     }
 
     @Override

@@ -17,13 +17,16 @@ public class OptionsGroupMapper {
         return OptionsGroupDTO.builder()
                 .id(optionGroup.getId())
                 .name(optionGroup.getName())
-                .values(optionsValuesMapper.convertPageToListDTO(optionGroup.getValues()))
+                .values(optionGroup.getValues() != null
+                        ? optionsValuesMapper.convertPageToListDTO(optionGroup.getValues())
+                        : List.of())
                 .build();
     }
 
     public OptionGroup convertCreateDTOToEntity(OptionsGroupCreateDTO optionsGroupCreateDTO) {
         return OptionGroup.builder()
                 .name(optionsGroupCreateDTO.getName())
+                .selectionType(optionsGroupCreateDTO.getSelectionType())
                 .build();
     }
 

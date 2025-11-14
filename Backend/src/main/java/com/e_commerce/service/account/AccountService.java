@@ -37,4 +37,8 @@ public interface AccountService extends UserDetailsService {
     void resetPassword(ResetPasswordDTO request);
 
     void resendVerificationEmail(String email);
+
+    void lockAccount(int accountId);
+
+    void unlockAccount(int accountId);
 }

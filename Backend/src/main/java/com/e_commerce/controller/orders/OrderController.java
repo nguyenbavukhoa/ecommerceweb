@@ -5,6 +5,7 @@ import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.order.orderDTO.OrderCreateForm;
 import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.dto.order.orderDTO.OrderFilter;
+import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.service.order.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -51,5 +52,15 @@ public class OrderController {
                 .body(new ApiResponse<>(true,"Create order successfully",orders,null,request.getRequestURI()));
     }
 
+    @PatchMapping("/update-status/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDTO>> updateOrderStatus(
+            @PathVariable Integer orderId,
+            @RequestParam OrderStatus status,
+            HttpServletRequest request
+    ){
+        OrderDTO updatedOrder = orderService.updateOrderStatus(orderId, status);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true,"Update order status successfully",updatedOrder,null,request.getRequestURI()));
+    }
 
 }

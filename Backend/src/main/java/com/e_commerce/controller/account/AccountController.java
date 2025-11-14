@@ -1,5 +1,6 @@
 package com.e_commerce.controller.account;
 
+import com.cloudinary.Api;
 import com.e_commerce.dto.ApiResponse;
 import com.e_commerce.dto.auth.accountDTO.*;
 import com.e_commerce.service.account.AccountService;
@@ -97,5 +98,17 @@ public class AccountController {
     public ResponseEntity<ApiResponse<Void>> resendVerificationEmail(@RequestParam("email") String email, HttpServletRequest request) {
         accountService.resendVerificationEmail(email);
         return ResponseEntity.ok(new ApiResponse<>(true, "Verification email resent successfully", null, null, request.getRequestURI()));
+    }
+
+    @PutMapping("/{id}/lock")
+    public ResponseEntity<ApiResponse<Void>> lockAccount(@PathVariable int id, HttpServletRequest request) {
+        accountService.lockAccount(id);
+        return ResponseEntity.ok(new ApiResponse<>(true,"Account locked successfully", null, null, request.getRequestURI()));
+    }
+
+    @PutMapping("/{id}/unlock")
+    public ResponseEntity<ApiResponse<Void>> unlockAccount(@PathVariable int id, HttpServletRequest request) {
+        accountService.unlockAccount(id);
+        return ResponseEntity.ok(new ApiResponse<>(true,"Account unlocked successfully", null, null, request.getRequestURI()));
     }
 }

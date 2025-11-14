@@ -4,12 +4,15 @@ import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupCreateDTO;
 import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupDTO;
 import com.e_commerce.dto.product.optionGroupDTO.OptionsGroupUpdateDTO;
 import com.e_commerce.entity.product.OptionGroup;
+import com.e_commerce.entity.product.Product;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.OptionsGroupMapper;
 import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.product.OptionsGroupRepository;
+import com.e_commerce.repository.product.ProductRepository;
 import com.e_commerce.service.product.OptionsGroupService;
+import com.e_commerce.service.product.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.util.List;
 public class OptionsGroupServiceImpl implements OptionsGroupService {
     private final OptionsGroupMapper optionsGroupMapper;
     private final OptionsGroupRepository optionsGroupRepository;
+    private final ProductRepository productRepository;
     @Override
     public OptionGroup getVariantOptionEntityById(Integer id) {
         return optionsGroupRepository.findById(id)
@@ -27,9 +31,13 @@ public class OptionsGroupServiceImpl implements OptionsGroupService {
     }
 
     @Override
-    public OptionsGroupDTO createVariantOption(OptionsGroupCreateDTO optionsGroupCreateDTO) {
+    public OptionsGroupDTO createOptionGroup(OptionsGroupCreateDTO optionsGroupCreateDTO) {
         OptionGroup optionGroup = optionsGroupMapper.convertCreateDTOToEntity(optionsGroupCreateDTO);
         optionGroup.setId(IdGenerator.getGenerationId());
+
+        Product product = productRepository.findById(optionsGroupCreateDTO.getProductId())
+                .orElseThrow(() -> new CustomException(ErrorResponse.PRODUCT_NOT_FOUND));
+        optionGroup.setProduct(product);
         return optionsGroupMapper.convertEntityToDTO(optionsGroupRepository.save(optionGroup));
     }
 

@@ -77,7 +77,7 @@ public class Account extends Timestamped implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonLocked() {
+        public boolean isAccountNonLocked() {
         return active;
     }
 
