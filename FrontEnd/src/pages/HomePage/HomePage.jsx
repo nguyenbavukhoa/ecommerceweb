@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import MainWrapperComponent from "../../components/MainWrapperComponent/MainWrapper";
 import ProductDetailsComponent from "../../components/ProductComponent/ProductDetailsComponent/ProductDetailsComponent";
 import { useToast } from "../../context/ToastContext";
-import CartModal from "../../components/CartComponent/CartModal";
+// import CartModal from "../../components/CartComponent/CartModal";
 function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProductId, setSelectedProduct] = useState(undefined);
@@ -69,7 +69,7 @@ function HomePage() {
           )}
         </div>
       </div>
-      <CartModal />
+      {/* <CartModal /> */}
     </>
   );
 }

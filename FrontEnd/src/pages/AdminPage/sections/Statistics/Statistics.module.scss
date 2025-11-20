@@ -1,0 +1,111 @@
+// src/pages/AdminPage/sections/Statistics/Statistics.module.scss
+@import "../../styles/shared";
+
+.section {
+  padding: 2rem 2rem 0 1.5rem;
+  display: block !important;
+}
+
+/* --- Áp dụng Mixins --- */
+.adminControl {
+  @include admin-control-style;
+}
+.formSearch {
+  @include form-search-style;
+}
+.table {
+  @include table-style;
+}
+.adminControlRight {
+  @include admin-control-buttons;
+}
+.btnDetail {
+  @include btn-detail-style;
+}
+
+/* --- Style riêng của Statistics --- */
+.orderStatistical {
+  display: flex;
+  margin: 30px 0;
+  column-gap: 20px;
+}
+.orderStatisticalItem {
+  box-shadow: 0px 1px 5px 2px #f1f1f1;
+  width: 32.1%;
+  display: flex;
+  padding: 20px 40px;
+  align-items: center;
+  justify-content: space-between;
+}
+.orderStatisticalItemIcon i {
+  font-size: 45px;
+  margin-right: 25px;
+  color: var(--red);
+}
+.orderStatisticalItemContentDesc {
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #888;
+}
+.orderStatisticalItemContentH {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.prodImgTitle {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+}
+.prdImgTbl {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 99px;
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 1200px) {
+  .adminControlCenter {
+    margin: 1rem 0;
+    width: 100%;
+  }
+  .formSearch {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    z-index: 1;
+  }
+  .adminControlLeft select {
+    margin-bottom: 10px;
+    margin-left: 0;
+  }
+  .formControlDate {
+    width: 135px;
+  }
+}
+
+@media only screen and (max-width: 786px) {
+  .orderStatistical {
+    flex-wrap: wrap;
+  }
+  .orderStatisticalItem {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .section {
+    padding: 20px 10px;
+  }
+}
+
+@media only screen and (max-width: 470px) {
+  .adminControlRight {
+    flex-wrap: wrap;
+  }
+  .fillterDate > div {
+    margin-bottom: 10px;
+  }
+  .btnResetOrder {
+    margin-left: 0;
+  }
+}

@@ -40,6 +40,9 @@ export function useCartAPI() {
 
   // --- HÀM MỚI ĐỂ THÊM SẢN PHẨM ---
   const addItemToCart = async (cartItemData) => {
+    console.log("Gửi đến:", `${API_URL}/addCart`);
+    console.log("Token:", token);
+    console.log("cartItemData:", cartItemData);
     try {
       const res = await fetch(`${API_URL}/addCart`, {
         method: "POST",
@@ -50,15 +53,20 @@ export function useCartAPI() {
         body: JSON.stringify(cartItemData),
       });
 
+      console.log("Response status:", res.status);
+      const text = await res.text();
+      console.log("Response body:", text);
       if (!res.ok) {
         throw new Error("Thêm sản phẩm vào giỏ hàng thất bại");
       }
 
       // Sau khi thêm thành công, gọi lại API để làm mới giỏ hàng
       await fetchCartItems();
+      return { success: true }; // 👈 Trả về trạng thái thành công
     } catch (err) {
       console.error("Lỗi khi thêm vào giỏ hàng:", err);
       // Bạn có thể set state lỗi ở đây để hiển thị cho người dùng
+      return { success: false, message: err.message }; // 👈 Trả về lỗi
     }
   };
 
@@ -77,9 +85,12 @@ export function useCartAPI() {
         }
       );
       if (!res.ok) throw new Error("Cập nhật lựa chọn thất bại");
+      // await fetchCartItems(); // Tải lại để đảm bảo dữ liệu là mới nhất
+      return { success: true };
     } catch (err) {
       setError(err.message);
       fetchCartItems();
+      return { success: false, message: err.message };
     }
   };
 
@@ -97,10 +108,12 @@ export function useCartAPI() {
         }
       );
       if (!res.ok) throw new Error("Cập nhật số lượng thất bại");
-      await fetchCartItems(); // Tải lại để đảm bảo giá và dữ liệu là mới nhất
+      // await fetchCartItems(); // Tải lại để đảm bảo giá và dữ liệu là mới nhất
+      return { success: true };
     } catch (err) {
       setError(err.message);
       setCartItems(originalItems); // Khôi phục lại nếu lỗi
+      return { success: false, message: err.message };
     }
   };
 
@@ -113,9 +126,12 @@ export function useCartAPI() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Xóa sản phẩm thất bại");
+      // await fetchCartItems(); // Tải lại để đảm bảo dữ liệu là mới nhất
+      return { success: true };
     } catch (err) {
       setError(err.message);
       setCartItems(originalItems); // Khôi phục lại nếu lỗi
+      return { success: false, message: err.message };
     }
   };
 

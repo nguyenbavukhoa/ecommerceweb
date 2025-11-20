@@ -1,0 +1,161 @@
+/* src/pages/AdminPage/components/Modals/CustomerModal.module.scss */
+
+.formContent {
+  padding: 0 20px 20px;
+}
+
+.signupForm {
+  margin-top: 15px;
+}
+
+.formGroup {
+  margin-bottom: 10px;
+}
+
+.formLabel {
+  margin-bottom: 5px;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.formControl {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
+  outline: none;
+  transition: border 0.3s linear;
+  &:focus {
+    border-color: var(--red);
+  }
+}
+
+.formMessage {
+  color: red;
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;
+}
+
+.formSubmit {
+  width: 100%;
+  height: 40px;
+  background-color: var(--red);
+  color: #fff;
+  padding: 10px 30px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  i {
+    margin-right: 6px;
+  }
+}
+/* === CSS NÚT GẠT ĐÃ Bật tắt === */
+/* Style được sao chép từ admin-global.css và đổi tên */
+.switchLabel {
+  position: relative;
+  cursor: pointer;
+  width: 40px;
+  height: 20px;
+  display: inline-block;
+  margin-left: 30px;
+  top: 6px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  background: #ccc;
+  border-radius: 100rem;
+  transition: background-color 0.25s linear;
+}
+
+.switchLabel:after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 40px;
+  background-color: #fff;
+  top: 5px;
+  left: 5px;
+  transition: background-color 0.25s linear, transform 0.25s linear;
+}
+
+/* === FIX LỖI CSS BỊ ĐÈ ===
+  Ghi đè lại rule global "input[type="checkbox"] + label:before"
+  bằng cách vô hiệu hóa nó.
+*/
+.switchInput + .switchLabel::before {
+  content: none !important;
+  display: none !important;
+}
+.switchInput {
+  display: none;
+}
+.switchInput:checked + .switchLabel {
+  background-color: var(--red);
+}
+.switchInput:checked + .switchLabel:after {
+  transform: translateX(20px);
+  background-color: #fff;
+}
+
+/* === CSS CHO DANH SÁCH USER-INFO === */
+.userInfoListContainer {
+  margin: 15px 0;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.listTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.noInfo {
+  font-size: 14px;
+  color: #777;
+  text-align: center;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.userInfoItem {
+  background: #fcfcfc;
+  border: 1px solid #f0f0f0;
+  border-radius: 5px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+
+  i {
+    color: var(--red);
+    width: 15px;
+    text-align: center;
+  }
+}
+
+.gender {
+  font-size: 12px;
+  color: #777;
+  font-style: italic;
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+/* (File gốc .modal.signup.open .modal-container đã được xử lý 
+   bởi CommonModal.module.scss, nên không cần thêm ở đây) */

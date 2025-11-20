@@ -1,16 +1,32 @@
 // src/components/CartModalComponent/CartModal.jsx
-import React from "react";
 import { useCart } from "../../context/CartProvider";
 import CartItem from "./CartItem"; // Import component con
-
+import { useNavigate } from "react-router-dom"; // 👇 1. Import useNavigate
 const CartModal = () => {
-  const { isOpen, closeCart, cartItems, loading, vnd, getCartTotal } =
-    useCart();
+  const {
+    isOpen,
+    closeCart,
+    cartItems,
+    loading,
+    vnd,
+    getCartTotal,
+    hasSelectedItems, // Lấy hasSelectedItems từ context
+  } = useCart();
+
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (!hasSelectedItems) return; // Kiểm tra dựa trên biến đã có
+    closeCart();
+    navigate("/checkout");
+  };
 
   // Nếu modal không mở, không render gì cả
   if (!isOpen) return null;
 
   const hasItems = cartItems && cartItems.length > 0;
+
+  console.log(cartItems);
 
   return (
     // Thêm onClick để đóng modal khi click ra ngoài
@@ -59,7 +75,10 @@ const CartModal = () => {
               <i className="fa-regular fa-plus"></i> Thêm món
             </button>
             {/* Thêm class 'disabled' một cách động */}
-            <button className={`thanh-toan ${!hasItems ? "disabled" : ""}`}>
+            <button
+              className={`thanh-toan ${!hasSelectedItems ? "disabled" : ""}`}
+              onClick={handleCheckout} // 👇 5. Gọi hàm điều hướng
+            >
               Thanh toán
             </button>
           </div>

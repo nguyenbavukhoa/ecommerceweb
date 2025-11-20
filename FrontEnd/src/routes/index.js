@@ -1,13 +1,11 @@
 import { useSearchParams } from "react-router-dom";
 import HomePage from "../pages/HomePage/HomePage";
-import UserInfoPage from "../pages/UserInfoPage/UserInfoPage";
-import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
-import OrderPage from "../pages/OrderPage/OrderPage";
-import ProductsPage from "../pages/ProductsPage/ProductsPage";
-import ProductDetailsPage from "../pages/ProductDetailsPage/ProductDetailsPage";
+import OrderHistoryPage from "../pages/OrderHistoryPage/OrderPage.jsx";
 import AuthPage from "../pages/AuthPage/AuthPage.jsx";
+import AdminPage from "../pages/AdminPage/AdminPage";
 import AdminLogin from "../pages/AdminLogin.jsx/AdminLogin.jsx";
-
+import CheckoutPage from "../pages/CheckoutPage/CheckoutPage"; // Import trang Checkout
+import ProfilePage from "../pages/ProfilePage/ProfilePage";
 export const routes = [
   {
     path: "/",
@@ -15,18 +13,18 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/order",
-    page: OrderPage,
+    path: "/checkout",
+    page: CheckoutPage,
+    // isShowHeader: true,
+  },
+  {
+    path: "/order-history",
+    page: OrderHistoryPage,
     isShowHeader: true,
   },
   {
-    path: "/products",
-    page: ProductsPage,
-    isShowHeader: true,
-  },
-  {
-    path: "/product-details",
-    page: ProductDetailsPage,
+    path: "/user-info", // For signup and signin
+    page: ProfilePage,
     isShowHeader: true,
   },
   {
@@ -35,12 +33,13 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/admin-login", // For signin admin
-    page: AdminLogin,
+    path: "/admin", // For admin dashboard
+    page: AdminPage,
     // isShowHeader: true,
   },
   {
-    path: "*",
-    page: NotFoundPage,
+    path: "/admin-login", // For signin admin
+    page: AdminLogin,
+    // isShowHeader: true,
   },
 ];

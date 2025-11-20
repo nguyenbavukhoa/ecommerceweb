@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./AdminLogin.module.css";
 
 function AdminLogin() {
+  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const togglePassword = () => {
@@ -13,6 +15,11 @@ function AdminLogin() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Admin login submitted!");
+  };
+
+  // Di chuyển đến trang chủ sau khi đăng nhập thành công
+  const goToAdminPage = () => {
+    navigate("/admin");
   };
 
   return (
@@ -61,7 +68,11 @@ function AdminLogin() {
             </div>
           </div>
 
-          <button type="submit" className={styles.submitBtn}>
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            onClick={goToAdminPage}
+          >
             Sign In
           </button>
         </form>

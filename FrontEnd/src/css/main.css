@@ -268,7 +268,7 @@ header {
 }
 
 .header-logo-img {
-  width: 150px;
+  max-width: 100px;
 }
 
 .header-middle-center {
@@ -491,6 +491,7 @@ header {
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
+  justify-content: center;
 }
 
 .menu-link {
@@ -499,7 +500,7 @@ header {
   padding: 15px 20px;
   text-transform: uppercase;
   position: relative;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .menu-link:hover::after {

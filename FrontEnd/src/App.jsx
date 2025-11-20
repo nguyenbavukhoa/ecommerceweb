@@ -6,8 +6,9 @@ import {
   Navigate,
 } from "react-router-dom";
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
+import { BrowserRouter } from "react-router-dom";
 import { routes } from "./routes";
-import { CategoryProvider } from "./Hooks/useCategory";
+import { FilterProvider } from "./context/FilterProvider";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartProvider";
@@ -17,12 +18,12 @@ import "./css/category.css";
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
+    <BrowserRouter>
+      <AuthProvider>
         <ToastProvider>
-          <div>
-            <CategoryProvider>
-              <Router>
+          <CartProvider>
+            <div>
+              <FilterProvider>
                 <Routes>
                   {/* Redirect "/" sang "/about" */}
                   {/* <Route
@@ -49,12 +50,12 @@ function App() {
                     );
                   })}
                 </Routes>
-              </Router>
-            </CategoryProvider>
-          </div>
+              </FilterProvider>
+            </div>
+          </CartProvider>
         </ToastProvider>
-      </CartProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

@@ -1,0 +1,8 @@
+// src/pages/AdminPage/components/Modals/StatisticsDetailModal.module.scss
+@import "../../styles/shared"; // Import file mixin
+
+.table {
+  @include table-style; // Áp dụng mixin
+
+  margin: 20px; // Style riêng
+}

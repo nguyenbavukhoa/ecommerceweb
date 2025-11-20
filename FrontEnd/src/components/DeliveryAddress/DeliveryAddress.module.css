@@ -1,0 +1,64 @@
+/* src/components/DeliveryAddress/DeliveryAddress.module.css */
+.addressContainer {
+  background-color: white;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+}
+
+/* --- Hiển thị địa chỉ đã chọn --- */
+.selectedAddressDisplay {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  cursor: pointer;
+}
+
+.selectedIcon {
+  font-size: 24px;
+  color: #b5292f;
+  margin-right: 15px;
+}
+
+.selectedDetails {
+  flex-grow: 1;
+}
+
+.addressText {
+  font-size: 15px;
+  color: #000000;
+  font-weight: bold;
+  margin: 0;
+}
+
+.namePhone {
+  font-size: 14px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.namePhone span {
+  font-weight: 600;
+}
+
+.namePhone span:first-child::after {
+  content: " | ";
+  margin: 0 5px;
+  color: #ccc;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-left: 10px;
+}

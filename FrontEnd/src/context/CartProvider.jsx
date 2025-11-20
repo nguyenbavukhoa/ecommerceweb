@@ -1,6 +1,6 @@
 // src/context/CartProvider.jsx
 import { useState, createContext, useContext } from "react";
-import { useCartAPI } from "../Hooks/useCartAPI";
+import { useCartAPI } from "../hooks/useCartAPI";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -51,6 +51,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // TÍNH TOÁN VÀ CUNG CẤP `hasSelectedItems` TẠI ĐÂY
+  const hasSelectedItems = cartItems?.some((item) => item.selected);
+
   return (
     <CartContext.Provider
       value={{
@@ -68,6 +71,7 @@ export const CartProvider = ({ children }) => {
         deleteCartItem: removeItemFromCart,
         increasingNumber,
         decreasingNumber,
+        hasSelectedItems, // 👈 Thêm vào context
       }}
     >
       {children}

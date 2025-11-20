@@ -1,6 +1,6 @@
 // src/hooks/useProductDetail.jsx
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext"; // Giả sử bạn có AuthContext
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = "http://localhost:8080/api/v1";
 
@@ -26,7 +26,7 @@ export default function useProductDetail(productId) {
           `${API_URL}/products/detail/${productId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              // Authorization: `Bearer ${token}`,
             },
           }
         );

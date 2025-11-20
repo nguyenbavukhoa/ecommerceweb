@@ -1,0 +1,178 @@
+/* src/pages/AdminPage/components/Modals/OrderDetailModal.module.scss */
+@import "../../styles/shared"; // Dùng cho status
+
+.modalDetailOrder {
+  display: flex;
+}
+.modalDetailOrder > div {
+  width: 50%;
+  overflow-y: auto;
+  height: 350px;
+  padding: 10px 20px 0;
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #fafafa;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 10px;
+  }
+}
+
+/* Cột trái (Sản phẩm) */
+.orderProduct {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  padding: 5px;
+  border-radius: 5px;
+}
+.orderProductLeft {
+  display: flex;
+  img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    margin-right: 14px;
+    border-radius: 5px;
+  }
+}
+.orderProductInfo {
+  h4 {
+    font-weight: 500;
+    color: var(--dark-gray);
+    font-size: 15px;
+  }
+  p {
+    margin-top: 5px;
+  }
+}
+.orderProductNote {
+  color: #0000008a;
+  font-size: 13px;
+}
+.orderProductQuantity {
+  font-weight: 500;
+  font-size: 14px;
+}
+.orderProductPrice {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.orderProductCurrentPrice {
+  color: var(--red);
+  font-weight: 500;
+}
+
+/* Cột phải (Thông tin) */
+.detailOrderGroup {
+  padding-top: 10px;
+}
+.detailOrderItem {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+  align-items: center;
+  &.tb {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+.detailOrderItemB {
+  color: #808080;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 5px;
+  background-color: #f7f7f7;
+  width: 100%;
+}
+.detailOrderItemLeft {
+  width: 40%;
+  display: flex;
+  align-items: center;
+  i {
+    color: var(--red);
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+  }
+}
+.detailOrderItemRight {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  width: 60%;
+}
+
+/* Chân modal */
+.modalDetailBottom {
+  padding: 10px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.priceTotal {
+  display: flex;
+  flex-direction: column;
+}
+.thanhtien {
+  color: #808080;
+  font-size: 13px;
+}
+.price {
+  color: var(--red);
+  font-weight: 500;
+  font-size: 16px;
+}
+.modalDetailBtn {
+  color: #fff;
+  padding: 10px 0;
+  padding-left: 40px;
+  padding-right: 25px;
+  border-radius: 99px;
+  position: relative;
+  border: none;
+  cursor: pointer;
+}
+.btnChuaxuly {
+  background-color: var(--red);
+  &::before {
+    content: "\f00d";
+    font-family: "Font Awesome 6 Pro";
+    position: absolute;
+    left: 22px;
+    font-weight: 900;
+  }
+}
+.btnDaxuly {
+  background-color: #27ae60;
+  &::before {
+    content: "\f00c";
+    font-family: "Font Awesome 6 Pro";
+    position: absolute;
+    left: 22px;
+    font-weight: 900;
+  }
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 470px) {
+  .modalDetailOrder {
+    flex-direction: column;
+  }
+  .modalDetailOrder > div {
+    width: 100%;
+    height: auto;
+  }
+  .modalDetailLeft {
+    max-height: 250px; // Giới hạn chiều cao
+  }
+}

@@ -1,0 +1,33 @@
+.accountInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 40px;
+}
+.infoField {
+  display: flex;
+  flex-direction: column;
+}
+.infoLabel {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.infoValue {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+.editButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 20px;
+}

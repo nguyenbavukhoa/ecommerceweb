@@ -1,10 +1,10 @@
 // src/components/ProductDetailsComponent/ProductDetailsComponent.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { vnd } from "../../../utils/vnd"; // Hàm format tiền tệ
 import { useCart } from "../../../context/CartProvider"; //
 import ImageWithFallback from "../../ImageWithFallbackComponent/ImageWithFallback";
 import VariantOptions from "../../VariantOptionComponent/VariantOptions";
-import useProductDetail from "../../../Hooks/useProductDetail";
+import useProductDetail from "../../../hooks/useProductDetail";
 
 const ProductDetailsComponent = ({
   productId,
@@ -18,16 +18,20 @@ const ProductDetailsComponent = ({
   const [note, setNote] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [optionsPrice, setOptionsPrice] = useState(0);
-  const [currentSelection, setCurrentSelection] = useState({});
 
   // State mới để lưu mảng các ID của tùy chọn
   const [selectedValueIds, setSelectedValueIds] = useState([]);
 
   // Cập nhật hàm callback để nhận cả mảng ID
-  const handleSelectionChange = (selection, priceOfOptions, ids) => {
-    setOptionsPrice(priceOfOptions);
-    setSelectedValueIds(ids);
-  };
+  const handleSelectionChange = useCallback(
+    (selection, priceOfOptions, ids) => {
+      // Các hàm set state từ useState được React đảm bảo là ổn định
+      // và không cần đưa vào dependency array của useCallback.
+      setOptionsPrice(priceOfOptions);
+      setSelectedValueIds(ids);
+    },
+    []
+  ); // Dependency array rỗng vì hàm này không phụ thuộc vào props hay state nào khác;
 
   useEffect(() => {
     if (product) {

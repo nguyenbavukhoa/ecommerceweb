@@ -1,0 +1,13 @@
+.headerLogo {
+  width: 100px;
+  height: 50px;
+  overflow: hidden; /* ẩn phần thừa ra ngoài */
+}
+
+.headerLogoImg {
+  width: 130%;
+  height: 100%;
+  object-fit: cover; /* Giữ tỉ lệ, không méo */
+  transform: scale(1.3); /* Zoom “vô trong” */
+  transform-origin: center; /* Zoom từ giữa */
+}
