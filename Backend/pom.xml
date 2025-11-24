@@ -69,6 +69,13 @@
 			<version>42.7.4</version>
 		</dependency>
 
+		<!-- SQL Server -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Lomdok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>

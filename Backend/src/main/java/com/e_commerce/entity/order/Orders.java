@@ -1,5 +1,6 @@
 package com.e_commerce.entity.order;
 
+import com.e_commerce.entity.Branch;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.payment.Payment;
@@ -47,4 +48,8 @@ public class Orders extends Timestamped {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Payment> payments;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
 }
