@@ -1,13 +1,11 @@
 package com.e_commerce.entity.order;
 
-import com.e_commerce.entity.Branch;
+import com.e_commerce.entity.Restaurant;
 import com.e_commerce.entity.account.Account;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -28,6 +26,6 @@ public class Carts extends Timestamped {
     private List<CartItems> cartItems;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id", nullable = false)
-    private Branch branch;
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 }
