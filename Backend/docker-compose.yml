@@ -40,7 +40,7 @@ services:
       - ./data/prometheus/config:/etc/prometheus/
       - prometheus_data:/prometheus
     ports:
-      - "9090:9090"
+      - "0.0.0.0:9090:9090"
     depends_on:
       - app
 
