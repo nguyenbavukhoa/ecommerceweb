@@ -48,6 +48,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,"auth/reset-password").permitAll()
                         .requestMatchers(HttpMethod.POST,"auth/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET,"products/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
 
                         .anyRequest()
                         .authenticated())
