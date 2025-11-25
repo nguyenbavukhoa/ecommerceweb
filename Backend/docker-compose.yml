@@ -28,6 +28,33 @@ services:
     env_file:
       - .env
 
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ecommerce_prometheus
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/prometheus/config:/etc/prometheus/
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ecommerce_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+
+
   app:
     image: error444/ecommerce-app:latest
     build: .
@@ -94,3 +121,5 @@ services:
 volumes:
   postgres_data:
     name: ecommerce_postgres_data
+  prometheus_data:
+    name: ecommerce_prometheus_data

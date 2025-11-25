@@ -49,6 +49,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,"auth/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET,"products/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
                         .anyRequest()
                         .authenticated())
                 .httpBasic(withDefaults())
