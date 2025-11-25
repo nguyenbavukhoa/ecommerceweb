@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict EITApdPpgBafOYuSzwBnHPtbtYT0r1WZYmuKFrnF518Gf3aCYBKjebY87bdIX72
+\restrict 6gvybgl27QX7k89nSLu7sLfF9oWmBjIEeXWP9dXvO11If8BsNrNvlHp9lu21krp
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -75,7 +75,7 @@ CREATE TABLE public.cart_items (
 CREATE TABLE public.carts (
     account_id integer NOT NULL,
     id integer NOT NULL,
-    restaurant_id integer NOT NULL,
+    restaurant_id integer,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
@@ -181,7 +181,7 @@ CREATE TABLE public.option_values (
 CREATE TABLE public."order" (
     account_id integer NOT NULL,
     id integer NOT NULL,
-    restaurant_id integer NOT NULL,
+    restaurant_id integer,
     total_price numeric(38,2),
     user_infomation_id integer NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
@@ -409,7 +409,7 @@ CREATE TABLE public.voucher (
 --
 
 COPY public.account (active, id, status, created_at, updated_at, account_name, email, password, role) FROM stdin;
-t	1054752806	t	2025-11-25 13:07:07.485431	2025-11-25 13:08:00.601416	Nguyen Van A	kien06112004@gmail.com	$2a$10$/1pfdeMa6EAmQGY3Inx3EuuW1PutXsVV.J1hQ74Vw9UMvIBIijrE.	USER
+t	506049779	t	2025-11-25 16:30:48.967859	2025-11-25 16:30:58.608307	Nguyen Van A	kien06112004@gmail.com	$2a$10$MndNii7V15gjp8eJ1Up3ROoDeM6ZmEdE89lljAhd/xsaZ3/hv1jtW	USER
 \.
 
 
@@ -418,6 +418,8 @@ t	1054752806	t	2025-11-25 13:07:07.485431	2025-11-25 13:08:00.601416	Nguyen Van 
 --
 
 COPY public.cart_item_option_values (cart_item_id, option_value_id) FROM stdin;
+510308674	1
+510308674	4
 \.
 
 
@@ -426,6 +428,7 @@ COPY public.cart_item_option_values (cart_item_id, option_value_id) FROM stdin;
 --
 
 COPY public.cart_items (cart_id, id, price, product_id, quantity, selected, created_at, updated_at, note) FROM stdin;
+2141212213	510308674	70000.00	1	1	f	2025-11-25 16:31:15.245717	2025-11-25 16:31:15.250311	giao trước 13h
 \.
 
 
@@ -434,6 +437,7 @@ COPY public.cart_items (cart_id, id, price, product_id, quantity, selected, crea
 --
 
 COPY public.carts (account_id, id, restaurant_id, created_at, updated_at) FROM stdin;
+506049779	2141212213	\N	2025-11-25 16:31:15.193335	2025-11-25 16:31:15.193335
 \.
 
 
@@ -442,11 +446,11 @@ COPY public.carts (account_id, id, restaurant_id, created_at, updated_at) FROM s
 --
 
 COPY public.category (id, created_at, updated_at, name) FROM stdin;
-1	2025-11-25 06:00:03.959402	2025-11-25 06:00:03.959402	Burger
-2	2025-11-25 06:00:03.959402	2025-11-25 06:00:03.959402	Pizza
-3	2025-11-25 06:00:03.959402	2025-11-25 06:00:03.959402	Gà Rán
-4	2025-11-25 06:00:03.959402	2025-11-25 06:00:03.959402	Đồ Uống
-5	2025-11-25 06:00:03.959402	2025-11-25 06:00:03.959402	Món Ăn Phụ
+1	2025-11-25 09:30:35.52721	2025-11-25 09:30:35.52721	Burger
+2	2025-11-25 09:30:35.52721	2025-11-25 09:30:35.52721	Pizza
+3	2025-11-25 09:30:35.52721	2025-11-25 09:30:35.52721	Gà Rán
+4	2025-11-25 09:30:35.52721	2025-11-25 09:30:35.52721	Đồ Uống
+5	2025-11-25 09:30:35.52721	2025-11-25 09:30:35.52721	Món Ăn Phụ
 \.
 
 
@@ -479,12 +483,12 @@ COPY public.invoice_details (id, invoice_id, line_total, product_id, quantity, u
 --
 
 COPY public.option_group (id, product_id, created_at, updated_at, name, selection_type) FROM stdin;
-1	1	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Kích cỡ	SINGLE
-2	1	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Thêm phô mai	MULTIPLE
-3	1	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Nước uống kèm	SINGLE
-4	6	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Kích cỡ	SINGLE
-5	6	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Vỏ bánh	SINGLE
-6	6	2025-11-25 06:01:01.761264	2025-11-25 06:01:01.761264	Thêm topping	MULTIPLE
+1	1	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Kích cỡ	SINGLE
+2	1	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Thêm phô mai	MULTIPLE
+3	1	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Nước uống kèm	SINGLE
+4	6	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Kích cỡ	SINGLE
+5	6	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Vỏ bánh	SINGLE
+6	6	2025-11-25 09:30:36.010949	2025-11-25 09:30:36.010949	Thêm topping	MULTIPLE
 \.
 
 
@@ -493,21 +497,21 @@ COPY public.option_group (id, product_id, created_at, updated_at, name, selectio
 --
 
 COPY public.option_values (additional_price, id, options_group_id, stock_quantity, created_at, updated_at, name, status) FROM stdin;
-0.00	1	1	100	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Nhỏ	ACTIVE
-10000.00	2	1	100	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Vừa	ACTIVE
-15000.00	3	1	100	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Lớn	ACTIVE
-5000.00	4	2	80	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Phô mai lát	ACTIVE
-8000.00	5	2	60	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Phô mai tan chảy	ACTIVE
-0.00	6	3	200	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Coca	ACTIVE
-0.00	7	3	180	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Pepsi	ACTIVE
-0.00	8	3	150	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	7 Up	ACTIVE
-0.00	9	4	80	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Nhỏ 6 inch	ACTIVE
-20000.00	10	4	70	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Vừa 9 inch	ACTIVE
-40000.00	11	4	60	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Lớn 12 inch	ACTIVE
-0.00	12	5	90	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Vỏ dày	ACTIVE
-0.00	13	5	90	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Vỏ mỏng	ACTIVE
-15000.00	14	6	100	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Thêm phô mai	ACTIVE
-20000.00	15	6	100	2025-11-25 06:01:19.384762	2025-11-25 06:01:19.384762	Thêm hải sản	ACTIVE
+0.00	1	1	100	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Nhỏ	ACTIVE
+10000.00	2	1	100	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Vừa	ACTIVE
+15000.00	3	1	100	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Lớn	ACTIVE
+5000.00	4	2	80	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Phô mai lát	ACTIVE
+8000.00	5	2	60	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Phô mai tan chảy	ACTIVE
+0.00	6	3	200	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Coca	ACTIVE
+0.00	7	3	180	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Pepsi	ACTIVE
+0.00	8	3	150	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	7 Up	ACTIVE
+0.00	9	4	80	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Nhỏ 6 inch	ACTIVE
+20000.00	10	4	70	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Vừa 9 inch	ACTIVE
+40000.00	11	4	60	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Lớn 12 inch	ACTIVE
+0.00	12	5	90	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Vỏ dày	ACTIVE
+0.00	13	5	90	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Vỏ mỏng	ACTIVE
+15000.00	14	6	100	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Thêm phô mai	ACTIVE
+20000.00	15	6	100	2025-11-25 09:30:36.14486	2025-11-25 09:30:36.14486	Thêm hải sản	ACTIVE
 \.
 
 
@@ -564,56 +568,56 @@ COPY public.payment_method (id, is_active, created_at, updated_at, code, descrip
 --
 
 COPY public.product (category_id, id, price_base, quantity, created_at, updated_at, description, img_main, name, status) FROM stdin;
-1	1	65000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger bò kèm phô mai thơm béo	burger_bo_pho_mai.jpg	Burger Bò Phô Mai	ACTIVE
-1	2	59000.00	60	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger gà chiên giòn rụm	burger_ga_gion.jpg	Burger Gà Giòn	ACTIVE
-1	3	62000.00	45	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger tôm chiên kèm rau tươi	burger_tom.jpg	Burger Tôm	ACTIVE
-1	4	61000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger cá chiên giòn	burger_ca.jpg	Burger Cá	ACTIVE
-1	5	69000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger bò nướng sốt BBQ	burger_bbq.jpg	Burger Bò Nướng BBQ	ACTIVE
-2	6	129000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza topping hải sản tươi ngon	pizza_hai_san.jpg	Pizza Hải Sản	ACTIVE
-2	7	119000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza thịt xông khói đậm vị	pizza_thit_xong_khoi.jpg	Pizza Thịt Xông Khói	ACTIVE
-2	8	125000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza bò phô mai tan chảy	pizza_bo_pho_mai.jpg	Pizza Bò Phô Mai	ACTIVE
-2	9	99000.00	30	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza rau củ tươi mát	pizza_chay.jpg	Pizza Chay	ACTIVE
-2	10	109000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza truyền thống Ý	pizza_truyen_thong.jpg	Pizza Truyền Thống	ACTIVE
-3	11	45000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Miếng gà rán giòn tan	ga_ran_truyen_thong.jpg	Gà Rán Truyền Thống	ACTIVE
-3	12	49000.00	90	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Gà rán kèm sốt cay đậm vị	ga_sot_cay.jpg	Gà Sốt Cay	ACTIVE
-3	13	52000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Cánh gà nướng BBQ thơm ngon	canh_ga_bbq.jpg	Cánh Gà BBQ	ACTIVE
-3	14	55000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Miếng gà không xương tiện lợi	ga_khong_xuong.jpg	Gà Không Xương	ACTIVE
-3	15	40000.00	120	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Gà popcorn giòn nhỏ xinh	ga_popcorn.jpg	Gà Popcorn	ACTIVE
-4	16	19000.00	200	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Nước giải khát Coca	coca.jpg	Coca-Cola	ACTIVE
-4	17	19000.00	180	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Nước giải khát Pepsi	pepsi.jpg	Pepsi	ACTIVE
-4	18	25000.00	150	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Trà đào thơm mát	tra_dao.jpg	Trà Đào	ACTIVE
-4	19	35000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Trà sữa kèm trân châu dẻo	tra_sua.jpg	Trà Sữa Trân Châu	ACTIVE
-4	20	10000.00	250	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Nước suối đóng chai	nuoc_suoi.jpg	Nước Suối	ACTIVE
-5	21	25000.00	150	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Khoai chiên giòn rụm	khoai_tay_chien.jpg	Khoai Tây Chiên	ACTIVE
-5	22	30000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Salad tươi mát	salad.jpg	Salad Rau Trộn	ACTIVE
-5	23	28000.00	90	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Phô mai chiên giòn	pho_mai_que.jpg	Phô Mai Que	ACTIVE
-5	24	20000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Bánh mì bơ tỏi thơm lừng	banh_mi_bo_toi.jpg	Bánh Mì Bơ Tỏi	ACTIVE
-5	25	25000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Khoai lang chiên vàng	khoai_lang_ken.jpg	Khoai Lang Kén	ACTIVE
-1	26	75000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger bò 2 tầng	burger_double.jpg	Burger Bò Double	ACTIVE
-1	27	65000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger gà cay đặc biệt	burger_ga_cay.jpg	Burger Gà Cay	ACTIVE
-2	28	135000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza hải sản sốt cay	pizza_hai_san_cay.jpg	Pizza Hải Sản Cay	ACTIVE
-2	29	139000.00	35	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza 4 loại phô mai	pizza_4_pho_mai.jpg	Pizza Phô Mai 4 Tầng	ACTIVE
-3	30	53000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Cánh gà chiên mật ong	canh_ga_mat_ong.jpg	Cánh Gà Mật Ong	ACTIVE
-3	31	49000.00	90	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Gà viên nhân phô mai tan chảy	ga_vien_pho_mai.jpg	Gà Viên Phô Mai	ACTIVE
-4	32	19000.00	200	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Nước giải khát 7 Up	7up.jpg	7 Up	ACTIVE
-4	33	23000.00	150	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Trà chanh tươi mát	tra_chanh.jpg	Trà Chanh	ACTIVE
-5	34	27000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Bánh ngô chiên giòn	banh_ngo.jpg	Bánh Ngô	ACTIVE
-5	35	32000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Xúc xích Đức nướng	xuc_xich_duc.jpg	Xúc Xích Đức	ACTIVE
-1	36	69000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger bò phô mai và thịt xông khói	burger_bacon.jpg	Burger Phô Mai Bacon	ACTIVE
-1	37	64000.00	55	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger gà với sốt mật ong	burger_ga_mat_ong.jpg	Burger Gà Sốt Mật Ong	ACTIVE
-2	38	95000.00	45	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza rau củ tươi mát	pizza_rau_cu.jpg	Pizza Rau Củ	ACTIVE
-2	39	115000.00	50	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza gà BBQ	pizza_ga_bbq.jpg	Pizza Gà BBQ	ACTIVE
-3	40	54000.00	70	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Cánh gà sốt tỏi cay nồng	canh_ga_toi.jpg	Cánh Gà Sốt Tỏi	ACTIVE
-3	41	42000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Gà viên chiên giòn	ga_vien_gion.jpg	Gà Viên Giòn	ACTIVE
-4	42	36000.00	120	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Trà sữa vị matcha	tra_sua_matcha.jpg	Trà Sữa Matcha	ACTIVE
-4	43	30000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Cà phê sữa đá Việt Nam	ca_phe_sua.jpg	Cà Phê Sữa	ACTIVE
-5	44	27000.00	90	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Khoai tây chiên phủ phô mai bột	khoai_lac_pho_mai.jpg	Khoai Tây Lắc Phô Mai	ACTIVE
-5	45	29000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Bánh vòng hành tây chiên	hanh_tay.jpg	Bánh Hành Tây	ACTIVE
-1	46	63000.00	45	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Burger cá chiên sốt cay	burger_ca_cay.jpg	Burger Cá Cay	ACTIVE
-2	47	128000.00	40	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Pizza bò nướng BBQ	pizza_bo_bbq.jpg	Pizza Bò BBQ	ACTIVE
-3	48	52000.00	80	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Gà rán kèm sốt phô mai	ga_sot_pho_mai.jpg	Gà Sốt Phô Mai	ACTIVE
-4	49	24000.00	130	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Trà tắc pha mật ong	tra_tac_mat_ong.jpg	Trà Tắc Mật Ong	ACTIVE
-5	50	25000.00	100	2025-11-25 06:00:39.091008	2025-11-25 06:00:39.091008	Bánh chuối chiên giòn vàng	banh_chuoi_chien.jpg	Bánh Chuối Chiên	ACTIVE
+1	1	65000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò kèm phô mai thơm béo	burger_bo_pho_mai.jpg	Burger Bò Phô Mai	ACTIVE
+1	2	59000.00	60	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger gà chiên giòn rụm	burger_ga_gion.jpg	Burger Gà Giòn	ACTIVE
+1	3	62000.00	45	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger tôm chiên kèm rau tươi	burger_tom.jpg	Burger Tôm	ACTIVE
+1	4	61000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger cá chiên giòn	burger_ca.jpg	Burger Cá	ACTIVE
+1	5	69000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò nướng sốt BBQ	burger_bbq.jpg	Burger Bò Nướng BBQ	ACTIVE
+2	6	129000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza topping hải sản tươi ngon	pizza_hai_san.jpg	Pizza Hải Sản	ACTIVE
+2	7	119000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza thịt xông khói đậm vị	pizza_thit_xong_khoi.jpg	Pizza Thịt Xông Khói	ACTIVE
+2	8	125000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza bò phô mai tan chảy	pizza_bo_pho_mai.jpg	Pizza Bò Phô Mai	ACTIVE
+2	9	99000.00	30	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza rau củ tươi mát	pizza_chay.jpg	Pizza Chay	ACTIVE
+2	10	109000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza truyền thống Ý	pizza_truyen_thong.jpg	Pizza Truyền Thống	ACTIVE
+3	11	45000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Miếng gà rán giòn tan	ga_ran_truyen_thong.jpg	Gà Rán Truyền Thống	ACTIVE
+3	12	49000.00	90	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà rán kèm sốt cay đậm vị	ga_sot_cay.jpg	Gà Sốt Cay	ACTIVE
+3	13	52000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Cánh gà nướng BBQ thơm ngon	canh_ga_bbq.jpg	Cánh Gà BBQ	ACTIVE
+3	14	55000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Miếng gà không xương tiện lợi	ga_khong_xuong.jpg	Gà Không Xương	ACTIVE
+3	15	40000.00	120	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà popcorn giòn nhỏ xinh	ga_popcorn.jpg	Gà Popcorn	ACTIVE
+4	16	19000.00	200	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Nước giải khát Coca	coca.jpg	Coca-Cola	ACTIVE
+4	17	19000.00	180	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Nước giải khát Pepsi	pepsi.jpg	Pepsi	ACTIVE
+4	18	25000.00	150	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà đào thơm mát	tra_dao.jpg	Trà Đào	ACTIVE
+4	19	35000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà sữa kèm trân châu dẻo	tra_sua.jpg	Trà Sữa Trân Châu	ACTIVE
+4	20	10000.00	250	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Nước suối đóng chai	nuoc_suoi.jpg	Nước Suối	ACTIVE
+5	21	25000.00	150	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Khoai chiên giòn rụm	khoai_tay_chien.jpg	Khoai Tây Chiên	ACTIVE
+5	22	30000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Salad tươi mát	salad.jpg	Salad Rau Trộn	ACTIVE
+5	23	28000.00	90	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Phô mai chiên giòn	pho_mai_que.jpg	Phô Mai Que	ACTIVE
+5	24	20000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Bánh mì bơ tỏi thơm lừng	banh_mi_bo_toi.jpg	Bánh Mì Bơ Tỏi	ACTIVE
+5	25	25000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Khoai lang chiên vàng	khoai_lang_ken.jpg	Khoai Lang Kén	ACTIVE
+1	26	75000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò 2 tầng	burger_double.jpg	Burger Bò Double	ACTIVE
+1	27	65000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger gà cay đặc biệt	burger_ga_cay.jpg	Burger Gà Cay	ACTIVE
+2	28	135000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza hải sản sốt cay	pizza_hai_san_cay.jpg	Pizza Hải Sản Cay	ACTIVE
+2	29	139000.00	35	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza 4 loại phô mai	pizza_4_pho_mai.jpg	Pizza Phô Mai 4 Tầng	ACTIVE
+3	30	53000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Cánh gà chiên mật ong	canh_ga_mat_ong.jpg	Cánh Gà Mật Ong	ACTIVE
+3	31	49000.00	90	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà viên nhân phô mai tan chảy	ga_vien_pho_mai.jpg	Gà Viên Phô Mai	ACTIVE
+4	32	19000.00	200	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Nước giải khát 7 Up	7up.jpg	7 Up	ACTIVE
+4	33	23000.00	150	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà chanh tươi mát	tra_chanh.jpg	Trà Chanh	ACTIVE
+5	34	27000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Bánh ngô chiên giòn	banh_ngo.jpg	Bánh Ngô	ACTIVE
+5	35	32000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Xúc xích Đức nướng	xuc_xich_duc.jpg	Xúc Xích Đức	ACTIVE
+1	36	69000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò phô mai và thịt xông khói	burger_bacon.jpg	Burger Phô Mai Bacon	ACTIVE
+1	37	64000.00	55	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger gà với sốt mật ong	burger_ga_mat_ong.jpg	Burger Gà Sốt Mật Ong	ACTIVE
+2	38	95000.00	45	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza rau củ tươi mát	pizza_rau_cu.jpg	Pizza Rau Củ	ACTIVE
+2	39	115000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza gà BBQ	pizza_ga_bbq.jpg	Pizza Gà BBQ	ACTIVE
+3	40	54000.00	70	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Cánh gà sốt tỏi cay nồng	canh_ga_toi.jpg	Cánh Gà Sốt Tỏi	ACTIVE
+3	41	42000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà viên chiên giòn	ga_vien_gion.jpg	Gà Viên Giòn	ACTIVE
+4	42	36000.00	120	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà sữa vị matcha	tra_sua_matcha.jpg	Trà Sữa Matcha	ACTIVE
+4	43	30000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Cà phê sữa đá Việt Nam	ca_phe_sua.jpg	Cà Phê Sữa	ACTIVE
+5	44	27000.00	90	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Khoai tây chiên phủ phô mai bột	khoai_lac_pho_mai.jpg	Khoai Tây Lắc Phô Mai	ACTIVE
+5	45	29000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Bánh vòng hành tây chiên	hanh_tay.jpg	Bánh Hành Tây	ACTIVE
+1	46	63000.00	45	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger cá chiên sốt cay	burger_ca_cay.jpg	Burger Cá Cay	ACTIVE
+2	47	128000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza bò nướng BBQ	pizza_bo_bbq.jpg	Pizza Bò BBQ	ACTIVE
+3	48	52000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà rán kèm sốt phô mai	ga_sot_pho_mai.jpg	Gà Sốt Phô Mai	ACTIVE
+4	49	24000.00	130	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà tắc pha mật ong	tra_tac_mat_ong.jpg	Trà Tắc Mật Ong	ACTIVE
+5	50	25000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Bánh chuối chiên giòn vàng	banh_chuoi_chien.jpg	Bánh Chuối Chiên	ACTIVE
 \.
 
 
@@ -622,8 +626,6 @@ COPY public.product (category_id, id, price_base, quantity, created_at, updated_
 --
 
 COPY public.restaurant (active, id, code, name) FROM stdin;
-t	1	HN-TT	Nhà Hàng Trung Tâm
-t	2	HCM-Q1	Nhà Hàng Quận 1
 \.
 
 
@@ -632,26 +634,6 @@ t	2	HCM-Q1	Nhà Hàng Quận 1
 --
 
 COPY public.restaurant_inventory (id, price, product_id, stock_quantity) FROM stdin;
-21	65000.00	1	80
-22	59000.00	2	90
-23	62000.00	3	70
-24	61000.00	4	85
-25	69000.00	5	60
-26	129000.00	6	50
-27	119000.00	7	60
-28	125000.00	8	55
-29	99000.00	9	40
-30	109000.00	10	65
-31	67000.00	1	60
-32	61000.00	2	70
-33	64000.00	3	55
-34	62000.00	4	65
-35	71000.00	5	50
-36	131000.00	6	40
-37	121000.00	7	45
-38	127000.00	8	48
-39	101000.00	9	35
-40	111000.00	10	50
 \.
 
 
@@ -660,7 +642,7 @@ COPY public.restaurant_inventory (id, price, product_id, stock_quantity) FROM st
 --
 
 COPY public.token (account_id, id, created_at, expiration_time, updated_at, token, token_type) FROM stdin;
-1054752806	2	2025-11-25 13:08:10.2474	2025-12-02 13:08:10.245388	2025-11-25 13:08:10.2474	eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sInN1YiI6ImtpZW4wNjExMjAwNEBnbWFpbC5jb20iLCJpYXQiOjE3NjQwNTA4OTAsImV4cCI6MTc2NDY1NTY5MH0.ZO7VkhSBOxLIBslnb2x_Me70rKcD57juBPZTSsE0Nzg	REFRESH_TOKEN
+506049779	2	2025-11-25 16:31:03.529128	2025-12-02 16:31:03.528123	2025-11-25 16:31:03.529128	eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sInN1YiI6ImtpZW4wNjExMjAwNEBnbWFpbC5jb20iLCJpYXQiOjE3NjQwNjMwNjMsImV4cCI6MTc2NDY2Nzg2M30.znVN-rq_hQCWjzifL5lbKrzdm1B-8QS1AoCHIq09H7M	REFRESH_TOKEN
 \.
 
 
@@ -691,7 +673,7 @@ SELECT pg_catalog.setval('public.restaurant_id_seq', 1, false);
 -- Name: restaurant_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.restaurant_inventory_id_seq', 40, true);
+SELECT pg_catalog.setval('public.restaurant_inventory_id_seq', 1, false);
 
 
 --
@@ -1169,5 +1151,5 @@ ALTER TABLE ONLY public.carts
 -- PostgreSQL database dump complete
 --
 
-\unrestrict EITApdPpgBafOYuSzwBnHPtbtYT0r1WZYmuKFrnF518Gf3aCYBKjebY87bdIX72
+\unrestrict 6gvybgl27QX7k89nSLu7sLfF9oWmBjIEeXWP9dXvO11If8BsNrNvlHp9lu21krp
 

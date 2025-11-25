@@ -26,6 +26,6 @@ public class Carts extends Timestamped {
     private List<CartItems> cartItems;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JoinColumn(name = "restaurant_id", nullable = true)
     private Restaurant restaurant;
 }
