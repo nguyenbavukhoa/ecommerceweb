@@ -629,6 +629,16 @@ export const db = {
       saveToLS(DB_KEYS.USERS, users);
       return users[index];
     },
+
+    // [MỚI] Hàm xóa User
+    delete: (userId) => {
+      let list = getFromLS(DB_KEYS.USERS, SEED_USERS);
+      const newList = list.filter((u) => u.id !== userId);
+      if (list.length === newList.length) throw new Error("User không tồn tại");
+
+      saveToLS(DB_KEYS.USERS, newList);
+      return true;
+    },
   },
 
   // 5. STORES (Cập nhật đầy đủ cho chức năng Cài đặt quán)
@@ -696,6 +706,16 @@ export const db = {
         return list[index];
       }
       throw new Error("Không tìm thấy cửa hàng");
+    },
+    // [MỚI] Hàm xóa Store
+    delete: (storeId) => {
+      let list = getFromLS(DB_KEYS.STORES, SEED_STORES);
+      const newList = list.filter((s) => s.id !== storeId);
+      if (list.length === newList.length)
+        throw new Error("Cửa hàng không tồn tại");
+
+      saveToLS(DB_KEYS.STORES, newList);
+      return true;
     },
   },
 

@@ -660,3 +660,48 @@ export function useUpdateUser() {
     },
   });
 }
+
+// --- STORE ---
+// Hook Xóa Store
+export function useDeleteStore() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async (storeId) => {
+      await new Promise((r) => setTimeout(r, 500));
+      // Gọi hàm delete trong mockData (cần thêm hàm này vào mockData.js sau)
+      return db.stores.delete(storeId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["serverStores"]);
+      queryClient.invalidateQueries(["publicStores"]);
+      showToast("success", "Đã xóa cửa hàng vĩnh viễn!");
+    },
+    onError: (err) => {
+      showToast("error", "Lỗi: " + err.message);
+    },
+  });
+}
+
+// --- USER ---
+// Hook Xóa User
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async (userId) => {
+      await new Promise((r) => setTimeout(r, 500));
+      return db.users.delete(userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["serverUsers"]);
+      queryClient.invalidateQueries(["customers"]);
+      showToast("success", "Đã xóa tài khoản vĩnh viễn!");
+    },
+    onError: (err) => {
+      showToast("error", "Lỗi: " + err.message);
+    },
+  });
+}

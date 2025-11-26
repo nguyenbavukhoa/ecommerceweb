@@ -3,6 +3,7 @@ import { useToast } from "../../../../context/ToastContext";
 import {
   useServerStores,
   useUpdateStore,
+  useDeleteStore,
 } from "../../../../context/FilterProvider";
 import { vnd } from "../../utils";
 import styles from "./Stores.module.scss";
@@ -91,6 +92,60 @@ const Stores = () => {
         id: store.id,
         data: { status: newStatus },
       });
+    }
+  };
+
+  const deleteStoreMutation = useDeleteStore(); // Hook xóa
+
+  // Logic Xóa (Double Confirm)
+  // --- [SỬA LẠI] LOGIC XÓA CÓ RÀNG BUỘC ---
+  const handleDeleteStore = (store) => {
+    // 1. KIỂM TRA RÀNG BUỘC ĐƠN HÀNG (Giống logic khóa)
+    // Không được xóa nếu đang có đơn hàng chưa hoàn tất
+    const allOrders = db.orders.getAll();
+    const activeOrders = allOrders.filter(
+      (o) =>
+        o.restaurantId === store.id &&
+        o.orderStatus !== "COMPLETED" &&
+        o.orderStatus !== "CANCELLED"
+    );
+
+    if (activeOrders.length > 0) {
+      showToast({
+        title: "Không thể xóa quán",
+        message: `Quán đang có ${activeOrders.length} đơn hàng chưa hoàn tất. Vui lòng xử lý xong trước khi xóa!`,
+        type: "error", // Màu đỏ cảnh báo
+      });
+      return; // Dừng ngay lập tức
+    }
+
+    // 2. KIỂM TRA RÀNG BUỘC TÀI CHÍNH (Optional nhưng nên có)
+    // Nếu quán còn doanh thu chưa rút -> Cảnh báo nhẹ (nhưng vẫn cho xóa nếu admin muốn)
+    if (store.revenue > 0) {
+      if (
+        !window.confirm(
+          `Cảnh báo: Quán này còn doanh thu ${vnd(
+            store.revenue
+          )} chưa thanh toán. Bạn có chắc chắn muốn xóa không?`
+        )
+      ) {
+        return;
+      }
+    }
+
+    // 3. XÁC NHẬN KÉP (Double Confirm)
+    if (
+      window.confirm(
+        `Bạn có chắc chắn muốn XÓA VĨNH VIỄN cửa hàng "${store.name}"?`
+      )
+    ) {
+      if (
+        window.confirm(
+          "Hành động này KHÔNG THỂ hoàn tác! Mọi dữ liệu liên quan sẽ mất. Bạn vẫn muốn xóa?"
+        )
+      ) {
+        deleteStoreMutation.mutate(store.id);
+      }
     }
   };
 
@@ -211,6 +266,13 @@ const Stores = () => {
                                 s.status === "active" ? "fa-lock" : "fa-unlock"
                               }`}
                             ></i>
+                          </button>
+                          <button
+                            className={styles.btnDelete}
+                            onClick={() => handleDeleteStore(s)}
+                            title="Xóa vĩnh viễn"
+                          >
+                            <i className="fa-light fa-trash-can"></i>
                           </button>
                         </div>
                       </td>
