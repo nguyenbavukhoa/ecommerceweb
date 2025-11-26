@@ -1,61 +1,63 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import { routes } from "./routes";
-import { CategoryProvider } from "./Hooks/useCategory";
+import { FilterProvider } from "./context/FilterProvider";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartProvider";
+import { initializeDatabase } from "./data/mockData";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
-
-// Import custom CSS
 import "./css/category.css";
 
 function App() {
+  useEffect(() => {
+    initializeDatabase();
+  }, []);
+
   return (
-
-    <AuthProvider>
-      <ToastProvider>
-        <div>
-          <CategoryProvider>
-            <Router>
+    <BrowserRouter>
+      <AuthProvider>
+        <ToastProvider>
+          {/* --- SỬA TẠI ĐÂY: Đưa FilterProvider ra ngoài CartProvider --- */}
+          <FilterProvider>
+            <CartProvider>
+              {/* Bên trong CartProvider mới render Routes */}
               <Routes>
-                {/* Redirect "/" sang "/about" */}
-                {/* <Route
-
-              path="/"
-              element={<Navigate to="/user-info-detail" replace />}
-            /> */}
-
-
                 {routes.map((route) => {
                   const Page = route.page;
                   const Layout = route.isShowHeader
                     ? DefaultComponent
                     : React.Fragment;
+
+                  let elementToRender = (
+                    <Layout>
+                      <Page />
+                    </Layout>
+                  );
+
+                  if (route.isPrivate) {
+                    elementToRender = (
+                      <ProtectedRoute>{elementToRender}</ProtectedRoute>
+                    );
+                  }
+
                   return (
                     <Route
                       key={route.path}
                       path={route.path}
-                      element={
-                        <Layout>
-                          <Page />
-                        </Layout>
-                      }
+                      element={elementToRender}
                     />
                   );
                 })}
               </Routes>
-            </Router>
-          </CategoryProvider>
-        </div>
-      </ToastProvider>
-    </AuthProvider>
-
+            </CartProvider>
+          </FilterProvider>
+          {/* ----------------------------------------------------------- */}
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

@@ -1,0 +1,84 @@
+/* src/pages/ProfilePage/styles/AccountInfo.module.css */
+.accountInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Desktop: 3 cột */
+  gap: 25px;
+  flex-grow: 1;
+}
+
+.infoField {
+  display: flex;
+  flex-direction: column;
+  word-break: break-word;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
+
+.editButton {
+  background: none;
+  border: 1px solid #e0e0e0;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 30px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editButton:hover {
+  background-color: #f0f8ff;
+  border-color: #007bff;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 992px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cột */
+  }
+}
+
+@media (max-width: 600px) {
+  .accountInfo {
+    flex-direction: column;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr; /* Mobile: 1 cột */
+    gap: 15px;
+    width: 100%;
+  }
+
+  .editButton {
+    margin-left: 0;
+    margin-top: 20px;
+    width: 100%;
+    justify-content: center;
+    background-color: #f9f9f9;
+    height: 40px;
+  }
+}

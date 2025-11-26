@@ -1,0 +1,204 @@
+@import "../../styles/shared";
+
+.section {
+  padding: 2rem 2rem 0 1.5rem;
+  display: block !important;
+}
+
+/* Container chính (Card) */
+.settingCard {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 0 auto; /* Căn giữa */
+}
+
+.header {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .hint {
+    color: #777;
+    font-size: 14px;
+  }
+}
+
+/* Form Styles */
+.formGroup {
+  margin-bottom: 20px;
+
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  input[type="text"],
+  input[type="time"],
+  textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s;
+    background-color: #fcfcfc;
+
+    &:focus {
+      border-color: var(--red);
+      background-color: #fff;
+    }
+  }
+
+  textarea {
+    height: 100px;
+    resize: vertical;
+  }
+}
+
+/* Hàng ngang (Time) */
+.row {
+  display: flex;
+  gap: 20px;
+  .col {
+    flex: 1;
+  }
+}
+
+/* Trạng thái quán */
+.statusRow {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  label {
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.btnStatus {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.open {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+  }
+
+  &.close {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+  }
+}
+
+/* Avatar Box */
+.avatarBox {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  img {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #eee;
+    background-color: #f9f9f9;
+  }
+
+  input {
+    flex: 1;
+  }
+}
+
+/* Actions Buttons */
+.actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saveBtn {
+  background-color: var(--red);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: #a02227;
+  }
+}
+
+.deactivateBtn {
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--red);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section {
+    padding: 20px 10px;
+  }
+  .settingCard {
+    padding: 20px;
+  }
+  .row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .avatarBox {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    flex-direction: column-reverse;
+    gap: 15px;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

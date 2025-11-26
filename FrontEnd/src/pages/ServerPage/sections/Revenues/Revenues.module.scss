@@ -1,0 +1,160 @@
+.section {
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Control Bar */
+.adminControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  color: var(--dark-gray);
+  margin: 0;
+  font-weight: 700;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 10px;
+
+  select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    &:focus {
+      border-color: var(--red);
+    }
+  }
+}
+
+/* Table */
+.tableContainer {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background-color: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #eee;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    color: #333;
+  }
+
+  tr:hover {
+    background-color: #fcfcfc;
+  }
+}
+
+.amount {
+  font-weight: 700;
+  color: #27ae60; /* Xanh lá tiền tệ */
+}
+
+.bankInfo {
+  font-size: 13px;
+  color: #666;
+  max-width: 250px;
+  line-height: 1.4;
+}
+
+/* Badges */
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.pending {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffe0b2;
+  }
+  &.approved {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+  }
+  &.rejected {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+  }
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnApprove,
+.btnReject {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.btnApprove {
+  background-color: #27ae60;
+  color: white;
+}
+
+.btnReject {
+  background-color: #c0392b;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section {
+    padding: 15px;
+  }
+  .adminControl {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .filterGroup {
+    width: 100%;
+    select {
+      width: 100%;
+    }
+  }
+}

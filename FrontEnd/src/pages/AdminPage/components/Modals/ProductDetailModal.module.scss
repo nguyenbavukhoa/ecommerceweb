@@ -1,0 +1,162 @@
+/* ====================================================== */
+/* FILE: ProductDetailModal.module.scss (ĐÃ SỬA LẠI) */
+/* ====================================================== */
+/* Bố cục 2 cột MỚI (Giống form Sửa/Thêm) */
+.detailLayout {
+  display: flex;
+  gap: 20px;
+}
+
+/* Cột trái: Giống hệt .modalContentLeft */
+.detailLeft {
+  flex: 0 0 350px; /* Kích thước cố định cho ảnh */
+  padding-right: 20px;
+  border-right: 1px solid #f0f0f0;
+}
+
+/* Cột phải: Giống hệt .modalContentRight */
+.detailRight {
+  flex: 1;
+  min-width: 0; /* Fix flexbox */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Khoảng cách giữa các mục */
+}
+
+/* Ảnh (giống .uploadImagePreview) */
+.productImage {
+  width: 100%;
+  height: 350px; /* Giống ảnh preview */
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  background-color: #f9f9f9;
+}
+
+/* Tên (từ style cũ) */
+.productName {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin: 0; /* Reset */
+}
+
+/* Lưới thông tin MỚI */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cột */
+  gap: 15px;
+  background: #fcfcfc;
+  border: 1px solid #f0f0f0;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.infoValue {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Mô tả (từ style cũ, chỉnh lại) */
+.productDescription {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fdfdfd;
+  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #f0f0f0;
+  margin: 0; /* Reset */
+}
+
+/* Section Tùy chọn (giữ style cũ) */
+.optionsSection {
+  margin: 0;
+  padding-top: 15px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.optionsTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #000;
+}
+
+.optionGroup {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.groupHeader {
+  padding: 10px 15px;
+  background: #f1f1f1;
+  display: flex;
+  justify-content: space-between;
+  span {
+    font-size: 13px;
+    font-weight: 400;
+    color: #666;
+  }
+}
+
+.optionValueList {
+  list-style-type: none;
+  padding: 15px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.optionValue {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  span:first-child {
+    color: #333;
+  }
+  span:last-child {
+    font-weight: 500;
+    color: var(--red);
+  }
+}
+
+/* --- Responsive (Sửa lại cho bố cục mới) --- */
+@media (max-width: 768px) {
+  .detailLayout {
+    flex-direction: column;
+  }
+  .detailLeft {
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+    padding-right: 0;
+    padding-bottom: 20px;
+  }
+  .productImage {
+    height: 300px;
+  }
+  .infoGrid {
+    grid-template-columns: 1fr; /* 1 cột */
+  }
+}

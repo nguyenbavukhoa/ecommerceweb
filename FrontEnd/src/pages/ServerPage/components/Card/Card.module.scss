@@ -1,0 +1,83 @@
+/* src/pages/AdminPage/components/Card/Card.module.scss */
+
+.cardSingle {
+  background: #fff;
+  height: 500px;
+  width: 31%;
+  min-width: 290px;
+  position: relative;
+  box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.05),
+    inset -5px -5px 5px rgba(255, 255, 255, 0.5),
+    5px 5px 5px rgba(0, 0, 0, 0.05), -5px -5px 5px rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  margin: 12px;
+}
+
+.box {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  align-items: center;
+  transition: 0.5s;
+  padding: 20px;
+  text-align: center;
+
+  .cardSingle:hover & {
+    // Dùng & lồng nhau
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(45deg, var(--red), orange);
+  }
+}
+
+.onBox {
+  margin-top: 2rem;
+}
+
+.box h2 {
+  position: absolute;
+  top: 5px;
+  right: 30px;
+  font-size: 2rem;
+  color: var(--dark-gray);
+  transition: 0.3s;
+  pointer-events: none;
+  .box:hover & {
+    color: #fff;
+  }
+}
+
+.box h3 {
+  font-size: 1.5rem;
+  color: var(--dark-gray);
+  z-index: 1;
+  transition: 0.3s;
+  margin-bottom: 10px;
+  .box:hover & {
+    color: #fff;
+  }
+}
+
+.box p {
+  font-size: 0.9em;
+  font-weight: 400;
+  color: var(--dark-gray);
+  z-index: 1;
+  transition: 0.3s;
+  text-align: left;
+  .box:hover & {
+    color: #fff;
+  }
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 470px) {
+  .cardSingle {
+    width: 100% !important;
+  }
+}

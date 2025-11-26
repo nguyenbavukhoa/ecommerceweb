@@ -1,0 +1,219 @@
+// src/pages/AdminPage/styles/_shared.scss
+// File này chứa các "mixin" (công thức) để tái sử dụng
+
+// Mixin cho style .table chung
+@mixin table-style {
+  width: 100%;
+  overflow: auto;
+  background: #fff;
+  border-radius: 7px;
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  tr {
+    border-bottom: 1px solid var(--lighter-gray);
+  }
+
+  thead td {
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: 500;
+    background: var(--lighter-gray);
+    padding: 15px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  tbody tr td {
+    padding: 10px 15px;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+// Mixin cho thanh control (dùng ở Customers, Orders, Statistics)
+@mixin admin-control-style {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .adminControlLeft select {
+    background-color: #eee;
+    padding: 10px 20px;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    margin-left: 10px;
+    border-right: 10px solid #eee !important;
+    height: 40px;
+    cursor: pointer;
+  }
+
+  .adminControlCenter {
+    flex: 1;
+  }
+
+  .adminControlRight {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Mixin cho form tìm kiếm
+@mixin form-search-style {
+  display: flex;
+  justify-content: center;
+
+  .searchBtn {
+    border: none;
+    outline: none;
+    font-size: 20px;
+    height: 40px;
+    padding: 0 15px;
+    color: var(--dark-gray);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+  }
+
+  .formSearchInput {
+    height: 40px;
+    outline: none;
+    border: none;
+    background-color: #f0f0f0;
+    padding: 10px 20px;
+    padding-left: 0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    width: 75%;
+  }
+}
+
+// Mixin cho các nút điều khiển (lọc ngày, reset)
+@mixin admin-control-buttons {
+  .fillterDate {
+    display: flex;
+  }
+  .fillterDate > div {
+    margin-right: 20px;
+  }
+  .fillterDate > div > label {
+    margin-right: 10px;
+    font-size: 15px;
+  }
+  .formControlDate {
+    background-color: #eee;
+    border: none;
+    outline: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    height: 40px;
+  }
+
+  .btnResetOrder {
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+  .btnResetOrder:hover {
+    background-color: var(--red);
+    color: #fff;
+  }
+
+  .btnControlLarge {
+    background-color: var(--red);
+    height: 40px;
+    color: #fff;
+    border-radius: 5px;
+    padding: 0 20px;
+    width: auto !important;
+    cursor: pointer;
+    border: none;
+    margin-left: 10px;
+  }
+  .btnControlLarge i {
+    margin-right: 5px;
+  }
+}
+
+// Mixin cho style trạng thái (Hoạt động / Bị khóa)
+@mixin status-styles {
+  .statusComplete {
+    background-color: #27ae60;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 15px;
+    display: inline-block;
+  }
+  .statusNoComplete {
+    background-color: #f04e2e;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 15px;
+    display: inline-block;
+  }
+}
+
+// Mixin cho các nút control trong bảng (Edit, Delete)
+@mixin table-control-buttons {
+  .controlTable {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .btnEdit,
+  .btnDelete {
+    background-color: #eee;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    color: var(--dark-gray);
+    text-transform: uppercase;
+    margin-left: 0;
+    outline: none;
+    border: none;
+    cursor: pointer;
+  }
+  .btnEdit {
+    background-color: #e5e5e5;
+    margin-right: 5px;
+  }
+  .btnDelete {
+    background-color: var(--red);
+    color: white;
+  }
+}
+
+// Mixin cho nút chi tiết
+@mixin btn-detail-style {
+  .btnDetail {
+    background-color: #eee;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    color: var(--dark-gray);
+    text-transform: uppercase;
+    margin-left: 0;
+    outline: none;
+    border: none;
+    cursor: pointer;
+  }
+  .btnDetail:hover {
+    background-color: #e0e0e0;
+  }
+}

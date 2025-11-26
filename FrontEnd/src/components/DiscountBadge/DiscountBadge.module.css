@@ -1,0 +1,18 @@
+/* Tên file: DiscountBadge.module.css */
+
+.discountBadge {
+  /* Viết theo kiểu camelCase cho nhất quán với JS */
+  /* Vị trí */
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  /* Style */
+  background-color: #e74c3c;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-bottom-right-radius: 8px;
+  z-index: 10;
+}

@@ -1,0 +1,144 @@
+// src/pages/AdminPage/sections/Customers/Customers.module.scss
+@import "../../styles/shared";
+
+.section {
+  padding: 2rem 2rem 0 1.5rem;
+  display: block !important;
+}
+
+/* --- Áp dụng Mixins --- */
+.adminControl {
+  @include admin-control-style;
+}
+.formSearch {
+  @include form-search-style;
+}
+.table {
+  @include table-style;
+}
+.adminControlRight {
+  @include admin-control-buttons;
+}
+.statusComplete,
+.statusNoComplete {
+  @include status-styles;
+}
+.controlTable {
+  @include table-control-buttons;
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 1200px) {
+  .adminControlCenter {
+    margin: 1rem 0; // Sửa
+    width: 100%; // Sửa
+  }
+
+  .adminControlLeft select {
+    margin-bottom: 10px;
+    margin-left: 0; // Thêm
+  }
+
+  .formControlDate {
+    width: 135px;
+  }
+
+  .statusNoComplete,
+  .statusComplete {
+    display: inline;
+    white-space: nowrap;
+  }
+
+  .formSearch {
+    position: relative; // Hủy fixed
+    left: auto;
+    top: auto;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .btnResetOrder {
+    height: 40px;
+    margin-top: 0px;
+  }
+}
+
+@media only screen and (max-width: 786px) {
+  .section {
+    padding: 20px 10px;
+  }
+}
+
+@media only screen and (max-width: 470px) {
+  .adminControlRight {
+    flex-wrap: wrap; // Cho phép xuống hàng
+  }
+  .fillterDate > div {
+    margin-bottom: 10px;
+  }
+  .btnResetOrder {
+    margin-left: 0;
+  }
+  .controlTable {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+  .controlTable .btnEdit {
+    margin-top: 0 !important;
+  }
+}
+
+/* === CSS CHO NÚT GẠT (COPY TỪ PRODUCTS) === */
+.statusToggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin-right: 10px; // Thêm khoảng cách
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 28px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--red);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+}
+
+// Sửa lại controlTable để 3 nút nằm vừa
+.controlTable {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+}

@@ -1,0 +1,303 @@
+.drone-map-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: calc(100vh - 80px); /* Fit màn hình admin */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: #b5292f; /* Màu đỏ admin */
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Layout chính chia 2 cột: Sidebar trái 350px, Map phải auto */
+.layout-grid {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0; /* Fix flex overflow */
+}
+
+.sidebar-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
+}
+
+/* Control Box */
+.control-box {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.address-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.address-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.address-input button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 0 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.status-box {
+  background: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.status-box.active {
+  border-color: #b5292f;
+  background-color: #fff5f5;
+}
+
+.flight-stats {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.selected-order-info {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed #ddd;
+  color: #b5292f;
+}
+
+.start-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.start-button.ready {
+  background: #b5292f; /* Màu đỏ admin */
+  color: white;
+  box-shadow: 0 4px 10px rgba(181, 41, 47, 0.2);
+}
+
+.start-button.ready:hover {
+  background: #a02227;
+}
+
+.start-button.flying {
+  background: #e67e22;
+  color: white;
+  cursor: not-allowed;
+}
+
+.start-button:disabled:not(.flying) {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Orders Panel */
+.orders-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.order-section h3 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 5px 0;
+  z-index: 5;
+}
+
+.order-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.order-card:hover {
+  border-color: #b5292f;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-card.active {
+  border-color: #b5292f;
+  background-color: #fff9f9;
+  border-left: 4px solid #b5292f;
+}
+
+.order-card.completed {
+  border-left: 4px solid #27ae60;
+  opacity: 0.8;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.order-id {
+  color: #b5292f;
+}
+.order-price {
+  color: #27ae60;
+}
+
+.order-detail {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.order-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.btn-pick {
+  background: #eee;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.order-card.active .btn-pick {
+  background: #b5292f;
+  color: white;
+}
+
+.empty-text {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Map Wrapper */
+.map-wrapper {
+  flex: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.drone-map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Custom scrollbar */
+.orders-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.orders-panel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.orders-panel::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .drone-map-container {
+    padding: 10px;
+    height: auto; /* Cho phép cuộn trang trên mobile */
+    overflow: visible; /* Hiện thanh cuộn */
+  }
+
+  .layout-grid {
+    flex-direction: column-reverse; /* Đưa bản đồ lên đầu, danh sách xuống dưới */
+    gap: 15px;
+  }
+
+  .map-wrapper {
+    width: 100%;
+    height: 400px !important; /* Quan trọng: Phải có chiều cao cố định */
+    min-height: 400px; /* Đảm bảo không bị co nhỏ */
+    flex: none; /* Tắt tính năng co giãn của flexbox */
+  }
+
+  /* 2. Đảm bảo map con bên trong full chiều cao cha */
+  .drone-map {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .sidebar-panel {
+    width: 100%;
+    height: auto; /* Sidebar tự giãn theo nội dung */
+    max-height: none; /* Bỏ giới hạn chiều cao */
+  }
+
+  /* Tinh chỉnh danh sách đơn hàng trên mobile cho gọn */
+  .orders-panel {
+    max-height: 400px; /* Giới hạn chiều cao danh sách để không quá dài */
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .page-title {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+}

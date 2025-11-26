@@ -1,132 +1,66 @@
-// import { useQuery } from "@tanstack/react-query";
-
-// export function useProducts(category = "all") {
-//   return useQuery({
-//     queryKey: ["products", category], // cache riêng theo category
-//     queryFn: async () => {
-//       const res = await fetch(
-//         category === "all"
-//           ? "/products.json"
-//           : `/products.json?category=${category}`
-//       );
-//       if (!res.ok) throw new Error("Network response was not ok");
-//       const data = await res.json();
-
-//       // nếu JSON dạng { products: [...] }
-//       return data.products || data;
-//     },
-//     staleTime: 1000 * 60, // cache trong 1 phút
-//   });
-// }
-
-// import { useQuery } from "@tanstack/react-query";
-
-// export function useProducts(category = "all") {
-//   return useQuery({
-//     queryKey: ["products", category],
-//     queryFn: async () => {
-//       const res = await fetch(
-//         "http://localhost:8081/api/v1/products?isActive=true"
-//       );
-//       if (!res.ok) throw new Error("Network response was not ok");
-//       const data = await res.json();
-
-//       // Lọc sản phẩm theo category
-//       const products = data.data.content || data;
-//       if (category === "all") {
-//         return products;
-//       }
-//       return products.filter((product) => product.category === category);
-//     },
-//     staleTime: 1000 * 60,
-//   });
-// }
-
-// // Thêm helper function để lấy unique categories
-// export function useCategories() {
-//   const { data: products } = useProducts();
-
-//   if (!products) return [];
-
-//   // Lấy danh sách category unique từ products
-//   const categories = [...new Set(products.map((product) => product.category))];
-//   return categories;
-// }
-// import { useQuery } from "@tanstack/react-query";
-
-// export function useProducts(category = "all") {
-//   return useQuery({
-//     queryKey: ["products", category],
-//     queryFn: async () => {
-//       const res = await fetch(
-//         "http://localhost:8081/api/v1/products?isActive=true"
-//       );
-//       if (!res.ok) throw new Error("Network response was not ok");
-//       const data = await res.json();
-
-//       // Lấy mảng sản phẩm trong data.data.content
-//       const products = data?.data?.content || [];
-
-//       // Nếu category = all thì trả hết
-//       if (category === "all") return products;
-
-//       // So sánh theo productCategoryDTO.name
-//       return products.filter(
-//         (product) => product.productCategoryDTO?.name === category
-//       );
-//     },
-//     staleTime: 1000 * 60,
-//   });
-// }
-
-// // Lấy unique categories
-// export function useCategories() {
-//   const { data: products } = useProducts();
-
-//   if (!products) return [];
-
-//   const categories = [
-//     ...new Set(products.map((p) => p.productCategoryDTO?.name).filter(Boolean)),
-//   ];
-
-//   return categories;
-// }
-
 import { useQuery } from "@tanstack/react-query";
+import { db } from "../data/mockData";
 
-// Hook lấy products
-export function useProducts(category = "all", page = 1) {
+export function useProducts(filters) {
   return useQuery({
-    queryKey: ["products", category, page],
+    // Thêm filters.storeId vào queryKey để khi đổi store (nếu có) nó tự fetch lại
+    queryKey: ["products", filters],
     queryFn: async () => {
-      let url = "http://localhost:8080/api/v1/products";
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Nếu là "all" thì dùng ?isActive=true
-      if (category === "all") {
-        url += "?isActive=true&page=" + page;
-      } else {
-        // Nếu khác all thì dùng ?productCategoriesId=<id>
-        url += `?productCategoriesId=${category}&page=` + page;
+      let result = db.products.getAll();
+
+      // --- 1. QUAN TRỌNG: Lọc theo Store ID trước tiên ---
+      if (filters.storeId) {
+        result = result.filter((p) => p.storeId === filters.storeId);
       }
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Network response was not ok");
+      // 2. Lọc theo tên
+      if (filters.name) {
+        const lowerName = filters.name.toLowerCase();
+        result = result.filter((p) => p.name.toLowerCase().includes(lowerName));
+      }
 
-      const data = await res.json();
+      // 3. Lọc theo danh mục
+      if (filters.category && filters.category !== "all") {
+        const isId = !isNaN(filters.category);
+        if (isId) {
+          result = result.filter(
+            (p) => p.categoryId === parseInt(filters.category)
+          );
+        }
+      }
 
-      // console.log(category, data, url);
+      // 4. Lọc giá
+      if (filters.minPrice)
+        result = result.filter((p) => p.priceBase >= Number(filters.minPrice));
+      if (filters.maxPrice)
+        result = result.filter((p) => p.priceBase <= Number(filters.maxPrice));
 
-      // Trả về danh sách products
+      // 5. Phân trang
+      const pageSize = 8;
+      const totalElements = result.length;
+      const totalPages = Math.ceil(totalElements / pageSize);
+      const currentPage = filters.page || 1;
+      const startIndex = (currentPage - 1) * pageSize;
+
+      // Sắp xếp
+      const sortedResult = result.sort((a, b) => b.id - a.id);
+      const paginatedData = sortedResult.slice(
+        startIndex,
+        startIndex + pageSize
+      );
+
       return {
-        products: data?.data?.content || [],
-        totalPages: data?.data?.totalPages || 0,
+        products: paginatedData,
+        totalPages: totalPages,
+        totalElements: totalElements,
       };
     },
-    staleTime: 1000 * 60, // cache 1 phút
+    staleTime: 0,
   });
 }
 
-// Helper format giá
 export function formatPrice(price) {
   if (price == null) return "0₫";
   return Number(price).toLocaleString("vi-VN", {

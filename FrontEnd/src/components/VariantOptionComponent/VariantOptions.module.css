@@ -1,0 +1,21 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.loading {
+  font-size: 14px;
+  color: #555;
+}
+
+.debug {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #333;
+  background: #f0f0f0;
+  padding: 8px;
+  border-radius: 8px;
+}

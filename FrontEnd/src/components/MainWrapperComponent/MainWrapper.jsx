@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useCategory } from "../../Hooks/useCategory";
-import { useProducts } from "../../Hooks/useProducts";
-
+import { useFilters } from "../../context/FilterProvider";
+import { useProducts } from "../../hooks/useProducts";
 
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";
@@ -13,21 +12,27 @@ import ProductList from "../ProductComponent/ProductListComponent/ProductListCom
 const banners = [banner2, banner3, banner4, banner5];
 export default function MainComponent({ onProductDetail }) {
   const [current, setCurrent] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Get the selected category from the context
-  const [selectedCategory] = useCategory();
+  // LẤY FILTER TỪ CONTEXT:
+  // 'filters' là một object chứa MỌI THỨ (name, category, price, page...)
+  const { filters, setFilters } = useFilters();
 
-  // Sử dụng useProducts với selectedCategory
-  const { data, isLoading, error } = useProducts(selectedCategory, currentPage);
+  // TRUYỀN TOÀN BỘ OBJECT 'filters' VÀO useProducts
+  // useProducts sẽ tự động chạy lại khi 'filters' thay đổi
+  const { data, isLoading, error } = useProducts(filters);
 
-  const { products, totalPages } = data || { products: [] };
+  // Lấy 'products' và 'totalPages' từ 'data'
+  const { products, totalPages } = data || { products: [], totalPages: 0 };
 
-  // Mỗi khi category thay đổi => reset về page 1
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory]);
-
+  // HÀM XỬ LÝ PHÂN TRANG
+  const handlePageChange = (newPage) => {
+    // Gọi 'setFilters' để cập nhật trang trong context
+    setFilters({ page: newPage });
+    // Cuộn lên đầu
+    document
+      .getElementById("home-service")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Auto slide
   useEffect(() => {
@@ -102,165 +107,21 @@ export default function MainComponent({ onProductDetail }) {
         </div>
         <ProductList products={products} onProductDetail={onProductDetail} />
 
-
         <div className="page-nav">
           <ul className="page-nav-list">
             {Array.from({ length: totalPages }, (_, i) => (
               <li
                 key={i + 1}
                 className={`page-nav-item ${
-                  currentPage === i + 1 ? "active" : ""
+                  filters.page === i + 1 ? "active" : ""
                 }`}
               >
-                <a
-                  href="#!"
-                  onClick={() => {
-                    setCurrentPage(i + 1);
-                    document
-                      .getElementById("home-service")
-                      .scrollIntoView({ behavior: "smooth" });
-                  }}
-                >
+                <a href="#!" onClick={() => handlePageChange(i + 1)}>
                   {i + 1}
                 </a>
               </li>
             ))}
           </ul>
-        </div>
-      </div>
-
-      {/* Account User */}
-      <div className="container" id="account-user">
-        <div className="main-account">
-          <div className="main-account-header">
-            <h3>Thông tin tài khoản của bạn</h3>
-            <p>Quản lý thông tin để bảo mật tài khoản</p>
-          </div>
-
-          <div className="main-account-body">
-            <div className="main-account-body-col">
-              <form className="info-user">
-                <div className="form-group">
-                  <label htmlFor="infoname" className="form-label">
-                    Họ và tên
-                  </label>
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="infoname"
-                    id="infoname"
-                    placeholder=""
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="infophone" className="form-label">
-                    Số điện thoại
-                  </label>
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="infophone"
-                    id="infophone"
-                    disabled
-                    placeholder=""
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="infoemail" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    className="form-control"
-                    type="email"
-                    name="infoemail"
-                    id="infoemail"
-                    placeholder="Thêm địa chỉ email của bạn"
-                  />
-                  <span className="inforemail-error form-message"></span>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="infoaddress" className="form-label">
-                    Địa chỉ
-                  </label>
-                  <input
-                    className="form-control"
-                    type="text"
-                    name="infoaddress"
-                    id="infoaddress"
-                    placeholder="Thêm địa chỉ giao hàng của bạn"
-                  />
-                </div>
-              </form>
-            </div>
-
-            <div className="main-account-body-col">
-              <form className="change-password">
-                <div className="form-group">
-                  <label className="form-label w60">Mật khẩu hiện tại</label>
-                  <input
-                    className="form-control"
-                    type="password"
-                    id="password-cur-info"
-                    placeholder="Nhập mật khẩu hiện tại"
-                  />
-                  <span className="password-cur-info-error form-message"></span>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label w60">Mật khẩu mới </label>
-                  <input
-                    className="form-control"
-                    type="password"
-                    id="password-after-info"
-                    placeholder="Nhập mật khẩu mới"
-                  />
-                  <span className="password-after-info-error form-message"></span>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label w60">
-                    Xác nhận mật khẩu mới
-                  </label>
-                  <input
-                    className="form-control"
-                    type="password"
-                    id="password-comfirm-info"
-                    placeholder="Nhập lại mật khẩu mới"
-                  />
-                  <span className="password-after-comfirm-error form-message"></span>
-                </div>
-              </form>
-            </div>
-
-            <div className="main-account-body-row">
-              <div>
-                <button id="save-info-user">
-                  <i className="fa-regular fa-floppy-disk"></i> Lưu thay đổi
-                </button>
-              </div>
-              <div>
-                <button id="save-password">
-                  <i className="fa-regular fa-key"></i> Đổi mật khẩu
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Order history */}
-      <div className="container" id="order-history">
-        <div className="main-account">
-          <div className="main-account-header">
-            <h3>Quản lý đơn hàng của bạn</h3>
-            <p>Xem chi tiết, trạng thái của những đơn hàng đã đặt.</p>
-          </div>
-          <div className="main-account-body">
-            <div className="order-history-section"></div>
-          </div>
         </div>
       </div>
     </main>

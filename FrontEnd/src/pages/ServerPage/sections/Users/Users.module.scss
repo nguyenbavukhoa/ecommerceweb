@@ -1,0 +1,258 @@
+.section {
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Control Bar */
+.adminControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  color: var(--dark-gray);
+  margin: 0;
+  font-weight: 700;
+}
+
+.searchBox {
+  position: relative;
+  width: 300px;
+  i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+  input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    &:focus {
+      border-color: var(--red);
+    }
+  }
+}
+
+.filterGroup select {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Table */
+.tableContainer {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  th {
+    background-color: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #eee;
+  }
+  td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    color: #333;
+  }
+  tr:hover {
+    background-color: #fcfcfc;
+  }
+}
+
+.userName {
+  font-weight: 600;
+  color: var(--dark-gray);
+  font-size: 15px;
+}
+.userEmail {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* Badges */
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  &.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.blocked {
+    background: #ffebee;
+    color: #c62828;
+  }
+  &.customer {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+  &.admin {
+    background: #fff3e0;
+    color: #e67e22;
+  }
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.btnLock {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  &:hover {
+    background-color: #c0392b;
+  }
+}
+.btnUnlock {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  &:hover {
+    background-color: #219150;
+  }
+}
+
+.tabContainer {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #777;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background-color: #f5f5f5;
+    color: #333;
+  }
+
+  &.active {
+    background-color: #e3f2fd; /* Xanh dương nhạt */
+    color: #1976d2;
+  }
+}
+
+/* Sửa lại màu badge cho đẹp hơn */
+.badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+  }
+  &.blocked {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+  }
+  &.pending {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffe0b2;
+  } /* Màu cam */
+
+  /* Role badges */
+  &.admin {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffe0b2;
+  }
+  &.customer {
+    background: #f3e5f5;
+    color: #8e24aa;
+    border: 1px solid #e1bee7;
+  }
+}
+
+/* Thêm nút Duyệt / Từ chối */
+.btnApprove {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  &:hover {
+    background-color: #219150;
+  }
+}
+
+.btnReject {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  &:hover {
+    background-color: #c0392b;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 15px;
+  }
+  .adminControl {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .searchBox {
+    width: 100%;
+  }
+}

@@ -22,10 +22,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host"
   },
   "eslintConfig": {
     "extends": [
@@ -44,5 +43,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "sass": "^1.94.0",
+    "vite-plugin-pwa": "^1.1.0",
+    "vite-plugin-svgr": "^4.5.0"
   }
 }

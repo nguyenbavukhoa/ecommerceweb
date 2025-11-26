@@ -1,0 +1,55 @@
+.profilePageWrapper {
+  background-color: #f5f5f5;
+  padding: 100px 0px 30px 0px;
+}
+
+.profilePage {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 10px; /* Thêm padding ngang để không dính sát lề trên mobile */
+}
+
+.checkoutRow {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.checkoutColTitle {
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+  padding-left: 33px;
+}
+
+.checkoutColTitle::before {
+  background: #b5292f;
+  width: 4px;
+  height: 17px;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block;
+  content: "";
+  position: absolute;
+}
+
+.contentPadding {
+  padding: 20px;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .profilePageWrapper {
+    padding-top: 20px; /* Giảm khoảng cách trên cùng */
+  }
+
+  .contentPadding {
+    padding: 15px; /* Giảm padding nội dung */
+  }
+}

@@ -1,0 +1,416 @@
+/* --- HeaderComponent.module.scss --- */
+
+$red: var(--red, #b5292f);
+$white: var(--white, #fff);
+$text-color: var(--text-color, #333);
+$black: var(--black, #000);
+
+/* --- HEADER MIDDLE --- */
+.headerMiddle {
+  background-color: $white;
+  box-shadow: inset 0px -0.5px 0px #e6e6e6;
+  position: relative;
+
+  .container {
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1130px;
+    margin: 0 auto;
+    position: relative;
+    gap: 15px; /* Khoảng cách giữa các nhóm */
+  }
+}
+
+/* --- GROUP 1: LEFT (Logo + Store Selector) --- */
+.headerLeftGroup {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Logo */
+.headerLogo {
+  width: 100px;
+  height: 50px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.headerLogoImg {
+  width: 130%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.3);
+  transform-origin: center;
+}
+
+/* Store Selector (Style đẹp) */
+.storeSelectorWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  /* Icon location đỏ */
+  i {
+    position: absolute;
+    left: 10px;
+    color: $red;
+    font-size: 14px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .storeSelect {
+    padding: 6px 10px 6px 28px; /* Chừa chỗ cho icon */
+    border-radius: 20px;
+    border: 1px solid #eee;
+    background-color: #f9f9f9;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    appearance: none; /* Bỏ mũi tên mặc định xấu xí của browser */
+
+    /* Thêm mũi tên custom */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 8px;
+    padding-right: 25px;
+
+    &:hover {
+      border-color: $red;
+      background-color: #fff;
+    }
+  }
+}
+
+/* --- GROUP 2: CENTER SEARCH --- */
+.headerMiddleCenter {
+  flex: 1;
+  max-width: 500px;
+
+  .formSearch {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+
+    .searchBtn {
+      background-color: #f0f0f0;
+      border-top-left-radius: 99px;
+      border-bottom-left-radius: 99px;
+      border: none;
+      outline: none;
+      font-size: 18px;
+      height: 40px;
+      padding: 0 15px;
+      color: $text-color;
+      display: flex;
+      align-items: center;
+    }
+
+    .input {
+      height: 40px;
+      outline: none;
+      border: none;
+      background-color: #f0f0f0;
+      padding: 10px 15px 10px 0;
+      border-top-right-radius: 99px;
+      border-bottom-right-radius: 99px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .filterBtn {
+      background-color: $red;
+      height: 32px;
+      color: $white;
+      padding: 0 15px;
+      border-radius: 20px;
+      position: absolute;
+      right: 5px;
+      top: 4px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+}
+
+/* --- GROUP 3: RIGHT MENU --- */
+.headerRight {
+  .list {
+    display: flex;
+    column-gap: 15px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    align-items: center;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+
+    & > i {
+      font-size: 22px;
+      margin-right: 8px;
+      color: $red;
+    }
+
+    /* Auth Text */
+    .authContainer {
+      display: flex;
+      flex-direction: column;
+      .textDndk {
+        font-size: 11px;
+        color: #666;
+      }
+      .textTk {
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+
+    /* Cart Badge */
+    .cartIconMenu {
+      position: relative;
+      .count {
+        color: $white;
+        background: $red;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 18px;
+        font-size: 11px;
+        font-weight: 600;
+        position: absolute;
+        top: -8px;
+        right: -8px;
+      }
+    }
+
+    /* Dropdown */
+    .dropdownMenu {
+      /* ... Giữ nguyên style dropdown cũ ... */
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: $white;
+      border: 1px solid #eee;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      width: 200px;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s;
+      z-index: 100;
+
+      li a {
+        display: block;
+        padding: 10px 15px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        &:hover {
+          background: #f5f5f5;
+        }
+      }
+    }
+    &:hover .dropdownMenu {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* --- HEADER BOTTOM --- */
+.headerBottom {
+  /* ... Giữ nguyên style cũ ... */
+  background-color: $white;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+  z-index: 14;
+  position: sticky;
+  top: 60px; /* Canh chỉnh */
+
+  .menuList {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 10px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    } /* Ẩn scrollbar cho gọn */
+  }
+
+  .menuLink {
+    display: block;
+    padding: 12px 15px;
+    color: $black;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+
+    &.active,
+    &:hover {
+      color: $red;
+      border-bottom-color: $red;
+    }
+  }
+}
+
+/* --- MOBILE SEARCH --- */
+.searchIconMobile,
+.mobileSearchContainer {
+  display: none;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
+  .headerMiddleCenter {
+    display: none;
+  } /* Ẩn search to */
+
+  .searchIconMobile {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    color: #333;
+    cursor: pointer;
+  }
+
+  /* Header Left: Logo nhỏ lại, Store Selector giữ nguyên */
+  .headerLeftGroup {
+    gap: 10px;
+    flex: 1; /* Chiếm khoảng trống còn lại */
+  }
+
+  .headerLogo {
+    width: 80px;
+  }
+
+  /* Mobile Search Dropdown */
+  .mobileSearchContainer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: $white;
+    padding: 10px 15px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+
+    /* Animation */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+
+    &.open {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .mobileForm {
+      position: relative;
+      input {
+        width: 100%;
+        height: 40px;
+        padding: 0 40px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        background: #f5f5f5;
+        outline: none;
+        &:focus {
+          background: #fff;
+          border-color: $red;
+        }
+      }
+      .mobileSearchIconDeco {
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        color: #888;
+      }
+      .mobileFilterBtn {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        background: none;
+        border: none;
+        color: $red;
+        font-size: 18px;
+        padding: 5px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .headerMiddle .container {
+    padding: 10px;
+  }
+
+  /* Ẩn text user/cart trên mobile cho gọn */
+  .headerRight .item {
+    span {
+      display: none;
+    }
+    .authContainer {
+      display: none;
+    }
+
+    /* Chỉ hiện icon */
+    & > i {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Badge vẫn hiện */
+    .cartIconMenu .count {
+      top: -5px;
+      right: -5px;
+    }
+  }
+
+  /* Store Selector trên mobile: Thu nhỏ lại chút */
+  .storeSelectorWrapper {
+    .storeSelect {
+      max-width: 120px; /* Giới hạn chiều rộng */
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 5px 20px 5px 22px; /* Thu nhỏ padding */
+    }
+    i {
+      font-size: 12px;
+      left: 8px;
+    }
+  }
+
+  .headerBottom .menuList {
+    justify-content: flex-start; /* Cuộn ngang */
+  }
+}

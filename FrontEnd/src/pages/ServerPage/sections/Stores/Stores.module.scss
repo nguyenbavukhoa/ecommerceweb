@@ -1,0 +1,384 @@
+.section {
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Control Bar */
+.adminControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  color: var(--dark-gray);
+  margin: 0;
+  font-weight: 700;
+}
+
+.searchBox {
+  position: relative;
+  width: 300px;
+
+  i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border 0.2s;
+
+    &:focus {
+      border-color: var(--red);
+    }
+  }
+}
+
+.btnAdd {
+  background-color: var(--red);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: #a02227;
+  }
+}
+
+/* Table */
+.tableContainer {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background-color: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #eee;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    color: #333;
+  }
+
+  tr:hover {
+    background-color: #fcfcfc;
+  }
+}
+
+.storeName {
+  font-weight: 600;
+  color: var(--dark-gray);
+  font-size: 15px;
+}
+
+.storeAddr {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.revenue {
+  font-weight: 600;
+  color: #27ae60;
+}
+
+/* Badges */
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+  }
+  &.inactive {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+  }
+  &.pending {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffe0b2;
+  }
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnEdit,
+.btnDelete {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnEdit {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  &:hover {
+    background-color: #bbdefb;
+  }
+}
+
+.btnDelete {
+  background-color: #ffebee;
+  color: #c62828;
+  &:hover {
+    background-color: #ffcdd2;
+  }
+}
+
+.btnReview {
+  background-color: #f39c12; /* Màu cam */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  &:hover {
+    background-color: #d35400;
+  }
+}
+
+.btnLock {
+  background-color: #e74c3c; /* Màu đỏ */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #c0392b;
+  }
+}
+
+/* --- RESPONSIVE MOBILE (Dưới 768px) --- */
+@media (max-width: 768px) {
+  .section {
+    padding: 10px;
+    background-color: #f0f2f5; /* Màu nền tối hơn chút để nổi bật thẻ card */
+  }
+
+  /* 1. Tối ưu thanh công cụ (Header) */
+  .adminControl {
+    flex-direction: column;
+    align-items: stretch; /* Kéo dãn full chiều ngang */
+    gap: 12px;
+  }
+
+  .adminControlLeft {
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .searchBox {
+    width: 100%; /* Full width */
+
+    input {
+      padding: 12px 15px 12px 40px; /* To hơn để dễ bấm */
+    }
+  }
+
+  .btnAdd {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* 2. Biến Table thành dạng Card (Thẻ) */
+  .tableContainer {
+    background: transparent;
+    box-shadow: none;
+    overflow: visible; /* Tắt scroll ngang */
+  }
+
+  .table {
+    display: block;
+
+    /* Ẩn Header của bảng */
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+    }
+
+    /* Mỗi dòng (tr) thành 1 thẻ Card */
+    tr {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #eee;
+      position: relative;
+    }
+
+    /* Xử lý từng ô dữ liệu (td) */
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+      text-align: right; /* Dữ liệu nằm bên phải */
+      width: 100%;
+
+      /* Label giả (để biết ô này là gì) */
+      &::before {
+        content: attr(
+          data-label
+        ); /* Sẽ cần thêm data-label ở JSX hoặc dùng fix cứng bên dưới */
+        font-weight: 600;
+        color: #666;
+        text-align: left;
+        margin-right: 15px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      &:last-child {
+        border-bottom: none;
+        padding-top: 15px;
+        justify-content: flex-end; /* Nút hành động sang phải */
+        gap: 10px;
+      }
+    }
+  }
+
+  /* --- FIX CỨNG LABEL (Nếu không muốn sửa JSX) --- */
+  /* Dùng kỹ thuật chọn theo thứ tự cột để thêm nhãn */
+
+  /* Cột 1: ID */
+  .table td:nth-of-type(1)::before {
+    content: "Mã CH:";
+  }
+
+  /* Cột 2: Thông tin (Name/Address) */
+  /* Đặc biệt: Muốn tên quán to lên và nằm riêng */
+  .table td:nth-of-type(2) {
+    display: block;
+    text-align: left;
+    order: -1; /* Đẩy lên đầu thẻ card */
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+
+    &::before {
+      content: none;
+    } /* Không hiện label cho tên quán */
+  }
+  .storeName {
+    font-size: 1.1rem;
+    color: var(--red); /* Màu chủ đạo cho nổi */
+    margin-bottom: 4px;
+  }
+  .storeAddr {
+    white-space: normal; /* Cho phép xuống dòng địa chỉ */
+    max-width: 100%;
+  }
+
+  /* Cột 3: Chủ sở hữu */
+  .table td:nth-of-type(3)::before {
+    content: "Chủ quán:";
+  }
+
+  /* Cột 4: Doanh thu */
+  .table td:nth-of-type(4) {
+    flex-wrap: wrap; /* Cho phép xuống dòng nếu số quá dài */
+    &::before {
+      content: "Doanh thu:";
+    }
+  }
+
+  /* Cột 5: Trạng thái */
+  .table td:nth-of-type(5)::before {
+    content: "Trạng thái:";
+  }
+
+  /* Cột 6: Hành động (Đã xử lý ở trên là last-child) */
+  .table td:nth-of-type(6)::before {
+    content: none;
+  }
+
+  /* Tăng kích thước nút bấm cho dễ chạm trên điện thoại */
+  .btnEdit,
+  .btnDelete,
+  .btnLock {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  .btnReview {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
