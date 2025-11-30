@@ -6,8 +6,13 @@ const sidebarItems = [
   // { key: "Products", icon: "fa-light fa-pot-food", label: "Sản phẩm" },
   { key: "Stores", icon: "fa-light fa-store", label: "Đối tác cửa hàng" },
   { key: "Users", icon: "fa-light fa-users", label: "Người dùng" },
-  { key: "Drones", icon: "fa-light fa-drone", label: "Quản lý Drone" },
+  {
+    key: "Transactions",
+    icon: "fa-light fa-basket-shopping",
+    label: "Giao dịch",
+  },
   { key: "Revenues", icon: "fa-light fa-wallet", label: "Doanh thu" },
+  { key: "Drones", icon: "fa-light fa-drone", label: "Quản lý Drone" },
 ];
 
 const Sidebar = ({ isOpen, activeTab, onTabClick, userName, onLogout }) => {

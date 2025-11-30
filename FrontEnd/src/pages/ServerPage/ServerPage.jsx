@@ -14,6 +14,7 @@ import Stores from "./sections/Stores/Stores";
 import Users from "./sections/Users/Users";
 import Drones from "./sections/Drones/Drones";
 import Revenues from "./sections/Revenues/Revenues";
+import Transactions from "./sections/Transactions/Transactions";
 // import Statistics from "./sections/Statistics/Statistics";
 
 import styles from "./ServerPage.module.css";
@@ -53,7 +54,7 @@ const ServerPage = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Dashboard":
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActiveTab} />;
       case "Users":
         return <Users />;
       case "Stores":
@@ -63,9 +64,11 @@ const ServerPage = () => {
       case "Revenues":
         return <Revenues />;
       // case "Statistics":
-      //   return <Statistics />;
+      //   return <Statistics />;\
+      case "Transactions":
+        return <Transactions />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActiveTab} />;
     }
   };
 

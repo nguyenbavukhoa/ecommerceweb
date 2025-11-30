@@ -393,7 +393,7 @@ export function useUserDetail(userId) {
   });
 }
 
-// 4. Hook Mutation Cập nhật/Tạo mới Người dùng (useSaveUser)
+// 4. Hook Mutation Cập nhật/Tạo mới Người dùng
 export function useSaveUser() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -414,10 +414,21 @@ export function useSaveUser() {
         : variables.id
         ? "Đã lưu thông tin người dùng thành công!"
         : "Đã tạo tài khoản mới thành công!";
-      showToast("success", message);
+
+      // [FIX] Sửa cú pháp showToast
+      showToast({
+        title: "Thành công",
+        message: message,
+        type: "success",
+      });
     },
     onError: (error) => {
-      showToast("error", `Lỗi: ${error.message}`);
+      // [FIX] Sửa cú pháp showToast
+      showToast({
+        title: "Thất bại",
+        message: `Lỗi: ${error.message}`,
+        type: "error",
+      });
       throw error;
     },
   });
@@ -538,7 +549,7 @@ export function useStores() {
 //   });
 // }
 
-// 9. Yêu cầu rút tiền
+// 9. Yêu cầu rút tiền (Lấy danh sách)
 export function useWithdrawRequests() {
   return useQuery({
     queryKey: ["withdrawRequests"],
@@ -547,6 +558,60 @@ export function useWithdrawRequests() {
       return db.withdraws.getAll();
     },
     staleTime: 0,
+  });
+}
+
+// [MỚI] Hook Lấy thông tin Ví tiền của Store (Dành cho Store Admin)
+export function useStoreWallet(storeId) {
+  return useQuery({
+    queryKey: ["storeWallet", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      // Giảm delay xuống thấp chút để polling mượt hơn
+      await new Promise((r) => setTimeout(r, 100));
+      return db.wallet.getStats(storeId);
+    },
+    staleTime: 0,
+    refetchInterval: 3000, // [QUAN TRỌNG]: Tự động lấy dữ liệu mới mỗi 3 giây
+  });
+}
+
+// [MỚI] Hook Tạo yêu cầu rút tiền (QUAN TRỌNG VỚI STORE WALLET)
+export function useCreateWithdraw() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (requestData) => {
+      await new Promise((r) => setTimeout(r, 500));
+      return db.withdraws.create(requestData);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries(["storeWallet", variables.storeId]);
+      queryClient.invalidateQueries(["withdrawRequests"]);
+    },
+    onError: (err) => {
+      // Ném lỗi để component gọi có thể bắt được
+      throw err;
+    },
+  });
+}
+
+// [MỚI] Hook Cập nhật trạng thái Rút tiền (Duyệt/Từ chối)
+export function useUpdateWithdraw() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status }) => {
+      await new Promise((r) => setTimeout(r, 500));
+      return db.withdraws.updateStatus(id, status);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["withdrawRequests"]);
+    },
+    onError: (err) => {
+      // Ném lỗi để component gọi có thể bắt được
+      throw err;
+    },
   });
 }
 
@@ -575,24 +640,31 @@ export function useCreateStore() {
       return db.stores.add(newStoreData);
     },
     onSuccess: () => {
-      // Refresh danh sách store (cả public và admin)
       queryClient.invalidateQueries(["publicStores"]);
       queryClient.invalidateQueries(["serverStores"]);
-      showToast("success", "Tạo cửa hàng mới thành công!");
+
+      showToast({
+        title: "Thành công",
+        message: "Tạo cửa hàng mới thành công!",
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
   });
 }
 
-// 12. Hook Update Store (Sửa lại chút để tổng quát hơn)
+// 12. Hook Update Store
 export function useUpdateStore() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
   return useMutation({
-    // Nhận object { id, data } thay vì { storeId, data } cho đồng bộ
     mutationFn: async ({ id, data }) => {
       await new Promise((r) => setTimeout(r, 500));
       return db.stores.update(id, data);
@@ -600,21 +672,29 @@ export function useUpdateStore() {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(["publicStores"]);
       queryClient.invalidateQueries(["serverStores"]);
-      // Nếu đang xem chi tiết 1 store thì refresh nó luôn
       queryClient.invalidateQueries(["storeInfo", variables.id]);
 
-      // Thông báo
       const msg = variables.data.status
         ? "Cập nhật trạng thái thành công!"
         : "Lưu thông tin thành công!";
-      showToast("success", msg);
+
+      showToast({
+        title: "Thành công",
+        message: msg,
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
   });
 }
-// 13. Hook Tạo User Mới (Server Admin dùng)
+
+// 13. Hook Tạo User Mới
 export function useCreateUser() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -625,17 +705,24 @@ export function useCreateUser() {
       return db.users.create(newUserData);
     },
     onSuccess: () => {
-      // Refresh danh sách user cho server
       queryClient.invalidateQueries(["serverUsers"]);
-      showToast("success", "Tạo tài khoản mới thành công!");
+      showToast({
+        title: "Thành công",
+        message: "Tạo tài khoản mới thành công!",
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
   });
 }
 
-// 14. Hook Cập nhật User (Server Admin dùng)
+// 14. Hook Cập nhật User
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -647,16 +734,24 @@ export function useUpdateUser() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(["serverUsers"]);
-      // Nếu đang xem chi tiết thì refresh luôn
       queryClient.invalidateQueries(["userDetail", variables.id]);
 
       const msg = variables.status
         ? "Cập nhật trạng thái thành công!"
         : "Cập nhật thông tin thành công!";
-      showToast("success", msg);
+
+      showToast({
+        title: "Thành công",
+        message: msg,
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
   });
 }
@@ -670,16 +765,23 @@ export function useDeleteStore() {
   return useMutation({
     mutationFn: async (storeId) => {
       await new Promise((r) => setTimeout(r, 500));
-      // Gọi hàm delete trong mockData (cần thêm hàm này vào mockData.js sau)
       return db.stores.delete(storeId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["serverStores"]);
       queryClient.invalidateQueries(["publicStores"]);
-      showToast("success", "Đã xóa cửa hàng vĩnh viễn!");
+      showToast({
+        title: "Thành công",
+        message: "Đã xóa cửa hàng vĩnh viễn!",
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
   });
 }
@@ -698,10 +800,31 @@ export function useDeleteUser() {
     onSuccess: () => {
       queryClient.invalidateQueries(["serverUsers"]);
       queryClient.invalidateQueries(["customers"]);
-      showToast("success", "Đã xóa tài khoản vĩnh viễn!");
+      showToast({
+        title: "Thành công",
+        message: "Đã xóa tài khoản vĩnh viễn!",
+        type: "success",
+      });
     },
     onError: (err) => {
-      showToast("error", "Lỗi: " + err.message);
+      showToast({
+        title: "Lỗi",
+        message: err.message,
+        type: "error",
+      });
     },
+  });
+}
+
+// [MỚI] Hook lấy thống kê tài chính toàn hệ thống (Cho Super Admin)
+export function useSystemFinance() {
+  return useQuery({
+    queryKey: ["systemFinance"],
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 300));
+      return db.wallet.getSystemStats();
+    },
+    staleTime: 0,
+    refetchInterval: 5000, // Tự cập nhật 5s/lần
   });
 }
