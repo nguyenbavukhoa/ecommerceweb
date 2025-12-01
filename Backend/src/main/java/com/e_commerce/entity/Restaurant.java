@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Entity
 @Data
 @Builder
@@ -23,4 +26,14 @@ public class Restaurant {
     private String code;
 
     private Boolean active = true;
+
+    private String address;
+
+    private String phone;
+
+    private String description;
+
+    private LocalTime openTime;
+
+    private LocalTime closeTime;
 }

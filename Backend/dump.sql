@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6gvybgl27QX7k89nSLu7sLfF9oWmBjIEeXWP9dXvO11If8BsNrNvlHp9lu21krp
+\restrict hFlVXwqeUOEGRblorzUeipuPWu1lxPhcZjWjqjLNBTMOGcuPRaMCOf7Nc6d4bVA
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -410,6 +410,7 @@ CREATE TABLE public.voucher (
 
 COPY public.account (active, id, status, created_at, updated_at, account_name, email, password, role) FROM stdin;
 t	506049779	t	2025-11-25 16:30:48.967859	2025-11-25 16:30:58.608307	Nguyen Van A	kien06112004@gmail.com	$2a$10$MndNii7V15gjp8eJ1Up3ROoDeM6ZmEdE89lljAhd/xsaZ3/hv1jtW	USER
+t	1789702709	f	2025-11-26 12:13:32.443536	2025-11-26 12:13:32.443536	VuKhoa	khoa9877223@gmail.com	$2a$10$7EsD3HTkS3dMqRxgoTH5Je..CRmgDbZ5iWxFVE9Lg7dI3jxTeGHsW	USER
 \.
 
 
@@ -568,14 +569,7 @@ COPY public.payment_method (id, is_active, created_at, updated_at, code, descrip
 --
 
 COPY public.product (category_id, id, price_base, quantity, created_at, updated_at, description, img_main, name, status) FROM stdin;
-1	1	65000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò kèm phô mai thơm béo	burger_bo_pho_mai.jpg	Burger Bò Phô Mai	ACTIVE
-1	2	59000.00	60	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger gà chiên giòn rụm	burger_ga_gion.jpg	Burger Gà Giòn	ACTIVE
-1	3	62000.00	45	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger tôm chiên kèm rau tươi	burger_tom.jpg	Burger Tôm	ACTIVE
-1	4	61000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger cá chiên giòn	burger_ca.jpg	Burger Cá	ACTIVE
-1	5	69000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò nướng sốt BBQ	burger_bbq.jpg	Burger Bò Nướng BBQ	ACTIVE
-2	6	129000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza topping hải sản tươi ngon	pizza_hai_san.jpg	Pizza Hải Sản	ACTIVE
 2	7	119000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza thịt xông khói đậm vị	pizza_thit_xong_khoi.jpg	Pizza Thịt Xông Khói	ACTIVE
-2	8	125000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza bò phô mai tan chảy	pizza_bo_pho_mai.jpg	Pizza Bò Phô Mai	ACTIVE
 2	9	99000.00	30	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza rau củ tươi mát	pizza_chay.jpg	Pizza Chay	ACTIVE
 2	10	109000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza truyền thống Ý	pizza_truyen_thong.jpg	Pizza Truyền Thống	ACTIVE
 3	11	45000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Miếng gà rán giòn tan	ga_ran_truyen_thong.jpg	Gà Rán Truyền Thống	ACTIVE
@@ -618,6 +612,13 @@ COPY public.product (category_id, id, price_base, quantity, created_at, updated_
 3	48	52000.00	80	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Gà rán kèm sốt phô mai	ga_sot_pho_mai.jpg	Gà Sốt Phô Mai	ACTIVE
 4	49	24000.00	130	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Trà tắc pha mật ong	tra_tac_mat_ong.jpg	Trà Tắc Mật Ong	ACTIVE
 5	50	25000.00	100	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Bánh chuối chiên giòn vàng	banh_chuoi_chien.jpg	Bánh Chuối Chiên	ACTIVE
+1	5	69000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò nướng sốt BBQ	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150769/combo_burger_2_mi_ng_b_n_ng_2_jw92up.jpg	Burger Bò Nướng BBQ	ACTIVE
+1	2	59000.00	60	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger gà chiên giòn rụm	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150352/bua-sang-nhanh-gon-va-day-du-dinh-duong-cung-banh-hamburger-2a4ce1_c0ot2g.jpg	Burger Gà Giòn	ACTIVE
+1	1	65000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger bò kèm phô mai thơm béo	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150669/3-cach-lam-banh-hamburger-ga-ngon-nhu-ngoai-tiem-202201070934570531_bkuoxd.jpg	Burger Bò Phô Mai	ACTIVE
+1	4	61000.00	50	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger cá chiên giòn	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150813/fishburger24_g9oiiv.png	Burger Cá	ACTIVE
+1	3	62000.00	45	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Burger tôm chiên kèm rau tươi	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150886/tom_hhfzix.webp	Burger Tôm	ACTIVE
+2	6	129000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza topping hải sản tươi ngon	https://cdn.tgdd.vn/2020/09/CookProduct/1200bzhspm-1200x676.jpg	Pizza Hải Sản	ACTIVE
+2	8	125000.00	40	2025-11-25 09:30:35.73636	2025-11-25 09:30:35.73636	Pizza bò phô mai tan chảy	https://res.cloudinary.com/dgmi3soo9/image/upload/v1764150969/cach-lam-banh-pizza-bo-tai-nha-ngon-khong-kem-ngoai-tiem-202205241428465475_wmztag.jpg	Pizza Bò Phô Mai	ACTIVE
 \.
 
 
@@ -626,6 +627,7 @@ COPY public.product (category_id, id, price_base, quantity, created_at, updated_
 --
 
 COPY public.restaurant (active, id, code, name) FROM stdin;
+f	1	NH001	Nhà hàng Hải Sản Biển Đông
 \.
 
 
@@ -643,6 +645,7 @@ COPY public.restaurant_inventory (id, price, product_id, stock_quantity) FROM st
 
 COPY public.token (account_id, id, created_at, expiration_time, updated_at, token, token_type) FROM stdin;
 506049779	2	2025-11-25 16:31:03.529128	2025-12-02 16:31:03.528123	2025-11-25 16:31:03.529128	eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sInN1YiI6ImtpZW4wNjExMjAwNEBnbWFpbC5jb20iLCJpYXQiOjE3NjQwNjMwNjMsImV4cCI6MTc2NDY2Nzg2M30.znVN-rq_hQCWjzifL5lbKrzdm1B-8QS1AoCHIq09H7M	REFRESH_TOKEN
+1789702709	3	2025-11-26 12:13:32.495533	2025-11-26 12:18:32.492463	2025-11-26 12:13:32.495533	84b6608b-beed-41dd-8d52-fb08a87e9702	EMAIL_VERIFICATION
 \.
 
 
@@ -666,7 +669,7 @@ COPY public.voucher (active, amount, id, min_order_value, percent, created_at, e
 -- Name: restaurant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.restaurant_id_seq', 1, false);
+SELECT pg_catalog.setval('public.restaurant_id_seq', 1, true);
 
 
 --
@@ -680,7 +683,7 @@ SELECT pg_catalog.setval('public.restaurant_inventory_id_seq', 1, false);
 -- Name: token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.token_id_seq', 2, true);
+SELECT pg_catalog.setval('public.token_id_seq', 3, true);
 
 
 --
@@ -1151,5 +1154,5 @@ ALTER TABLE ONLY public.carts
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6gvybgl27QX7k89nSLu7sLfF9oWmBjIEeXWP9dXvO11If8BsNrNvlHp9lu21krp
+\unrestrict hFlVXwqeUOEGRblorzUeipuPWu1lxPhcZjWjqjLNBTMOGcuPRaMCOf7Nc6d4bVA
 

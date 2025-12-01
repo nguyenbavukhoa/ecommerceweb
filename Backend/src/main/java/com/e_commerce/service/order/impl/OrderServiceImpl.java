@@ -264,14 +264,18 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-
-
     @Override
     public PageDTO<OrderDTO> getAllOrders(int page, int size, OrderFilter orderFilter) {
         Account account = accountService.getAccountAuth();
         Specification<Orders> specification = OrderSpecification.filterOrder(orderFilter, account.getId());
         Pageable pageable = PageRequest.of(page-1, size);
         return ordersMapper.convertEntityPageToDTOPage(ordersRepository.findAll(specification, pageable));
+    }
+
+    @Override
+    public PageDTO<OrderDTO> getOrdersByRestaurant(int page, int size, Integer restaurantId) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return ordersMapper.convertEntityPageToDTOPage(ordersRepository.findByRestaurantId(restaurantId, pageable));
     }
 
 

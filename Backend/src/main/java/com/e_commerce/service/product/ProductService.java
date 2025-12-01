@@ -22,4 +22,6 @@ public interface ProductService {
     ProductDetailDTO getProductDetail(Integer id);
 
     void decreaseStock(Integer productId, int quantity);
+
+    PageDTO<ProductDTO> getProductsByRestaurant(int page, int size ,Integer restaurantId);
 }

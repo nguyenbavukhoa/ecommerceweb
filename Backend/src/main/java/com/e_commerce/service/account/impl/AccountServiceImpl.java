@@ -143,6 +143,12 @@ public class AccountServiceImpl implements AccountService {
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
+        if(registrationForm.getRole() == AccountRole.STAFF) {
+            account.setActive(true);
+        }else {
+            account.setActive(false);
+        }
+
         Account savedAccount = accountRepository.save(account);
 
         tokenService.generateToken(account); // Tạo và lưu token xác thực email

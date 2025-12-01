@@ -59,4 +59,18 @@ public class ProductController {
                 new ApiResponse<>(true, "Get product detail successfully", productDetail, null, request.getRequestURI())
         );
     }
+
+    @GetMapping("restaurant/{restaurantId}")
+    public ResponseEntity<ApiResponse<PageDTO<ProductDTO>>> getProductsByRestaurant(
+            @PathVariable Integer restaurantId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            HttpServletRequest request
+        ) {
+        PageDTO<ProductDTO> products = productService.getProductsByRestaurant(page,size, restaurantId);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Get products by restaurant successfully", products, null, request.getRequestURI())
+        );
+    }
+
 }

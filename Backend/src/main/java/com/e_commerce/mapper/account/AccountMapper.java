@@ -31,7 +31,7 @@ public class AccountMapper {
         return Account.builder()
                 .email(registrationForm.getEmail())
                 .accountName(registrationForm.getAccountName())
-                .role((AccountRole.valueOf(registrationForm.getRole())))
+                .role(registrationForm.getRole())
                 .status(false)
                 .active(true)
                 .build();

@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RestaurantRepository extends JpaRepository<Restaurant, Integer> {
     boolean existsByName(String name);
     boolean existsByCode(String code);
+
 }
 

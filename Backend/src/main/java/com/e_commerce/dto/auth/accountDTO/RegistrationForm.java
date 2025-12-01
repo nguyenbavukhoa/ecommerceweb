@@ -1,5 +1,6 @@
 package com.e_commerce.dto.auth.accountDTO;
 
+import com.e_commerce.enums.AccountRole;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,6 @@ public class RegistrationForm {
     private String password;
 
     @NotNull(message = "Role is required")
-    @Pattern(regexp = "ADMIN|USER", message = "Role must be one of: ADMIN, USER")
-    private String role;
+    @Pattern(regexp = "ADMIN|USER|STAFF", message = "Role must be one of: ADMIN, USER, STAFF")
+    private AccountRole role;
 }

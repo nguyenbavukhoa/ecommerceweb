@@ -63,4 +63,16 @@ public class OrderController {
                 new ApiResponse<>(true,"Update order status successfully",updatedOrder,null,request.getRequestURI()));
     }
 
+    @GetMapping("/restaurant/{restaurantId}")
+    public ResponseEntity<ApiResponse<PageDTO<OrderDTO>>> getOrdersByRestaurant(
+            @PathVariable Integer restaurantId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request
+    ){
+        PageDTO<OrderDTO> result = orderService.getOrdersByRestaurant(page,size,restaurantId);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true,"Get orders by restaurant successfully",result,null,request.getRequestURI()));
+    }
+
 }

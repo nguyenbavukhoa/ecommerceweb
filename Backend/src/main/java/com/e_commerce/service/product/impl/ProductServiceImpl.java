@@ -124,4 +124,10 @@ public class ProductServiceImpl implements ProductService {
             throw new CustomException(ErrorResponse.PRODUCT_INSUFFICIENT_STOCK);
         }
     }
+
+    @Override
+    public PageDTO<ProductDTO> getProductsByRestaurant(int page, int size ,Integer restaurantId) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return productMapper.convertProductPageToDTO(productRepository.findByRestaurantId(restaurantId, pageable));
+    }
 }

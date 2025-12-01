@@ -50,6 +50,6 @@ public class Orders extends Timestamped {
     private List<Payment> payments;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", nullable = true)
+    @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 }

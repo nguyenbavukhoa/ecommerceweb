@@ -1,5 +1,6 @@
 package com.e_commerce.entity.product;
 
+import com.e_commerce.entity.Restaurant;
 import com.e_commerce.enums.AvailabilityStatus;
 import com.e_commerce.orther.Timestamped;
 import jakarta.persistence.*;
@@ -40,4 +41,8 @@ public class Product extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 }
