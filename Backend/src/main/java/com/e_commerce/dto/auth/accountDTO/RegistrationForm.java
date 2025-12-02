@@ -27,6 +27,5 @@ public class RegistrationForm {
     private String password;
 
     @NotNull(message = "Role is required")
-    @Pattern(regexp = "ADMIN|USER|STAFF", message = "Role must be one of: ADMIN, USER, STAFF")
     private AccountRole role;
 }

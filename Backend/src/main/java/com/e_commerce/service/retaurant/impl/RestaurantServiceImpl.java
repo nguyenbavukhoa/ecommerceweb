@@ -3,6 +3,7 @@ package com.e_commerce.service.retaurant.impl;
 import com.e_commerce.entity.Restaurant;
 import com.e_commerce.entity.order.Orders;
 import com.e_commerce.enums.OrderStatus;
+import com.e_commerce.orther.IdGenerator;
 import com.e_commerce.repository.RestaurantRepository;
 import com.e_commerce.repository.order.OrdersRepository;
 import com.e_commerce.service.retaurant.RestaurantService;
@@ -33,6 +34,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (restaurantRepository.existsByCode(restaurant.getCode())) {
             throw new RuntimeException("Restaurant with code " + restaurant.getCode() + " already exists");
         }
+        restaurant.setId(IdGenerator.getGenerationId());
         return restaurantRepository.save(restaurant);
     }
 

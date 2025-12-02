@@ -15,6 +15,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT a FROM Account a WHERE a.role = :role")
-    List<Account> findByRole(@Param("role") AccountRole role);
+    @Query("SELECT a FROM Account a WHERE a.role IN :roles")
+    List<Account> findByRoles(@Param("roles") List<AccountRole> roles);
+
 }

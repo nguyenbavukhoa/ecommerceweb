@@ -2,7 +2,9 @@ package com.e_commerce.service.product.impl;
 
 import com.e_commerce.dto.PageDTO;
 import com.e_commerce.dto.product.productDTO.*;
+import com.e_commerce.entity.Restaurant;
 import com.e_commerce.entity.product.Product;
+import com.e_commerce.enums.AvailabilityStatus;
 import com.e_commerce.exceptions.CustomException;
 import com.e_commerce.exceptions.ErrorResponse;
 import com.e_commerce.mapper.product.ProductMapper;
@@ -12,6 +14,7 @@ import com.e_commerce.repository.product.ProductRepository;
 import com.e_commerce.service.product.CategoryService;
 import com.e_commerce.service.product.ProductService;
 import com.e_commerce.service.product.OptionsGroupService;
+import com.e_commerce.service.retaurant.RestaurantService;
 import com.e_commerce.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryService categoryService;
     private final CloudinaryService cloudinaryService;
     private final OptionsGroupService optionsGroupService;
+    private final RestaurantService restaurantService;
 
     @Override
     public ProductUserViewDTO getProductById(Integer id) {
@@ -51,6 +55,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.covertCreateDTOToEntity(productCreateDTO);
         product.setId(IdGenerator.getGenerationId());
         product.setCategory(categoryService.getCategoryEntityById(productCreateDTO.getCategoryId()));
+        product.setStatus(AvailabilityStatus.ACTIVE);
+
+        Restaurant restaurant = restaurantService.getById(productCreateDTO.getRestaurantId());
+        product.setRestaurant(restaurant);
 
         if (productCreateDTO.getImgMain() != null && !productCreateDTO.getImgMain().isEmpty()) {
             Map<String, Object> imageUrl = cloudinaryService.uploadFile(productCreateDTO.getImgMain(), "product");

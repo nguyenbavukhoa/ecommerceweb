@@ -93,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalPrice(total);
         order.setUserInformation(userInformation);
         order.setNote(orderCreateForm.getNote());
+        order.setRestaurant(selectedCartItems.get(0).getProduct().getRestaurant());
 
         order = ordersRepository.save(order);
 

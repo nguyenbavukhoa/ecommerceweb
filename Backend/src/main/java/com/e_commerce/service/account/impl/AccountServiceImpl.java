@@ -352,11 +352,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<AccountDTO> getCustomerInfoList() {
-        List<Account> customers = accountRepository.findByRole(AccountRole.USER);
-        if (customers.isEmpty()) {
+        List<AccountRole> roles = List.of(AccountRole.USER, AccountRole.STAFF);
+        List<Account> accounts = accountRepository.findByRoles(roles);
+        if (accounts.isEmpty()) {
             throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
         }
-        return customers.stream().map(this::convertToDTO).toList();
+        return accounts.stream().map(this::convertToDTO).toList();
     }
 
 @Override
@@ -368,11 +369,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<AccountDTO> getAccountAllByRoleUser() {
-        List<Account> accounts = accountRepository.findByRole(AccountRole.USER);
+        List<AccountRole> roles = List.of(AccountRole.USER, AccountRole.STAFF);
+        List<Account> accounts = accountRepository.findByRoles(roles);
         if (accounts.isEmpty()) {
             throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
         }
         return accountMapper.convertListEntityToListDTO(accounts);
     }
-    
+
 }
