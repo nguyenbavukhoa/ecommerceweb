@@ -1,0 +1,170 @@
+/* --- 1. KHUNG CHỨA CHÍNH (POSITION & ANIMATION) --- */
+.advanced-search {
+  position: fixed !important;
+  left: 0;
+  width: 100%;
+
+  /* Vị trí trên Desktop (Header Middle ~65px + Header Bottom ~50px = 115px) */
+  top: 115px;
+
+  z-index: 10; /* Nằm dưới Header (z-index: 14/15) nhưng trên nội dung web */
+
+  /* Mặc định ẩn */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-20px);
+  transition: all 0.3s ease-in-out;
+
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #eee;
+  padding: 15px 0; /* Padding cho thoáng */
+}
+
+/* Khi mở (thêm class .open) -> Hiện ra */
+.advanced-search.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* --- 2. GIAO DIỆN BÊN TRONG (CONTAINER & INPUTS) --- */
+.advanced-search .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1130px;
+  margin: 0 auto;
+  padding: 0 10px;
+  gap: 15px;
+}
+
+/* Các nhóm phần tử */
+.advanced-search-category,
+.advanced-search-price,
+.advanced-search-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Text nhãn */
+.advanced-search span {
+  font-size: 15px;
+  color: #333;
+  white-space: nowrap;
+}
+
+/* Ô nhập liệu và Select */
+.advanced-search select,
+.advanced-search input {
+  height: 35px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  background-color: #f9f9f9;
+  font-size: 14px;
+}
+
+.advanced-search select:focus,
+.advanced-search input:focus {
+  border-color: #b5292f;
+  background-color: #fff;
+}
+
+.advanced-search-price input {
+  width: 120px; /* Độ rộng ô giá */
+}
+
+/* Nút bấm (Icon) */
+.advanced-search button {
+  height: 35px;
+  min-width: 35px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.advanced-search button:hover {
+  border-color: #b5292f;
+  color: #b5292f;
+}
+
+.advanced-search button.active {
+  background-color: #b5292f;
+  color: #fff;
+  border-color: #b5292f;
+}
+
+/* Nút tìm giá riêng (màu đỏ) */
+#advanced-search-price-btn {
+  background-color: #b5292f;
+  color: #fff;
+  border: none;
+}
+#advanced-search-price-btn:hover {
+  background-color: #a02227;
+}
+
+/* --- 3. RESPONSIVE MOBILE (< 992px) --- */
+@media (max-width: 991.98px) {
+  .advanced-search {
+    /* Mobile: Header thấp hơn (chỉ có Header Middle ~60px) */
+    top: 60px;
+    padding: 10px 0;
+  }
+
+  /* Khi thanh search mobile đang mở -> Trượt xuống thấp hơn */
+  .advanced-search.shifted {
+    top: 110px !important;
+  }
+
+  /* Bố cục dọc cho mobile */
+  .advanced-search .container {
+    flex-direction: column;
+    align-items: stretch; /* Kéo dãn full chiều ngang */
+    gap: 10px;
+  }
+
+  .advanced-search-category,
+  .advanced-search-price,
+  .advanced-search-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .advanced-search-category select {
+    flex: 1; /* Dãn hết phần còn lại */
+    margin-left: 10px;
+  }
+
+  .advanced-search-price {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .advanced-search-price input {
+    width: 30% !important;
+    text-align: center;
+  }
+
+  .advanced-search-control {
+    justify-content: flex-end;
+    border-top: 1px dashed #ddd;
+    padding-top: 10px;
+  }
+
+  .advanced-search-control button {
+    flex: 1; /* Nút to dễ bấm */
+    height: 40px;
+  }
+}

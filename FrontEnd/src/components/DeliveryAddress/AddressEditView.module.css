@@ -1,0 +1,155 @@
+/* src/components/DeliveryAddress/AddressEditView.module.css */
+.editView {
+  animation: fadeIn 0.3s ease;
+}
+.editHeader {
+  display: flex;
+  align-items: center;
+  padding: 15px 15px;
+  border-bottom: 1px solid #eee;
+  background-color: white; /* Đảm bảo header có nền trắng */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.backBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  color: #555;
+}
+.editHeader h3 {
+  margin-right: 3%; /* Đảm bảo tiêu đề không bị lệch khi có nút back */
+  font-size: 20px;
+  flex-grow: 1;
+  text-align: center;
+}
+.searchSection {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+.searchInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+.currentSelection {
+  background-color: #f8f9fa;
+  border: none;
+  margin: 15px;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+.currentSelection .addressIcon {
+  /* Chia sẻ style với addressOption */
+  color: #e91d1d;
+}
+.savedAddressesSection {
+  padding: 0 15px 15px 15px;
+  background-color: whitesmoke;
+}
+.savedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.savedHeader h4 {
+  margin-left: 5px;
+  font-size: 15px;
+}
+
+.addressListScrollable {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
+  max-height: 60vh; /* Giới hạn chiều cao tối đa */
+}
+.addressOption {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #eee;
+  background-color: white;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
+  position: relative;
+}
+.addressOption:hover {
+  background-color: #f39999;
+}
+.addressOption.active {
+  border-color: #b5292f;
+  background-color: #fff0f0;
+}
+.addressIcon {
+  font-size: 16px;
+  color: #555;
+  margin-right: 12px;
+  margin-top: 3px;
+  width: 20px;
+  text-align: center;
+}
+.addressDetails {
+  flex-grow: 1;
+}
+.namePhone {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 5px 0;
+}
+.addressText {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}
+.checkIcon {
+  font-size: 14px;
+  color: #b5292f;
+  margin-left: 10px;
+  margin-top: 3px;
+}
+.addNewAddressBtn {
+  display: block;
+  width: 95%;
+  margin: 10px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #e2353e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.editLink {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-left: 10px;
+  padding: 5px;
+  align-self: center; /* Căn nút "Sửa" vào giữa theo chiều dọc */
+  flex-shrink: 0; /* Ngăn nút bị co lại */
+}
+
+.editLink:hover {
+  text-decoration: underline;
+}

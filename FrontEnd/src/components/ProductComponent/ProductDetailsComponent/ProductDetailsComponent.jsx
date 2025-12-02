@@ -1,68 +1,45 @@
-// import React from "react";
-// import { Row, Col } from "antd";
-// import imageProduct from "../../assets/images/slider1.png";
-// import imageProductSmall from "../../assets/images/slider1.png";
-// import ButtonComponent from "../../ButtonComponent/ButtonComponent";
-// import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-// import InputNumber from "antd/es/input-number";
-
-// const ProductDetailsComponent = () => {
-//   const onChange = () => {};
-//   return (
-//     <Row>
-//       <Col span={12}>
-//         <img src={imageProduct} alt="Product" preview="false" />
-//         <div>
-//           <img
-//             src={imageProductSmall}
-//             alt="Product Small"
-//             style={{ width: "100px", height: "100px" }}
-//           />
-//         </div>
-//       </Col>
-//       <Col span={12}>
-//         <h1>Product Name</h1>
-//         <p>Description of the product goes here.</p>
-//         <h2>$29.99</h2>
-//         <p>quantity:</p>
-//         <div>
-//           <PlusOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
-//           <InputNumber min={1} max={10} defaultValue={3} onChange={onChange} />;
-//           <MinusOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
-//         </div>
-//         <div>
-//           <ButtonComponent
-//             size={40}
-//             textButton="Add to Cart"
-//             styleButton={{ background: "pink", border: "none" }}
-//             styleTextButton={{ color: "white" }}
-//           />
-//         </div>
-//       </Col>
-//     </Row>
-//   );
-// };
-
-// export default ProductDetailsComponent;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { vnd } from "../../../utils/vnd";
+import { useCart } from "../../../context/CartProvider";
+import ImageWithFallback from "../../ImageWithFallbackComponent/ImageWithFallback";
+import VariantOptions from "../../VariantOptionComponent/VariantOptions";
+import useProductDetail from "../../../hooks/useProductDetail";
 
 const ProductDetailsComponent = ({
-  product,
+  productId,
   onClose,
   onAddToCart,
   onOrderNow,
 }) => {
+  const { product, loading, error } = useProductDetail(productId);
+  const { addItemToCart, openCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
-  const [totalPrice, setTotalPrice] = useState(product?.priceBase || 0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [optionsPrice, setOptionsPrice] = useState(0);
+
+  const [selectedValueIds, setSelectedValueIds] = useState([]);
+  // 1. Thêm state lưu danh sách object option để hiển thị tên trong giỏ
+  const [selectedOptionsDTO, setSelectedOptionsDTO] = useState([]);
+
+  // 2. Cập nhật callback nhận tham số thứ 4 (optionObjects)
+  const handleSelectionChange = useCallback(
+    (selection, priceOfOptions, ids, optionObjects) => {
+      setOptionsPrice(priceOfOptions);
+      setSelectedValueIds(ids);
+      setSelectedOptionsDTO(optionObjects); // Lưu DTO
+    },
+    []
+  );
 
   useEffect(() => {
     if (product) {
-      setTotalPrice(product.priceBase * quantity);
+      // 3. Sửa product.basePrice thành product.priceBase (theo mockData)
+      const base = product.priceBase || 0;
+      const finalPrice = (base + optionsPrice) * quantity;
+      setTotalPrice(finalPrice);
     }
-  }, [quantity, product]);
+  }, [quantity, optionsPrice, product]);
 
   const handleIncrease = () => {
     if (quantity < 100) setQuantity((prev) => prev + 1);
@@ -72,16 +49,39 @@ const ProductDetailsComponent = ({
     if (quantity > 1) setQuantity((prev) => prev - 1);
   };
 
-  if (!product) return null;
+  const handleAddToCart = async () => {
+    if (!product) return;
 
-  // console.log(product);
+    const cartItemData = {
+      productId: product.id,
+      productName: product.name,
+      imgUrl: product.imgMain,
+      price: product.priceBase + optionsPrice,
+
+      // [QUAN TRỌNG] Thêm storeId vào item trong giỏ
+      storeId: product.storeId,
+
+      optionValuesDTO: selectedOptionsDTO,
+      quantity: quantity,
+      note: note,
+    };
+
+    await addItemToCart(cartItemData);
+    alert("Đã thêm vào giỏ hàng!");
+    openCart();
+    onClose();
+  };
+
+  if (loading) return <div>Đang tải sản phẩm...</div>;
+  if (error) return <div>Lỗi: {error}</div>;
+  if (!product) return null;
 
   return (
     <>
       <div className="modal-header">
-        <img
+        <ImageWithFallback
           className="product-image"
-          src={product.imgMain}
+          src={product.imgMain} // Sửa imgUrl thành imgMain theo mockData
           alt={product.name}
         />
       </div>
@@ -89,6 +89,7 @@ const ProductDetailsComponent = ({
         <h2 className="product-title">{product.name}</h2>
         <div className="product-control">
           <div className="priceBox">
+            {/* 5. Sửa hiển thị giá */}
             <span className="current-price">{vnd(product.priceBase)}</span>
           </div>
           <div className="buttons_added">
@@ -105,8 +106,8 @@ const ProductDetailsComponent = ({
               type="number"
               value={quantity}
               onChange={(e) => {
-                const val = parseInt(e.target.value);
-                if (val >= 1 && val <= 100) setQuantity(val);
+                const val = parseInt(e.target.value, 10);
+                if (!isNaN(val) && val >= 1 && val <= 100) setQuantity(val);
               }}
             />
             <input
@@ -119,11 +120,16 @@ const ProductDetailsComponent = ({
         </div>
         <p className="product-description">{product.description}</p>
       </div>
+      <div className="modal-variants">
+        <VariantOptions
+          optionGroups={product.optionGroups}
+          onSelectionChange={handleSelectionChange}
+        />
+      </div>
       <div className="notebox">
         <p className="notebox-title">Ghi chú</p>
         <textarea
           className="text-note"
-          id="popup-detail-note"
           placeholder="Nhập thông tin cần lưu ý..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -135,19 +141,8 @@ const ProductDetailsComponent = ({
           <span className="price">{vnd(totalPrice)}</span>
         </div>
         <div className="modal-footer-control">
-          <button
-            className="button-dathangngay"
-            data-product={product.id}
-            onClick={() => onOrderNow(quantity, note)}
-          >
-            Đặt hàng ngay
-          </button>
-          <button
-            className="button-dat"
-            id="add-cart"
-            onClick={() => onAddToCart(quantity, note)}
-          >
-            <i className="fa-light fa-basket-shopping"></i>
+          <button className="button-dat" onClick={handleAddToCart}>
+            <i className="fa-light fa-basket-shopping"></i> Thêm vào giỏ
           </button>
         </div>
       </div>
@@ -156,4 +151,3 @@ const ProductDetailsComponent = ({
 };
 
 export default ProductDetailsComponent;
-

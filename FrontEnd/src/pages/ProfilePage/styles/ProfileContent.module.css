@@ -1,0 +1,224 @@
+/* src/pages/ProfilePage/styles/ProfileContent.module.css */
+
+.wrapper {
+  /* padding: 10px 20px 20px;  <-- Cũ */
+  padding: 20px 30px; /* Tăng padding chút cho thoáng đẹp hơn */
+
+  /* width: 500px; <-- XÓA DÒNG NÀY (Nguyên nhân gây dư hoặc hụt) */
+  width: 100%; /* <-- THAY BẰNG 100% để nó đi theo độ rộng của Modal */
+  box-sizing: border-box; /* Quan trọng: Để padding nằm trong width 100% */
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+/* Layout Form */
+.section {
+  margin-bottom: 20px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.rowGroup {
+  display: flex;
+  gap: 15px;
+}
+
+.rowGroup .formGroup {
+  flex: 1;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+/* Inputs */
+.inputField,
+.selectField {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inputField:focus,
+.selectField:focus {
+  border-color: #b5292f;
+  box-shadow: 0 0 0 3px rgba(181, 41, 47, 0.1);
+}
+
+.disabled {
+  background-color: #f5f5f5;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* Password Eye Icon */
+.passwordWrapper {
+  position: relative;
+}
+
+.eyeIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+  padding: 5px;
+}
+
+.eyeIcon:hover {
+  color: #333;
+}
+
+/* --- Security Section & Toggle --- */
+.securitySection {
+  background-color: #fcfcfc;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.toggleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggleLabel {
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggleLabel i {
+  color: #b5292f;
+}
+
+/* Toggle Switch CSS Chuẩn */
+.switchWrapper {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switchWrapper input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switchSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.switchSlider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switchWrapper input:checked + .switchSlider {
+  background-color: #b5292f;
+}
+
+.switchWrapper input:checked + .switchSlider:before {
+  transform: translateX(20px);
+}
+
+/* Animation Accordion for Password Fields */
+.passwordFields {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s;
+}
+
+.passwordFields.open {
+  max-height: 400px; /* Đủ lớn để hiện hết */
+  opacity: 1;
+  margin-top: 15px;
+  border-top: 1px dashed #ddd;
+  padding-top: 15px;
+}
+
+/* Error & Submit */
+.errorMessage {
+  color: #d63031;
+  background-color: #ff767520;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  border: 1px solid #ff767550;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnSave {
+  width: 100%;
+  padding: 12px;
+  background-color: #b5292f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnSave:hover {
+  background-color: #a02227;
+}
+
+/* --- Responsive Mobile --- */
+@media (max-width: 576px) {
+  .wrapper {
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .rowGroup {
+    flex-direction: column;
+    gap: 0;
+  }
+}

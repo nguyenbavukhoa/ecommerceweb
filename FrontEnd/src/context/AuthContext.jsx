@@ -1,114 +1,134 @@
-// src/context/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react";
+import authService from "../services/authService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
 
-  // --- LOGIN ---
-  const loginUser = async (email, password, rememberMe = false) => {
-    try {
-      const res = await fetch("http://localhost:8080/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        // credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success && data.data) {
-        const userData = data.data;
-
-        const authData = {
-          email, // từ input login
-          accountName: userData.accountName,
-          role: userData.role || "USER", // fallback nếu null
-          accessToken: userData.accessToken,
-          refreshToken: userData.refreshToken,
-        };
-
-        setAuth(authData);
-
-        // rememberMe -> localStorage, ngược lại sessionStorage
-        if (rememberMe) {
-          localStorage.setItem("auth", JSON.stringify(authData));
-        } else {
-          sessionStorage.setItem("auth", JSON.stringify(authData));
-        }
-
-        return authData;
-      } else {
-        throw new Error(data.message || "Sai email hoặc mật khẩu!");
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-      throw err;
-    }
+  // --- HÀM HELPER: LẤY MESSAGE LỖI ---
+  const getErrorMessage = (error, defaultMessage) => {
+    const res = error.response?.data;
+    if (res?.message) return res.message;
+    if (typeof res === "string") return res;
+    return defaultMessage;
   };
 
-  // --- SIGNUP ---
-  const signupUser = async (email, password, accountName) => {
-    try {
-      console.log(email, password, accountName);
-
-      const res = await fetch("http://localhost:8080/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          accountName,
-          role: "USER", // server mặc định cũng có, nhưng thêm cho chắc
-        }),
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        const messages = [data.message, ...(data.errors || [])];
-        const err = new Error(messages.join(" | ")); // gộp nhiều lỗi
-        err.messages = messages; // giữ mảng đầy đủ
-        throw err;
-      }
-
-      // Không login ngay, chỉ báo user check email
-      return {
-        success: true,
-        message: "Vui lòng xác thực email rồi đăng nhập",
-      };
-    } catch (err) {
-      console.error("Signup failed:", err);
-      throw err;
-    }
-  };
-
-  // --- LOGOUT ---
-  const logout = async () => {
-    try {
-      setAuth(null);
-      localStorage.removeItem("auth");
-      sessionStorage.removeItem("auth");
-
-      await fetch("http://localhost:8080/api/v1/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
-
-  // --- Restore auth khi reload ---
+  // 1. TỰ ĐỘNG ĐĂNG NHẬP (Khi F5 hoặc mở lại web)
   useEffect(() => {
-    const saved =
-      localStorage.getItem("auth") || sessionStorage.getItem("auth");
-    if (saved) {
-      setAuth(JSON.parse(saved));
+    // Kiểm tra xem trong kho lưu trữ có Token và thông tin User chưa
+    const token = localStorage.getItem("accessToken");
+    const savedUser = localStorage.getItem("user_info");
+
+    if (token && savedUser) {
+      try {
+        // Nếu có, phục hồi lại trạng thái đăng nhập ngay lập tức
+        setAuth(JSON.parse(savedUser));
+      } catch (e) {
+        // Nếu dữ liệu lỗi thì xóa đi đăng nhập lại
+        logout();
+      }
     }
   }, []);
+
+  // 2. LOGIN (Lưu Token để dùng lần sau)
+  const loginUser = async (email, password) => {
+    try {
+      const response = await authService.login(email, password);
+      // API trả về cấu trúc: { success: true, data: { accessToken, accountName, ... } }
+      const data = response.data || response;
+
+      // Lấy Token từ kết quả trả về
+      const accessToken = data.accessToken || data.token;
+
+      if (accessToken) {
+        // [QUAN TRỌNG] Lưu lại để lần sau dùng
+        localStorage.setItem("accessToken", accessToken);
+
+        // Lưu cả Refresh Token (nếu có) để sau này gia hạn
+        if (data.refreshToken) {
+          localStorage.setItem("refreshToken", data.refreshToken);
+        }
+
+        // Lưu thông tin user (Tên, Role...) để hiển thị lên Header
+        localStorage.setItem("user_info", JSON.stringify(data));
+
+        // Cập nhật State để web biết là đã đăng nhập
+        setAuth(data);
+
+        return { success: true, message: "Đăng nhập thành công!" };
+      } else {
+        return { success: false, message: "Lỗi: Server không trả về Token." };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: getErrorMessage(error, "Đăng nhập thất bại."),
+      };
+    }
+  };
+
+  // 3. LOGOUT (Xóa sạch để thoát hẳn)
+  const logout = async () => {
+    await authService.logout();
+    // Xóa hết những gì đã lưu
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user_info");
+    setAuth(null);
+  };
+
+  // ... (Các hàm Register, Forgot, Verify, Reset GIỮ NGUYÊN) ...
+  const signupUser = async (userData) => {
+    try {
+      const res = await authService.register(userData);
+      return { success: true, message: res.message || "Đăng ký thành công!" };
+    } catch (error) {
+      return {
+        success: false,
+        message: getErrorMessage(error, "Đăng ký thất bại."),
+      };
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    try {
+      const res = await authService.forgotPassword(email);
+      return { success: true, message: res.message || "Đã gửi mã xác nhận." };
+    } catch (error) {
+      return {
+        success: false,
+        message: getErrorMessage(error, "Lỗi gửi email."),
+      };
+    }
+  };
+
+  const verifyOtp = async (email, otp) => {
+    try {
+      const res = await authService.verifyOtp(email, otp);
+      return { success: true, message: res.message || "Xác thực thành công!" };
+    } catch (error) {
+      return {
+        success: false,
+        message: getErrorMessage(error, "Mã OTP không đúng."),
+      };
+    }
+  };
+
+  const resetPassword = async (email, newPassword) => {
+    try {
+      const res = await authService.resetPassword(email, newPassword);
+      return {
+        success: true,
+        message: res.message || "Đổi mật khẩu thành công!",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: getErrorMessage(error, "Đổi mật khẩu thất bại."),
+      };
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -117,6 +137,9 @@ export const AuthProvider = ({ children }) => {
         loginUser,
         signupUser,
         logout,
+        forgotPassword,
+        verifyOtp,
+        resetPassword,
       }}
     >
       {children}

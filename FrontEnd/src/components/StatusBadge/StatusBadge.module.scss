@@ -1,0 +1,39 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151; // Màu chữ xám đậm mặc định
+  background: transparent;
+
+  i {
+    font-size: 10px; // Icon nhỏ lại chút
+  }
+
+  &.pending {
+    color: #d97706;
+    background: #fffbeb;
+    i {
+      color: #f59e0b;
+    } // Icon màu cam tươi
+  }
+
+  &.approved {
+    color: #059669;
+    background: #f0fdf4;
+    i {
+      color: #10b981;
+    } // Icon màu xanh tươi
+  }
+
+  &.rejected {
+    color: #dc2626;
+    background: #fef2f2;
+    i {
+      color: #ef4444;
+    } // Icon màu đỏ tươi
+  }
+}

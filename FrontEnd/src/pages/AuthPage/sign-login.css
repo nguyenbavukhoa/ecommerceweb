@@ -218,3 +218,85 @@
 .change-login a:hover {
   text-decoration: underline;
 }
+
+/* --- RESPONSIVE MOBILE & TABLET --- */
+
+/* Tablet (Màn hình < 992px) */
+@media (max-width: 991px) {
+  .modals.signup-login .modal-signup-login-container {
+    margin-top: 20px;
+    height: auto;
+    min-height: 600px;
+  }
+
+  /* Ẩn phần text giới thiệu bên trái để tiết kiệm chỗ */
+  .modal-signup-login-container .form-content {
+    display: none;
+  }
+
+  /* Form chiếm 100% chiều rộng */
+  .modal-signup-login-container .logreg-box {
+    width: 100%;
+    position: relative;
+  }
+
+  /* Reset các hiệu ứng trượt (transform) của Desktop */
+  .logreg-box .form-box:first-child,
+  .logreg-box.active .form-box:first-child,
+  .logreg-box .form-box:nth-child(2),
+  .logreg-box.active .form-box:nth-child(2) {
+    transform: none !important; /* Tắt trượt ngang */
+    position: relative;
+    width: 100%;
+    height: auto;
+    border: none;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.9); /* Thêm nền trắng mờ */
+    padding: 40px 20px;
+  }
+
+  /* Căn giữa form */
+  .logreg-box .form-box {
+    display: flex; /* Đảm bảo flex để căn giữa nội dung */
+  }
+}
+
+/* Mobile (Màn hình < 576px) */
+@media (max-width: 576px) {
+  .modals.signup-login .modal-signup-login-container {
+    margin-top: 0;
+    border-radius: 0;
+    height: 100vh; /* Full màn hình */
+    padding: 0;
+  }
+
+  .modal-signup-login-container .logreg-box {
+    height: 100%;
+  }
+
+  .logreg-box .form-box:first-child,
+  .logreg-box .form-box:nth-child(2) {
+    height: 100%; /* Form full chiều cao */
+    border-radius: 0;
+    padding: 20px;
+    background-color: #fff; /* Nền trắng hoàn toàn cho dễ đọc */
+  }
+
+  /* Chỉnh lại chiều rộng input cho vừa màn hình nhỏ */
+  .login-form .form-group,
+  .sign-up-form .form-group {
+    width: 100%; /* Input giãn full chiều ngang */
+    max-width: 340px; /* Giữ giới hạn max để không quá to */
+  }
+
+  .form-title {
+    font-size: 26px; /* Giảm cỡ chữ tiêu đề */
+    margin-bottom: 20px;
+  }
+
+  /* Chỉnh lại nút submit */
+  .form-submit {
+    height: 40px;
+    font-size: 15px;
+  }
+}

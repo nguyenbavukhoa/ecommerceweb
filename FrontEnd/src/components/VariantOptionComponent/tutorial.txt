@@ -1,0 +1,16 @@
+// src/App.jsx
+import VariantOptions from "./components/VariantOptions";
+
+function App() {
+  const token = "YOUR_JWT_TOKEN"; // thay bằng token thật
+  const categoryId = 1; // ví dụ category "phở"
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Đặt món</h1>
+      <VariantOptions categoryId={categoryId} token={token} />
+    </div>
+  );
+}
+
+export default App;

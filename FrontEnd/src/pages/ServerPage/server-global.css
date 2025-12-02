@@ -1,0 +1,113 @@
+/* src/pages/AdminPage/admin-global.css */
+/* File này chứa TẤT CẢ style toàn cục CHỈ DÀNH CHO ADMIN */
+
+/* --- FONT-FACE --- /assets/font/SFPRODISPLAY/SFProDisplay-Regular.ttf*/
+/* Đường dẫn /assets/... là trỏ từ thư mục /public */
+@font-face {
+  font-family: "SFProDisplay";
+  src: url("../../font/SFPRODISPLAY/SFProDisplay-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-display: fallback;
+}
+@font-face {
+  font-family: "SFProDisplay";
+  src: url("../../font/SFPRODISPLAY/SFProDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: fallback;
+}
+@font-face {
+  font-family: "SFProDisplay";
+  src: url("../../font/SFPRODISPLAY/SFProDisplay-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-display: fallback;
+}
+/* (Thêm các font-face khác...) */
+
+/* --- BIẾN CSS VÀ RESET CHUNG CHO ADMIN --- */
+/* Chúng ta dùng một class cha .adminRoot để "scope" (giới hạn) các style này */
+.adminRoot {
+  /* Biến :root */
+  --red: #b5292f;
+  --lightest-gray: rgb(249, 249, 249);
+  --lighter-gray: rgb(240, 240, 240);
+  --light-gray: rgb(144, 144, 144);
+  --medium-gray: rgb(96, 96, 96);
+  --dark-gray: rgb(13, 13, 13);
+  --header-height: 60px;
+  --animation-duration: 200ms;
+  --animation-timing-curve: ease-in-out;
+
+  /* Reset * */
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  text-decoration: none;
+  box-sizing: border-box;
+
+  /* Style cho body, input (áp dụng cho toàn admin) */
+  font-family: "SF Pro Display", sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* Áp dụng box-sizing cho mọi thứ BÊN TRONG admin */
+.adminRoot *,
+.adminRoot *::before,
+.adminRoot *::after {
+  box-sizing: border-box;
+}
+
+/* Áp dụng font cho các element con */
+.adminRoot body,
+.adminRoot input,
+.adminRoot button,
+.adminRoot textarea,
+.adminRoot pre {
+  font-family: SFProDisplay, sans-serif;
+}
+
+.adminRoot button {
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* --- SWITCH STYLE (toàn cục cho admin) --- */
+.adminRoot .switch {
+  position: relative;
+  cursor: pointer;
+  width: 40px;
+  height: 20px;
+  display: inline-block;
+  margin-left: 30px;
+  top: 6px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  background: #ccc;
+  border-radius: 100rem;
+  transition: background-color 0.25s linear;
+}
+
+.adminRoot .switch:after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 40px;
+  background-color: #fff;
+  top: 5px;
+  left: 5px;
+  transition: background-color 0.25s linear, transform 0.25s linear;
+}
+
+.adminRoot .switch-input {
+  display: none;
+}
+
+.adminRoot .switch-input:checked + .switch {
+  background-color: var(--red);
+}
+
+.adminRoot .switch-input:checked + .switch:after {
+  transform: translateX(20px);
+  background-color: #fff;
+}

@@ -1,0 +1,30 @@
+/* src/pages/AdminPage/sections/Dashboard/Dashboard.module.scss */
+
+.section {
+  padding: 2rem 2rem 0 1.5rem;
+  display: block !important;
+}
+
+.pageTitle {
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap; // Cho responsive
+  justify-content: center; // Căn giữa các card
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 1200px) {
+  .cards {
+    flex-wrap: wrap; // Đã có ở trên, nhưng để cho rõ
+  }
+}
+@media only screen and (max-width: 786px) {
+  .section {
+    padding: 20px 10px;
+  }
+}

@@ -1,0 +1,199 @@
+/* src/pages/AdminPage/components/Sidebar/Sidebar.module.scss */
+
+.sidebar {
+  flex-shrink: 0;
+  overflow: hidden;
+  width: 75px; /* Mặc định thu nhỏ */
+  height: 100px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding-top: 5rem;
+  align-items: center;
+  justify-content: stretch;
+  transition: width var(--animation-duration) var(--animation-timing-curve);
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 2000;
+}
+
+/* Trạng thái mở rộng */
+.sidebar.open {
+  width: 250px;
+}
+
+.hiddenSidebar {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  transition: opacity var(--animation-duration) var(--animation-timing-curve);
+  white-space: nowrap;
+}
+.sidebar.open .hiddenSidebar {
+  width: 100%;
+  height: auto;
+  opacity: 1;
+  margin-left: 1.5rem;
+}
+
+.topSidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: calc(10px);
+  margin-bottom: 0.5rem;
+  height: 30px; /* Thu nhỏ */
+  width: 100%;
+  transition: height var(--animation-duration) var(--animation-timing-curve);
+}
+.sidebar.open .topSidebar {
+  height: 125px; /* Mở rộng */
+  .hiddenSidebar {
+    // Style cho title "Vy Food"
+    text-align: center;
+    width: 100%;
+    padding-right: 10%;
+  }
+}
+
+.channelLogo {
+  display: block;
+  width: 30px; /* Thu nhỏ */
+  height: 30px;
+  margin-left: -35%;
+  transition: var(--animation-duration) var(--animation-timing-curve);
+  img {
+    height: 100%;
+  }
+}
+.sidebar.open .channelLogo {
+  width: 100px; /* Mở rộng */
+  height: 100px;
+}
+
+.middleSidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-grow: 1;
+  margin: 1rem 0;
+}
+
+.middleSidebar,
+.bottomSidebar {
+  width: 100%;
+}
+
+.sidebarList {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  list-style: none;
+}
+
+.sidebarLink {
+  display: flex;
+  width: 100%;
+  padding: 0.5rem 0;
+  color: var(--light-gray);
+  text-decoration: none;
+  align-items: center;
+  padding-left: 25px; /* Căn giữa icon khi thu nhỏ */
+  &:hover {
+    color: var(--red);
+  }
+}
+.sidebar.open .sidebarLink {
+  justify-content: flex-start; /* Căn trái text khi mở rộng */
+  padding-left: 1rem;
+}
+
+.sidebarIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 25px; // Giữ không gian cho icon
+}
+.sidebar.open .sidebarIcon {
+  width: auto;
+  margin-right: 1.5rem; // Thêm margin khi mở rộng
+}
+.sidebar.open .hiddenSidebar {
+  margin-left: 0; // Reset margin
+}
+
+.sidebarListItem {
+  position: relative;
+  width: 100%;
+  color: var(--light-gray);
+  cursor: pointer;
+  &:hover {
+    background-color: var(--lightest-gray);
+  }
+  &.active {
+    color: var(--red);
+    background-color: var(--lightest-gray);
+    &::before {
+      content: "";
+      background-color: var(--red);
+      height: 100%;
+      top: 0;
+      left: 0;
+      width: 5px;
+      position: absolute;
+    }
+  }
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 1200px) {
+  .sidebar {
+    height: calc(100vh - var(--header-height));
+    top: var(--header-height);
+  }
+}
+
+@media only screen and (max-width: 615px) {
+  .sidebar {
+    width: 70%;
+    position: fixed;
+    background-color: #fff;
+    z-index: 2000;
+    box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%);
+    // Luôn ở trạng thái "mở rộng" khi hiện
+    .hiddenSidebar {
+      opacity: 1;
+      width: 100%;
+      height: auto;
+      margin-left: 1.5rem;
+    }
+    .channelLogo {
+      width: 100px;
+      height: 100px;
+    }
+    .topSidebar {
+      height: 125px;
+      .hiddenSidebar {
+        text-align: center;
+      }
+    }
+    .sidebarLink {
+      padding-left: 1rem;
+      justify-content: flex-start;
+    }
+    .sidebarIcon {
+      width: auto;
+      margin-right: 1.5rem;
+    }
+  }
+
+  // class .mobileClosed (thay cho .sidebar.open cũ) nghĩa là "đang đóng trên mobile"
+  .mobileClosed {
+    transition: width var(--animation-duration) var(--animation-timing-curve);
+    display: none;
+  }
+}

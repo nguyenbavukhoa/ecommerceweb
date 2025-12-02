@@ -1,0 +1,39 @@
+/* src/pages/AdminPage/components/Header/Header.module.scss */
+
+.header {
+  display: none; /* Mặc định ẩn trên desktop */
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+  padding: 0 0.5rem;
+  height: var(--header-height);
+  justify-content: space-between;
+  width: 100%;
+  z-index: 2000;
+}
+
+.menuIconBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.menuIcon {
+  font-size: 30px;
+  color: var(--medium-gray);
+  cursor: pointer;
+  padding-left: 1rem;
+  &:hover {
+    color: var(--dark-gray);
+  }
+}
+
+/* --- RESPONSIVE (từ admin-responsive.css) --- */
+@media only screen and (max-width: 1200px) {
+  .header {
+    display: flex; // Kích hoạt header
+  }
+}

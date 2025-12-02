@@ -1,0 +1,12 @@
+// 1. Import component
+import ImageWithFallback from './ImageWithFallback';
+// 2. Sử dụng component như thẻ img 
+<ImageWithFallback 
+    // Các props bắt buộc
+    src={product.imageUrl} 
+    alt={product.name}
+        
+    // Các props khác của thẻ img (tùy chọn)
+    className="product-image"
+    style={{ width: '100%', height: '180px', objectFit: 'cover' }}
+/>

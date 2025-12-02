@@ -1,0 +1,658 @@
+/* ====================================================== */
+/* FILE: ProductForm.module.scss                 */
+/* ====================================================== */
+
+/* --- 1. Base Layout (Container, Header) --- */
+.formPageContainer {
+  background-color: #fff;
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 5px;
+  padding: 25px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* Giới hạn chiều cao của card để nội dung bên trong cuộn */
+  max-height: calc(100vh - 20px);
+  overflow: hidden;
+}
+
+.formPageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  flex-shrink: 0;
+}
+
+.formPageTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.formPageCancelBtn {
+  background-color: #fff;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    margin-right: 8px;
+  }
+  &:hover {
+    background-color: #fff5f5;
+    color: #d00;
+  }
+}
+
+/* --- 2. Wizard Layout (Mobile-First) --- */
+.formWizardLayout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.wizardContent {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-top: 20px;
+  padding-bottom: 20px; /* Thêm padding đáy để không bị sát nút */
+}
+
+.stepContent {
+  padding-top: 0;
+}
+
+/* --- 3. Stepper Nav (Mặc định Mobile: Ngang + Scroll) --- */
+.stepperNav {
+  display: flex;
+  flex-direction: row;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 5px;
+  border: 1px solid #eee;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  /* Mobile Scroll Horizontal */
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 0px; /* Ẩn scrollbar cho đẹp */
+    background: transparent;
+  }
+}
+
+.stepperItem {
+  flex: 0 0 auto; /* Không co dãn, giữ nguyên kích thước nội dung */
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+
+  span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    color: #fff;
+    font-size: 11px;
+    margin-right: 8px;
+    padding-left: 0; /* Fix canh giữa số */
+    transition: all 0.3s ease;
+  }
+
+  &.active {
+    color: var(--red);
+    background-color: #fff; /* Nổi bật trên nền xám */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    span {
+      background-color: var(--red);
+      color: #fff;
+    }
+  }
+}
+
+/* --- 4. Step 1: Info Form --- */
+.addProductForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modalContentLeft,
+.modalContentRight {
+  width: 100%;
+  flex: 1;
+}
+
+.modalContentRight {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.uploadImagePreview {
+  width: 100%;
+  max-width: 300px; /* Giới hạn ảnh trên mobile */
+  display: block;
+  margin: 0 auto;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid #eee;
+  background-color: #f9f9f9;
+}
+
+.formGroupFile {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.formLabelFile {
+  background-color: var(--red);
+  color: #fff;
+  padding: 10px 20px;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 14px;
+  display: inline-block;
+  cursor: pointer;
+  width: 100%; /* Nút chọn ảnh full width */
+  box-sizing: border-box;
+
+  i {
+    margin-right: 8px;
+  }
+}
+
+/* Form Elements */
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formLabel {
+  margin-bottom: 5px;
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+}
+
+.formControl {
+  width: 100%;
+  height: 45px; /* Cao hơn để dễ bấm trên mobile */
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 15px;
+  background-color: #fff;
+
+  &:focus {
+    border-color: var(--red);
+  }
+}
+
+.productDesc {
+  @extend .formControl;
+  height: 120px;
+  resize: vertical;
+  padding: 12px;
+  font-family: inherit;
+}
+
+/* --- 5. Step 2: Options Form --- */
+.step2Desc {
+  font-size: 13px;
+  color: #666;
+  background-color: #fff8e1; /* Màu vàng nhạt */
+  border: 1px solid #ffe0b2;
+  padding: 12px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.optionGroup {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.optionGroupHeader {
+  display: flex;
+  flex-direction: column; /* Mobile: Xếp dọc header nhóm */
+  gap: 10px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.optionGroupName {
+  @extend .formControl;
+  font-weight: 600;
+}
+
+.optionGroupMulti {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+
+  input {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.optionGroupRemove {
+  background: #fff;
+  border: 1px solid #ffcdd2;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%; /* Nút xóa full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+}
+
+.optionValuesList {
+  padding: 15px;
+}
+
+/* Style cho từng dòng giá trị (Mobile: Card style) */
+.optionValue {
+  display: flex;
+  flex-direction: column; /* Xếp dọc */
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #eee;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .formControl {
+    height: 40px;
+  }
+
+  .priceInputContainer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    .formControl {
+      flex: 1;
+      margin-right: 10px;
+    }
+    span {
+      font-size: 13px;
+      color: #666;
+      white-space: nowrap;
+    }
+  }
+}
+
+.optionValueRemove {
+  background: #ffebee;
+  border: none;
+  color: #c62828;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  align-self: flex-end; /* Nút xóa nằm góc phải */
+  display: flex;
+  align-items: center;
+
+  &::after {
+    content: "Xóa tùy chọn này";
+    margin-left: 5px;
+    font-size: 12px;
+  }
+}
+
+.addOptionValueBtn {
+  background: #fff;
+  border: 1px dashed #999;
+  color: #555;
+  padding: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.addGroupBtn {
+  width: 100%;
+  padding: 15px;
+  background-color: #e3f2fd;
+  border: 1px dashed #2196f3;
+  color: #1976d2;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  margin-top: 20px;
+}
+
+/* --- 6. Step 3: Review Layout --- */
+.reviewLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewLeft,
+.reviewRight {
+  width: 100%;
+}
+
+.reviewTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-gray);
+  border-bottom: 2px solid var(--red);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.reviewImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.reviewInfoList {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.reviewItem {
+  display: flex;
+  flex-direction: column; /* Mobile: Label trên, Value dưới */
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e0e0e0;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+}
+
+.reviewLabel {
+  font-weight: 600;
+  color: #555;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.reviewValue {
+  color: #000;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.reviewOptionGroup {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+
+  strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 5px;
+    color: var(--red);
+  }
+}
+
+/* --- 7. Common Elements (Nút điều hướng) --- */
+.stepNavigation {
+  display: flex;
+  flex-direction: column-reverse; /* Mobile: Nút Tiếp tục ở trên, Quay lại ở dưới */
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.formSubmit {
+  width: 100%;
+  height: 45px;
+  background-color: var(--red);
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  i {
+    margin-left: 8px;
+  }
+}
+
+.formPageCancelBtn {
+  width: 100%;
+  height: 40px; /* Nút phụ thấp hơn chút */
+  margin: 0;
+}
+
+/* ====================================================== */
+/* 8. DESKTOP RESPONSIVE (min-width: 992px)      */
+/* ====================================================== */
+/* Ghi đè lại style Mobile để tạo layout Sidebar cho Desktop */
+@media only screen and (min-width: 992px) {
+  .formPageContainer {
+    padding: 0; /* Reset padding */
+    max-height: calc(100vh - 100px);
+  }
+
+  .formPageHeader {
+    padding: 20px 30px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .formWizardLayout {
+    flex-direction: row; /* Ngang */
+  }
+
+  /* Sidebar Stepper */
+  .stepperNav {
+    flex-direction: column; /* Dọc */
+    flex: 0 0 260px;
+    border-right: 1px solid #eee;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0;
+    background-color: #fff;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .stepperItem {
+    padding: 15px 20px;
+    margin-bottom: 5px;
+    font-size: 14px;
+
+    &.active {
+      background-color: #fff5f5;
+      color: var(--red);
+      border-left: 3px solid var(--red);
+      border-radius: 4px;
+    }
+
+    &:hover:not(.active) {
+      background-color: #f5f5f5;
+    }
+  }
+
+  /* Content Area */
+  .wizardContent {
+    padding: 30px 40px;
+  }
+
+  /* Form Step 1: 2 Cột */
+  .addProductForm {
+    flex-direction: row;
+    gap: 40px;
+  }
+
+  .modalContentRight {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .formLabelFile {
+    width: auto;
+  }
+
+  /* Form Step 2: Row Layout */
+  .optionGroupHeader {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .optionGroupName {
+    flex: 1;
+  }
+
+  .optionGroupRemove {
+    width: auto;
+  }
+
+  .optionValue {
+    flex-direction: row; /* Ngang trở lại */
+    align-items: center;
+    border-bottom: none;
+    padding-bottom: 0;
+
+    .formControl {
+      flex: 2;
+    }
+
+    .priceInputContainer {
+      width: auto;
+      flex: 1;
+
+      .formControl {
+        flex: 1;
+      }
+    }
+  }
+
+  .optionValueRemove {
+    align-self: center;
+    background: none;
+    padding: 5px;
+
+    &::after {
+      content: none; /* Ẩn chữ trên desktop */
+    }
+
+    i {
+      font-size: 18px;
+    }
+  }
+
+  .addOptionValueBtn {
+    width: auto;
+    display: inline-flex;
+  }
+
+  /* Form Step 3: 2 Cột */
+  .reviewLayout {
+    flex-direction: row;
+    gap: 40px;
+  }
+
+  .reviewItem {
+    flex-direction: row; /* Label trái, Value phải */
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .reviewLabel {
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  /* Buttons */
+  .stepNavigation {
+    flex-direction: row; /* Ngang */
+    justify-content: space-between;
+  }
+
+  .formSubmit,
+  .formPageCancelBtn {
+    width: auto;
+    padding: 0 30px;
+  }
+}
+/* ====================================================== */

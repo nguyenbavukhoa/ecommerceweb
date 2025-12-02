@@ -1,5 +1,4 @@
-import React from "react";
-
+import ImageWithFallback from "../../ImageWithFallbackComponent/ImageWithFallback";
 function ProductItem({ product, onDetail }) {
   if (!product) return null;
 
@@ -7,21 +6,23 @@ function ProductItem({ product, onDetail }) {
   const price = product.priceBase ?? 0; // nếu undefined, đặt 0
   const img = product.imgMain || "/images/default.png";
 
+  // Hàm onDetail (từ props) đã có sẵn ID,
+  // nên chúng ta chỉ cần gọi nó.
+  const handleDetailClick = (e) => {
+    // Chỉ preventDefault nếu 'e' tồn tại (tức là click từ thẻ <a>)
+    if (e) {
+      e.preventDefault();
+    }
+    // --- Gọi onDetail() mà không cần truyền ID ---
+    onDetail();
+  };
 
   return (
     <div className="col-product">
       <article className="card-product">
         <div className="card-header">
-          <a
-            href="#"
-            className="card-image-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onDetail(product.id);
-            }}
-          >
-            <img className="card-image" src={img} alt={name} />
-
+          <a href="#" className="card-image-link" onClick={handleDetailClick}>
+            <ImageWithFallback className="card-image" src={img} alt={img} />
           </a>
         </div>
         <div className="food-info">
@@ -30,13 +31,9 @@ function ProductItem({ product, onDetail }) {
               <a
                 href="#"
                 className="card-title-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onDetail(product.id);
-                }}
+                onClick={handleDetailClick}
               >
                 {name}
-
               </a>
             </div>
           </div>
@@ -44,12 +41,11 @@ function ProductItem({ product, onDetail }) {
             <div className="product-price">
               <span className="current-price">
                 {price.toLocaleString("vi-VN")}₫
-
               </span>
             </div>
             <div className="product-buy">
               <button
-                onClick={() => onDetail(product.id)}
+                onClick={handleDetailClick}
                 className="card-button order-item"
               >
                 <i className="fa-regular fa-cart-shopping-fast"></i> Đặt món

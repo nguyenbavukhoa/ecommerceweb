@@ -29,9 +29,8 @@ function ProductList({ products, onProductDetail, isLoading }) {
           <ProductItem
             key={product.id}
             product={product}
-            onDetail={() => onProductDetail(product)}
+            onDetail={() => onProductDetail(product.id)}
           />
-
         ))}
       </div>
     </>
