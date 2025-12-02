@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict U29LkV9KxHyPn166dMHwBnL8g9YGuCpRmWXCWK7CW44bvmda7S6ClVelvVfibud
+\restrict kfhCJ6YQYnha9NlljU3E5ko81uY7fVuAQAPqhAVg7jAh7RqirmZaeEGlK6c36gS
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -566,8 +566,8 @@ COPY public.option_values (additional_price, id, options_group_id, stock_quantit
 --
 
 COPY public."order" (account_id, id, restaurant_id, total_price, user_infomation_id, created_at, order_time, updated_at, note, order_status) FROM stdin;
-969846954	317080866	1	210000.00	198853118	2025-12-02 16:54:52.946438	2025-12-02 16:54:52.89247	2025-12-02 16:54:53.073713	\N	PLACED
 969846954	1914324914	1	210000.00	198853118	2025-12-02 16:52:27.598852	2025-12-02 16:52:27.590545	2025-12-02 16:52:27.658574	\N	PLACED
+969846954	317080866	1	210000.00	198853118	2025-12-02 16:54:52.946438	2025-12-02 16:54:52.89247	2025-12-02 17:13:09.283058	\N	IN_PROGRESS
 \.
 
 
@@ -598,6 +598,7 @@ COPY public.order_items (id, order_id, product_id, quantity, unit_price, created
 --
 
 COPY public.order_status_history (id, order_id, changed_at, status) FROM stdin;
+1097055689	317080866	2025-12-02 17:13:09.268779	IN_PROGRESS
 \.
 
 
@@ -672,6 +673,8 @@ COPY public.product (category_id, id, price_base, quantity, created_at, updated_
 4	19	35000.00	100	2025-11-27 03:19:31.145752	2025-11-27 03:19:31.145752	Trà Sữa tươi mát	tra_sua.jpg	Trà Sữa Trân Châu	ACTIVE	2
 2	6	129000.00	40	2025-11-27 03:19:31.145752	2025-11-27 03:19:31.145752	Pizza topping hải sản tươi ngon	https://cdn.tgdd.vn/2020/09/CookProduct/1200bzhspm-1200x676.jpg	Pizza Hải Sản	ACTIVE	2
 2	10	109000.00	50	2025-11-27 03:19:31.145752	2025-11-27 03:19:31.145752	Pizza truyền thống Ý	pizza_truyen_thong.jpg	Pizza Truyền Thống	ACTIVE	2
+1	1472903640	45000.00	0	2025-12-02 17:20:49.400388	2025-12-02 17:20:49.400388	Phở bò truyền thống với nước dùng được ninh từ xương bò suốt 12 tiếng, thịt bò tươi ngon và bánh phở dai mềm	http://res.cloudinary.com/dgmi3soo9/image/upload/v1764670853/product/upload_1764670847169_acd887f2-bb9e-4ee6-8e8d-855b695f1936.jpg	Phở Bò Hà Nội	ACTIVE	\N
+1	1109150173	45000.00	0	2025-12-02 17:24:03.320544	2025-12-02 17:24:03.320544	Phở bò truyền thống với nước dùng được ninh từ xương bò suốt 12 tiếng, thịt bò tươi ngon và bánh phở dai mềm	http://res.cloudinary.com/dgmi3soo9/image/upload/v1764671046/product/upload_1764671040782_b85fb50e-aed8-4245-9232-a1a24a79e8d3.jpg	Phở Bò Hà Nội	ACTIVE	2
 \.
 
 
@@ -732,7 +735,7 @@ SELECT pg_catalog.setval('public.drone_id_seq', 1, false);
 -- Name: restaurant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.restaurant_id_seq', 1, true);
+SELECT pg_catalog.setval('public.restaurant_id_seq', 2, true);
 
 
 --
@@ -1233,5 +1236,5 @@ ALTER TABLE ONLY public.carts
 -- PostgreSQL database dump complete
 --
 
-\unrestrict U29LkV9KxHyPn166dMHwBnL8g9YGuCpRmWXCWK7CW44bvmda7S6ClVelvVfibud
+\unrestrict kfhCJ6YQYnha9NlljU3E5ko81uY7fVuAQAPqhAVg7jAh7RqirmZaeEGlK6c36gS
 
