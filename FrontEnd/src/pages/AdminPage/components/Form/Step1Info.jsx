@@ -1,4 +1,3 @@
-// src/pages/AdminPage/sections/Products/Step1Info.jsx
 import React, { useState, useEffect } from "react";
 import { useToast } from "../../../../context/ToastContext";
 import styles from "./ProductForm.module.scss";
@@ -7,6 +6,7 @@ const Step1Info = ({ initialData, initialImage, onSubmit, categories }) => {
   const { showToast } = useToast();
   const [formData, setFormData] = useState(initialData);
   const [imagePreview, setImagePreview] = useState(initialImage);
+  const [selectedFile, setSelectedFile] = useState(null); // [MỚI] State lưu file
 
   useEffect(() => {
     setFormData(initialData);
@@ -18,12 +18,13 @@ const Step1Info = ({ initialData, initialImage, onSubmit, categories }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // [SỬA] Xử lý upload ảnh
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Tạo URL blob để preview ảnh
+      setSelectedFile(file); // Lưu file thật
       const objectUrl = URL.createObjectURL(file);
-      setImagePreview(objectUrl);
+      setImagePreview(objectUrl); // Preview
     }
   };
 
@@ -40,8 +41,8 @@ const Step1Info = ({ initialData, initialImage, onSubmit, categories }) => {
       return;
     }
 
-    // Gửi data về cha
-    onSubmit(formData, imagePreview);
+    // [QUAN TRỌNG] Truyền cả file thực tế lên cha
+    onSubmit(formData, imagePreview, selectedFile);
   };
 
   return (
@@ -88,12 +89,16 @@ const Step1Info = ({ initialData, initialImage, onSubmit, categories }) => {
             value={formData.categoryId}
             onChange={handleChange}
           >
-            {categories &&
+            {/* Hiển thị danh mục động */}
+            {categories && categories.length > 0 ? (
               categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
-              ))}
+              ))
+            ) : (
+              <option value="">Đang tải danh mục...</option>
+            )}
           </select>
         </div>
 

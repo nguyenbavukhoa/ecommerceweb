@@ -1,4 +1,3 @@
-// src/components/CartModalComponent/CartItem.jsx
 import React from "react";
 import { useCart } from "../../context/CartProvider";
 import ImageWithFallback from "../ImageWithFallbackComponent/ImageWithFallback";
@@ -13,17 +12,18 @@ const CartItem = ({ item }) => {
     deleteCartItem,
   } = useCart();
 
+  // [DEBUG] Log item nhận được
+  // console.log(`🛒 [CartItem] Rendering ID ${item.id}:`, item);
+
   const itemClassName = `${styles.cartItem} ${
     item.selected ? styles.selected : ""
   }`;
 
-  const handleActionClick = (e, action) => {
-    e.stopPropagation();
-    action();
-  };
+  // Chuẩn hóa optionValues
+  const options = item.optionValuesDTO || item.optionValues || [];
 
   return (
-    <li className={itemClassName} key={item.id}>
+    <li className={itemClassName}>
       <div className={styles.cartItemSelection}>
         <button
           className={styles.confirmBtn}
@@ -45,14 +45,16 @@ const CartItem = ({ item }) => {
 
       <div className={styles.cartItemInfo}>
         <p className={styles.cartItemTitle}>{item.productName}</p>
-        {item.optionValuesDTO && item.optionValuesDTO.length > 0 && (
+
+        {options.length > 0 && (
           <p className={styles.cartItemOptions}>
-            {item.optionValuesDTO.map((option) => option.value).join(" • ")}
+            {options.map((option) => option.value).join(" • ")}
           </p>
         )}
+
         <p className={styles.cartItemNote}>
           <i className="fa-light fa-pencil"></i>
-          <span>{item.note || "Thêm ghi chú..."}</span>
+          <span>{item.note || "Không có ghi chú"}</span>
         </p>
       </div>
 
@@ -66,28 +68,25 @@ const CartItem = ({ item }) => {
               className={`${styles.minus} ${styles.isForm}`}
               type="button"
               value="-"
-              onClick={(e) =>
-                handleActionClick(e, () =>
-                  decreasingNumber(item.id, item.quantity)
-                )
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                decreasingNumber(item.id, item.quantity);
+              }}
             />
             <input
               className={styles.inputQty}
               type="number"
               value={item.quantity}
               readOnly
-              onClick={(e) => e.stopPropagation()}
             />
             <input
               className={`${styles.plus} ${styles.isForm}`}
               type="button"
               value="+"
-              onClick={(e) =>
-                handleActionClick(e, () =>
-                  increasingNumber(item.id, item.quantity)
-                )
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                increasingNumber(item.id, item.quantity);
+              }}
             />
           </div>
         </div>
@@ -96,7 +95,10 @@ const CartItem = ({ item }) => {
       <div className={styles.cartItemActions}>
         <button
           className={styles.deleteBtn}
-          onClick={(e) => handleActionClick(e, () => deleteCartItem(item.id))}
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteCartItem(item.id);
+          }}
         >
           <i className="fa-regular fa-trash-can"></i>
         </button>

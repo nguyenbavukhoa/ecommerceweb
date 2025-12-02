@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-// 1. IMPORT AUTH ĐỂ LẤY USER
+// 1. IMPORT HOOKS
 import { useAuth } from "../../../../context/AuthContext";
-
 import { useFilters, useCategories } from "../../../../context/FilterProvider";
+// [QUAN TRỌNG] Hook useProducts mới đã hỗ trợ nhận tham số
 import { useProducts } from "../../../../hooks/useProducts";
 import { useToast } from "../../../../context/ToastContext";
+
+// 2. COMPONENTS & SERVICES
 import ProductDetailModal from "../../components/Modals/ProductDetailModal";
 import ProductForm from "../../components/Form/ProductForm";
 import styles from "./Products.module.scss";
@@ -14,27 +16,27 @@ import { vnd } from "../../utils";
 import ImageWithFallback from "../../../../components/ImageWithFallbackComponent/ImageWithFallback";
 import { db } from "../../../../data/mockData";
 
-const Products = () => {
+const Products = ({ storeId }) => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-
-  // 2. LẤY STORE ID TỪ USER ĐANG ĐĂNG NHẬP
   const { user } = useAuth();
-  const currentStoreId = user?.storeId;
+
+  // Ưu tiên lấy storeId từ Props (AdminPage truyền xuống), nếu không có thì lấy của User
+  const currentStoreId = storeId || user?.storeId;
 
   const { filters, setFilters } = useFilters();
   const { data: categories = [], isLoading: categoriesLoading } =
     useCategories();
   const [searchTerm, setSearchTerm] = useState(filters.name || "");
 
-  // 3. TRUYỀN STORE ID VÀO HOOK USEPRODUCTS
-  // Gộp filters hiện tại với storeId
+  // [QUAN TRỌNG] Truyền storeId vào hook.
+  // Nhờ sửa useProducts ở trên, hook này giờ sẽ dùng currentStoreId thay vì filters.storeId mặc định
   const { data, isLoading, error } = useProducts({
     ...filters,
     storeId: currentStoreId,
   });
 
-  const { products, totalPages } = data || { products: [], totalPages: 0 };
+  const { content: products = [], totalPages = 0 } = data || {};
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [productToEditId, setProductToEditId] = useState(null);
@@ -51,6 +53,7 @@ const Products = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, filters.name, setFilters]);
 
+  // Handle Toggle Status (Giữ nguyên logic cũ tạm thời)
   const handleStatusToggle = async (product) => {
     try {
       const newStatus = product.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
@@ -58,21 +61,15 @@ const Products = () => {
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       showToast({
         title: "Thành công",
-        message: `Đã đổi trạng thái sang: ${
-          newStatus === "ACTIVE" ? "Đang bán" : "Tạm ngưng"
-        }`,
+        message: "Đã cập nhật trạng thái",
         type: "success",
       });
     } catch (err) {
-      console.error(err);
-      showToast({
-        title: "Lỗi",
-        message: "Không thể cập nhật trạng thái",
-        type: "error",
-      });
+      showToast({ title: "Lỗi", message: "Cập nhật thất bại", type: "error" });
     }
   };
 
+  // --- MODAL HANDLERS ---
   const openAddModal = () => {
     setProductToEditId(null);
     setIsFormOpen(true);
@@ -101,7 +98,9 @@ const Products = () => {
     setProductToEditId(null);
   };
 
-  const handleCategoryChange = (e) => setFilters({ category: e.target.value });
+  // --- FILTER HANDLERS ---
+  const handleCategoryChange = (e) =>
+    setFilters({ category: e.target.value, page: 1 });
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setFilters({ page: newPage });
@@ -117,8 +116,7 @@ const Products = () => {
         productToEditId={productToEditId}
         onSaveSuccess={handleSaveSuccess}
         onCancel={handleCancelForm}
-        // Có thể truyền storeId vào đây nếu muốn chắc chắn,
-        // nhưng ProductForm cũng có thể tự lấy từ AuthContext
+        storeId={currentStoreId}
       />
     );
   }
@@ -126,6 +124,7 @@ const Products = () => {
   return (
     <>
       <div className={styles.section}>
+        {/* Header Control */}
         <div className={styles.adminControl}>
           <div className={styles.adminControlLeft}>
             <select
@@ -172,6 +171,7 @@ const Products = () => {
           </div>
         </div>
 
+        {/* Product List */}
         <div id="show-product">
           {isLoading ? (
             <div className={styles.noResult}>
@@ -187,8 +187,7 @@ const Products = () => {
                 <i className="fa-light fa-face-sad-cry"></i>
               </div>
               <div className={styles.noResultH}>Không có sản phẩm nào</div>
-              {/* Thêm thông báo nếu store chưa có món */}
-              <p>Danh sách món ăn của chi nhánh này đang trống.</p>
+              <p>Cửa hàng này chưa có món ăn nào.</p>
             </div>
           ) : (
             products.map((product) => (
@@ -214,9 +213,7 @@ const Products = () => {
                     <div className={styles.listTool}>
                       <label
                         className={styles.statusToggle}
-                        title={
-                          product.status === "ACTIVE" ? "Đang bán" : "Tạm ngưng"
-                        }
+                        title="Đổi trạng thái"
                       >
                         <input
                           type="checkbox"
@@ -228,14 +225,12 @@ const Products = () => {
                       <button
                         className={styles.btnEdit}
                         onClick={() => openEditModal(product)}
-                        title="Chỉnh sửa"
                       >
                         <i className="fa-light fa-pen-to-square"></i>
                       </button>
                       <button
                         className={styles.btnDetail}
                         onClick={() => openDetailModal(product)}
-                        title="Xem chi tiết"
                       >
                         <i className="fa-regular fa-eye"></i>
                       </button>
@@ -247,40 +242,43 @@ const Products = () => {
           )}
         </div>
 
-        <div className={styles.pageNav}>
-          <ul className={styles.pageNavList}>
-            <li
-              className={`${styles.pageNavItem} ${
-                filters.page === 1 ? styles.disabled : ""
-              }`}
-            >
-              <a href="#!" onClick={() => handlePageChange(filters.page - 1)}>
-                &laquo;
-              </a>
-            </li>
-            {Array.from({ length: totalPages }, (_, i) => (
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className={styles.pageNav}>
+            <ul className={styles.pageNavList}>
               <li
-                key={i + 1}
                 className={`${styles.pageNavItem} ${
-                  filters.page === i + 1 ? styles.active : ""
+                  filters.page === 1 ? styles.disabled : ""
                 }`}
               >
-                <a href="#!" onClick={() => handlePageChange(i + 1)}>
-                  {i + 1}
+                <a href="#!" onClick={() => handlePageChange(filters.page - 1)}>
+                  &laquo;
                 </a>
               </li>
-            ))}
-            <li
-              className={`${styles.pageNavItem} ${
-                filters.page === totalPages ? styles.disabled : ""
-              }`}
-            >
-              <a href="#!" onClick={() => handlePageChange(filters.page + 1)}>
-                &raquo;
-              </a>
-            </li>
-          </ul>
-        </div>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <li
+                  key={i + 1}
+                  className={`${styles.pageNavItem} ${
+                    filters.page === i + 1 ? styles.active : ""
+                  }`}
+                >
+                  <a href="#!" onClick={() => handlePageChange(i + 1)}>
+                    {i + 1}
+                  </a>
+                </li>
+              ))}
+              <li
+                className={`${styles.pageNavItem} ${
+                  filters.page === totalPages ? styles.disabled : ""
+                }`}
+              >
+                <a href="#!" onClick={() => handlePageChange(filters.page + 1)}>
+                  &raquo;
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
       <ProductDetailModal
         isOpen={isDetailModalOpen}

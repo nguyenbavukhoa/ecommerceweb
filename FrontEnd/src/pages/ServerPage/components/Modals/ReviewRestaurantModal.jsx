@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import CommonModal from "../../../AdminPage/components/Modals/CommonModal";
-import styles from "./ReviewRestaurantModal.module.scss"; // Sẽ tạo file css này sau
+import styles from "./ReviewRestaurantModal.module.scss";
 import { vnd } from "../../utils";
 
 const ReviewRestaurantModal = ({
   isOpen,
   onClose,
   restaurant,
-  onApprove,
-  onReject,
+  onApprove, // Hàm xử lý duyệt (Gọi update status = active)
+  onReject, // Hàm xử lý từ chối (Xóa hoặc status = inactive)
   onRequestMore,
 }) => {
   const [docPreview, setDocPreview] = useState(null);
@@ -30,93 +30,60 @@ const ReviewRestaurantModal = ({
             <p className={styles.valueHighlight}>{restaurant.name}</p>
           </div>
           <div className={styles.group}>
-            <label>Chủ sở hữu:</label>
-            <p>{restaurant.owner}</p>
+            <label>Mã cửa hàng:</label>
+            <p>{restaurant.code || "---"}</p>
           </div>
           <div className={styles.group}>
             <label>Liên hệ:</label>
-            <p>
-              {restaurant.phone} - {restaurant.email}
-            </p>
+            <p>{restaurant.phone}</p>
           </div>
           <div className={styles.group}>
             <label>Địa chỉ:</label>
             <p>{restaurant.address}</p>
           </div>
           <div className={styles.group}>
-            <label>Mã số thuế:</label>
-            <p>{restaurant.taxCode || "Chưa cập nhật"}</p>
+            <label>Giờ hoạt động:</label>
+            <p>
+              {restaurant.openTime} - {restaurant.closeTime}
+            </p>
           </div>
           <div className={styles.group}>
-            <label>GPKD:</label>
-            <p>{restaurant.businessLicense || "Chưa cập nhật"}</p>
+            <label>Mô tả:</label>
+            <p>{restaurant.description}</p>
           </div>
         </div>
 
-        {/* --- CỘT PHẢI: TÀI LIỆU & MENU --- */}
+        {/* --- CỘT PHẢI: TÀI LIỆU & MENU (API chưa có, để placeholder) --- */}
         <div className={styles.docColumn}>
-          <div className={styles.sectionTitle}>Menu Mẫu</div>
-          <ul className={styles.menuList}>
-            {restaurant.menuSample?.map((item, idx) => (
-              <li key={idx}>
-                <span>{item.name}</span>
-                <strong>{vnd(item.price)}</strong>
-              </li>
-            )) || <p>Chưa cập nhật menu</p>}
-          </ul>
-
           <div className={styles.sectionTitle}>Hồ sơ đính kèm</div>
           <div className={styles.docList}>
-            {/* Giả lập nút xem tài liệu */}
-            <button
-              className={styles.btnDoc}
-              onClick={() => setDocPreview("GPKD")}
-            >
-              <i className="fa-regular fa-file-pdf"></i> Giấy phép KD
-            </button>
-            <button
-              className={styles.btnDoc}
-              onClick={() => setDocPreview("CCCD")}
-            >
-              <i className="fa-regular fa-id-card"></i> CCCD Chủ quán
-            </button>
+            {/* Vì API chưa trả về link ảnh GPKD, ta ẩn hoặc hiện thông báo */}
+            <p style={{ color: "#999", fontSize: "13px", fontStyle: "italic" }}>
+              Hiện chưa có tài liệu đính kèm từ API.
+            </p>
           </div>
-
-          {/* Preview giả lập */}
-          {docPreview && (
-            <div className={styles.docPreviewBox}>
-              <p>
-                Đang xem: <strong>{docPreview}</strong>
-              </p>
-              <div className={styles.fakeImg}>
-                (Hình ảnh tài liệu {docPreview})
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* --- FOOTER ACTIONS --- */}
       <div className={styles.modalFooter}>
-        <button
-          className={styles.btnRequest}
-          onClick={() => onRequestMore(restaurant.id)}
-        >
-          <i className="fa-regular fa-paper-plane"></i> Yêu cầu bổ sung
-        </button>
         <div className={styles.mainActions}>
           <button
             className={styles.btnReject}
-            onClick={() => onReject(restaurant.id)}
+            onClick={() => onReject(restaurant)}
           >
-            <i className="fa-regular fa-xmark"></i> Từ chối
+            <i className="fa-regular fa-xmark"></i> Từ chối / Xóa
           </button>
-          <button
-            className={styles.btnApprove}
-            onClick={() => onApprove(restaurant.id)}
-          >
-            <i className="fa-regular fa-check"></i> Duyệt hồ sơ
-          </button>
+
+          {/* Chỉ hiện nút Duyệt nếu status chưa active (ví dụ đang pending) */}
+          {!restaurant.active && (
+            <button
+              className={styles.btnApprove}
+              onClick={() => onApprove(restaurant)}
+            >
+              <i className="fa-regular fa-check"></i> Duyệt hồ sơ (Kích hoạt)
+            </button>
+          )}
         </div>
       </div>
     </CommonModal>

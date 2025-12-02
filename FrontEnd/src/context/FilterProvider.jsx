@@ -1,300 +1,17 @@
-// // src/context/FilterProvider.jsx
-// import React, { createContext, useContext, useState } from "react";
-// // Bổ sung useMutation và useQueryClient
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import { useAuth } from "../context/AuthContext";
-// // Bổ sung useToast (Giả định nằm trong cùng thư mục context)
-// import { useToast } from "../context/ToastContext";
-
-// // 1. IMPORT DATABASE ẢO
-// import { db } from "../data/mockData";
-
-// const FilterContext = createContext();
-
-// const initialState = {
-//   name: "",
-//   status: "ALL",
-//   category: "all",
-//   minPrice: "",
-//   maxPrice: "",
-//   startDate: "",
-//   endDate: "",
-//   sortBy: "",
-//   sortOrder: "",
-//   page: 1,
-// };
-
-// export const FilterProvider = ({ children }) => {
-//   const [filters, setFilters] = useState(initialState);
-
-//   const updateFilters = (newFilterValues) => {
-//     setFilters((prev) => {
-//       const updated = { ...prev, ...newFilterValues };
-//       // Reset về trang 1 nếu thay đổi tiêu chí lọc (trừ page)
-//       const hasFilterChanged = Object.keys(newFilterValues).some(
-//         (key) => key !== "page" && newFilterValues[key] !== prev[key]
-//       );
-//       if (hasFilterChanged) {
-//         updated.page = 1;
-//       }
-//       return updated;
-//     });
-//   };
-
-//   return (
-//     <FilterContext.Provider value={{ filters, setFilters: updateFilters }}>
-//       {children}
-//     </FilterContext.Provider>
-//   );
-// };
-
-// export const useFilters = () => {
-//   const context = useContext(FilterContext);
-//   if (!context)
-//     throw new Error("useFilters must be used within a FilterProvider");
-//   return context;
-// };
-
-// /* ===========================================================
-//    CÁC HOOK DỮ LIỆU (DÙNG MOCK DATA)
-//    =========================================================== */
-
-// // 5. Lấy danh mục
-// export function useCategories() {
-//   return useQuery({
-//     queryKey: ["categories"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       return db.categories.getAll();
-//     },
-//     staleTime: Infinity,
-//   });
-// }
-
-// // 6. Lấy danh sách Users (Admin)
-// export function useCustomers() {
-//   return useQuery({
-//     queryKey: ["customers"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       return db.users.getAll();
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 7. Lấy thông tin chi tiết User
-// export function useUserInfo(accountId) {
-//   return useQuery({
-//     queryKey: ["userInfo", accountId],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 200));
-//       const user = db.users.getOne(accountId);
-//       return user ? [user] : [];
-//     },
-//     enabled: !!accountId,
-//   });
-// }
-
-// // === 8. Lấy danh sách đơn hàng (Admin) + Lọc/Phân trang ===
-// export function useAdminOrders(filters) {
-//   return useQuery({
-//     queryKey: ["adminOrders", filters],
-//     queryFn: async () => {
-//       await new Promise((resolve) => setTimeout(resolve, 400));
-
-//       let result = db.orders.getAll();
-
-//       // --- 1. LỌC THEO STORE ID ---
-//       if (filters.storeId) {
-//         result = result.filter((o) => o.restaurantId === filters.storeId);
-//       }
-
-//       // 2. Tìm kiếm (Mã đơn, Ghi chú, Tên người nhận từ Snapshot)
-//       if (filters.name) {
-//         const s = filters.name.toLowerCase();
-//         result = result.filter((o) => {
-//           // Tìm trong snapshot (ưu tiên)
-//           const deliveryName = o.deliveryInfo?.name || "";
-
-//           // Tìm fallback trong user DB
-//           const userName = db.users.getOne(o.userId)?.fullName || "";
-
-//           return (
-//             o.id.toString().includes(s) ||
-//             (o.note && o.note.toLowerCase().includes(s)) ||
-//             deliveryName.toLowerCase().includes(s) ||
-//             userName.toLowerCase().includes(s)
-//           );
-//         });
-//       }
-
-//       // ... (Các phần lọc status, date, phân trang GIỮ NGUYÊN) ...
-//       if (filters.status && filters.status !== "ALL") {
-//         result = result.filter((o) => o.orderStatus === filters.status);
-//       }
-
-//       if (filters.startDate && filters.endDate) {
-//         // ... logic date ...
-//         const start = new Date(filters.startDate);
-//         const end = new Date(filters.endDate);
-//         end.setHours(23, 59, 59, 999);
-//         result = result.filter((o) => {
-//           const parts = o.orderTime.split(" ");
-//           if (parts.length < 2) return false;
-//           const [d, m, y] = parts[1].split("/");
-//           const date = new Date(`${y}-${m}-${d}`);
-//           return date >= start && date <= end;
-//         });
-//       }
-
-//       const pageSize = 10;
-//       const totalElements = result.length;
-//       const totalPages = Math.ceil(totalElements / pageSize);
-//       const page = Math.min(Math.max(filters.page || 1, 1), totalPages || 1);
-//       const startIdx = (page - 1) * pageSize;
-
-//       return {
-//         orders: result.slice(startIdx, startIdx + pageSize),
-//         totalPages,
-//         totalElements,
-//       };
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 9. Thông tin quán
-// export function useStoreInfo() {
-//   return useQuery({
-//     queryKey: ["storeInfo"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       // Mock cứng (chưa làm DB cho cái này vì ít sửa)
-//       return {
-//         name: "KHK Food & Beverage",
-//         address: "Số 10, Đường 3/2, Quận 10, TP.HCM",
-//         phone: "0356194587",
-//         description: "Chuyên cung cấp các loại đồ ăn nhanh...",
-//         openTime: "07:30",
-//         closeTime: "22:30",
-//         isOpen: true,
-//         avatar: "https://via.placeholder.com/150",
-//       };
-//     },
-//     staleTime: Infinity,
-//   });
-// }
-
-// // 10. Yêu cầu rút tiền
-// export function useWithdrawRequests() {
-//   return useQuery({
-//     queryKey: ["withdrawRequests"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       return db.withdraws.getAll();
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 11. Danh sách cửa hàng
-// export function useServerStores() {
-//   return useQuery({
-//     queryKey: ["serverStores"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       return db.stores.getAll();
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 12. Danh sách users (Admin)
-// export function useServerUsers() {
-//   return useQuery({
-//     queryKey: ["serverUsers"],
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-//       return db.users.getAll();
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 7. Hook Chi tiết Người dùng (useUserDetail) - Lấy thông tin đầy đủ cho Modal
-// export function useUserDetail(userId) {
-//   return useQuery({
-//     queryKey: ["userDetail", userId],
-//     enabled: !!userId, // Chỉ chạy khi có ID
-//     queryFn: async () => {
-//       await new Promise((r) => setTimeout(r, 300));
-
-//       const user = db.users.getOne(userId);
-//       if (!user) throw new Error("Không tìm thấy người dùng.");
-
-//       // Thêm thông tin bổ sung: Đếm số đơn hàng
-//       const orders = db.orders.getAll().filter((o) => o.userId == userId);
-
-//       return {
-//         ...user,
-//         ordersCount: orders.length,
-//       };
-//     },
-//     staleTime: 0,
-//   });
-// }
-
-// // 8. Hook Mutation Cập nhật/Tạo mới Người dùng (useSaveUser)
-// export function useSaveUser() {
-//   const queryClient = useQueryClient();
-//   const { showToast } = useToast();
-
-//   return useMutation({
-//     mutationFn: async (userData) => {
-//       await new Promise((r) => setTimeout(r, 500));
-
-//       // Nếu có ID, gọi UPDATE; nếu không, gọi CREATE
-//       const isEdit = !!userData.id;
-//       const result = isEdit
-//         ? db.users.update(userData)
-//         : db.users.create(userData);
-
-//       return result;
-//     },
-//     onSuccess: (updatedUser, variables) => {
-//       // 1. Invalidate list khách hàng để refresh table
-//       queryClient.invalidateQueries(["customers"]);
-//       // 2. Cập nhật cache của chi tiết người dùng (nếu đang mở modal)
-//       queryClient.setQueryData(["userDetail", updatedUser.id], updatedUser);
-
-//       const isStatusToggle = variables?.isStatusToggle;
-//       const message = isStatusToggle
-//         ? `Đã cập nhật trạng thái người dùng ${updatedUser.fullName}.`
-//         : variables.id
-//         ? "Đã lưu thông tin người dùng thành công!"
-//         : "Đã tạo tài khoản mới thành công!";
-
-//       showToast("success", message);
-//     },
-//     onError: (error) => {
-//       showToast("error", `Lỗi: ${error.message}`);
-//       throw error; // Quan trọng: Re-throw error để try/catch trong component bắt được
-//     },
-//   });
-// }
-// src/context/FilterProvider.jsx
 import React, { createContext, useContext, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { db } from "../data/mockData";
-
+import orderService from "../services/orderService";
+import storeService from "../services/storeService";
+import categoryService from "../services/categoryService";
+import authService from "../services/authService";
 const FilterContext = createContext();
 
 // Khởi tạo filter mặc định (quan trọng: có storeId)
 const initialState = {
-  storeId: "RES-01", // Mặc định Store 1 cho User
+  storeId: "1", // Mặc định Store 1 cho User
   name: "",
   status: "ALL",
   category: "all",
@@ -317,7 +34,12 @@ export const FilterProvider = ({ children }) => {
       const hasFilterChanged = Object.keys(newFilterValues).some(
         (key) => key !== "page" && newFilterValues[key] !== prev[key]
       );
-      if (hasFilterChanged) {
+      // Nếu đổi Store -> Reset category và name về mặc định để tránh lỗi logic
+      if (newFilterValues.storeId && newFilterValues.storeId !== prev.storeId) {
+        updated.category = "all";
+        updated.name = "";
+        updated.page = 1;
+      } else if (hasFilterChanged) {
         updated.page = 1;
       }
       return updated;
@@ -342,10 +64,19 @@ export function useServerUsers() {
   return useQuery({
     queryKey: ["serverUsers"],
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      return db.users.getAll();
+      // Gọi API lấy danh sách
+      const users = await authService.getAllUsers();
+
+      // Map dữ liệu để khớp với UI (nếu cần)
+      return users.map((u) => ({
+        ...u,
+        // Đảm bảo active luôn là boolean để checkbox/toggle hoạt động đúng
+        active: u.active === true || String(u.active) === "true",
+        // Map accountName sang fullName nếu UI cần dùng fullName
+        fullName: u.accountName || u.fullName,
+      }));
     },
-    staleTime: 0,
+    staleTime: 5000, // Cache 5s
   });
 }
 
@@ -357,10 +88,7 @@ export function useServerUsers() {
 export function useCategories() {
   return useQuery({
     queryKey: ["categories"],
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      return db.categories.getAll();
-    },
+    queryFn: categoryService.getAll,
     staleTime: Infinity,
   });
 }
@@ -437,64 +165,37 @@ export function useSaveUser() {
 // === 5. Lấy danh sách đơn hàng (Admin) + Lọc/Phân trang ===
 export function useAdminOrders(filters, storeIdOverride) {
   return useQuery({
+    // Key phụ thuộc vào filter để tự reload khi đổi trang/store
     queryKey: ["adminOrders", filters, storeIdOverride],
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-
-      let result = db.orders.getAll();
-
-      // Ưu tiên storeId được truyền vào (dành cho Admin Dashboard), nếu không thì lấy từ filter
+      // Xác định Store ID
       const activeStoreId = storeIdOverride || filters.storeId;
 
-      if (activeStoreId) {
-        result = result.filter((o) => o.restaurantId === activeStoreId);
+      if (!activeStoreId) {
+        return { orders: [], totalPages: 0, totalElements: 0 };
       }
 
-      // Tìm kiếm thông minh (Search)
-      if (filters.name) {
-        const s = filters.name.toLowerCase();
-        result = result.filter((o) => {
-          const deliveryName = o.deliveryInfo?.name || ""; // Tìm trong snapshot
-          const userName = db.users.getOne(o.userId)?.fullName || ""; // Fallback
-          return (
-            o.id.toString().includes(s) ||
-            (o.note && o.note.toLowerCase().includes(s)) ||
-            deliveryName.toLowerCase().includes(s) ||
-            userName.toLowerCase().includes(s)
-          );
-        });
-      }
+      // Gọi API lấy danh sách theo Store (có phân trang)
+      const { content, totalPages, totalElements } =
+        await orderService.getOrdersByRestaurant(
+          activeStoreId,
+          filters.page,
+          10 // PageSize mặc định
+        );
 
-      if (filters.status && filters.status !== "ALL") {
-        result = result.filter((o) => o.orderStatus === filters.status);
-      }
-
-      if (filters.startDate && filters.endDate) {
-        const start = new Date(filters.startDate);
-        const end = new Date(filters.endDate);
-        end.setHours(23, 59, 59, 999);
-        result = result.filter((o) => {
-          const parts = o.orderTime.split(" ");
-          if (parts.length < 2) return false;
-          const [d, m, y] = parts[1].split("/");
-          const date = new Date(`${y}-${m}-${d}`);
-          return date >= start && date <= end;
-        });
-      }
-
-      const pageSize = 10;
-      const totalElements = result.length;
-      const totalPages = Math.ceil(totalElements / pageSize);
-      const page = Math.min(Math.max(filters.page || 1, 1), totalPages || 1);
-      const startIdx = (page - 1) * pageSize;
+      // Lưu ý: Hiện tại API chưa hỗ trợ lọc theo Search/Status/Date trên server
+      // Dữ liệu trả về là của trang hiện tại.
+      // Nếu muốn filter client-side thì chỉ filter được trên 10 item này thôi.
+      // Tạm thời trả về nguyên bản từ API.
 
       return {
-        orders: result.slice(startIdx, startIdx + pageSize),
-        totalPages,
-        totalElements,
+        orders: content,
+        totalPages: totalPages,
+        totalElements: totalElements,
       };
     },
-    staleTime: 0,
+    keepPreviousData: true, // Giữ data cũ khi chuyển trang để mượt hơn
+    staleTime: 30 * 1000, // Cache 30s
   });
 }
 
@@ -506,10 +207,11 @@ export function useStoreInfo(storeId) {
     queryFn: async () => {
       await new Promise((r) => setTimeout(r, 300));
       if (storeId) {
-        return db.stores.getOne(storeId);
+        // Gọi service lấy chi tiết store
+        return await storeService.getOne(storeId);
       }
-      // Mặc định trả về Store 1 nếu không chỉ định (cho trang chủ User)
-      return db.stores.getAll()[0];
+      const all = await storeService.getAll();
+      return all.length > 0 ? all[0] : null;
     },
     staleTime: Infinity,
   });
@@ -518,14 +220,14 @@ export function useStoreInfo(storeId) {
 // 7. [MỚI] Lấy danh sách tất cả Store (Cho Dropdown Header)
 export function useStores() {
   return useQuery({
-    queryKey: ["publicStores"],
+    queryKey: ["stores"],
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      const allStores = db.stores.getAll();
-      // Lọc chỉ lấy quán đang hoạt động
-      return allStores.filter((s) => s.status === "active");
+      const stores = await storeService.getAll();
+      // Chỉ lấy quán đang hoạt động (active: true)
+      return stores.filter((s) => s.active === true);
     },
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000, // Cache 5 phút
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -621,11 +323,15 @@ export function useServerStores() {
   return useQuery({
     queryKey: ["serverStores"],
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      // Admin cần xem revenue thực tế, db.stores.getAll() đã tính sẵn rồi
-      return db.stores.getAll();
+      // Gọi API lấy danh sách
+      const stores = await storeService.getAll();
+
+      // Nếu cần tính doanh thu (revenue) giả lập ở Client (vì API Get Restaurant chưa trả về revenue)
+      // Ta có thể giữ logic tính toán cũ nếu muốn, hoặc hiển thị 0 tạm thời.
+      // Ở đây trả về nguyên bản từ API để test kết nối trước.
+      return stores;
     },
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -636,13 +342,12 @@ export function useCreateStore() {
 
   return useMutation({
     mutationFn: async (newStoreData) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.stores.add(newStoreData);
+      // Gọi API Create
+      return storeService.create(newStoreData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["publicStores"]);
       queryClient.invalidateQueries(["serverStores"]);
-
+      queryClient.invalidateQueries(["stores"]); // Refresh cả dropdown header
       showToast({
         title: "Thành công",
         message: "Tạo cửa hàng mới thành công!",
@@ -650,11 +355,8 @@ export function useCreateStore() {
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      const msg = err.response?.data?.message || err.message;
+      showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
 }
@@ -666,43 +368,41 @@ export function useUpdateStore() {
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.stores.update(id, data);
+      // Gọi API Update
+      return storeService.update(id, data);
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries(["publicStores"]);
+    onSuccess: (res, variables) => {
       queryClient.invalidateQueries(["serverStores"]);
       queryClient.invalidateQueries(["storeInfo", variables.id]);
-
-      const msg = variables.data.status
-        ? "Cập nhật trạng thái thành công!"
-        : "Lưu thông tin thành công!";
-
       showToast({
         title: "Thành công",
-        message: msg,
+        message: "Cập nhật thành công!",
         type: "success",
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      const msg = err.response?.data?.message || err.message;
+      showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
 }
 
 // 13. Hook Tạo User Mới
+// Tạo tài khoản mới
 export function useCreateUser() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
   return useMutation({
     mutationFn: async (newUserData) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.users.create(newUserData);
+      // API Register yêu cầu: { email, password, accountName, role }
+      const payload = {
+        email: newUserData.email,
+        password: newUserData.password,
+        accountName: newUserData.fullName, // Map fullName UI -> accountName API
+        role: newUserData.role,
+      };
+      return authService.register(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["serverUsers"]);
@@ -713,11 +413,9 @@ export function useCreateUser() {
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      const msg =
+        err.response?.data?.message || "Tạo thất bại. Email có thể đã tồn tại.";
+      showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
 }
@@ -729,29 +427,28 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: async (userData) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.users.update(userData);
+      // userData có thể chứa: { id, fullName, role, active }
+
+      const payload = {};
+      if (userData.fullName) payload.accountName = userData.fullName;
+      if (userData.role) payload.role = userData.role;
+      // Nếu có gửi active, map vào payload
+      if (userData.active !== undefined) payload.active = userData.active;
+
+      // Gọi API Update Account
+      return authService.updateAccount(userData.id, payload);
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(["serverUsers"]);
-      queryClient.invalidateQueries(["userDetail", variables.id]);
-
-      const msg = variables.status
-        ? "Cập nhật trạng thái thành công!"
-        : "Cập nhật thông tin thành công!";
-
       showToast({
         title: "Thành công",
-        message: msg,
+        message: "Cập nhật tài khoản thành công!",
         type: "success",
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      const msg = err.response?.data?.message || "Cập nhật thất bại.";
+      showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
 }
@@ -764,28 +461,28 @@ export function useDeleteStore() {
 
   return useMutation({
     mutationFn: async (storeId) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.stores.delete(storeId);
+      // Gọi API Delete
+      return storeService.delete(storeId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["serverStores"]);
-      queryClient.invalidateQueries(["publicStores"]);
+      queryClient.invalidateQueries(["stores"]);
       showToast({
         title: "Thành công",
-        message: "Đã xóa cửa hàng vĩnh viễn!",
+        message: "Đã xóa cửa hàng!",
         type: "success",
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      // Lỗi thường gặp: "Cannot delete restaurant with active orders"
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.[0] ||
+        err.message;
+      showToast({ title: "Xóa thất bại", message: msg, type: "error" });
     },
   });
 }
-
 // --- USER ---
 // Hook Xóa User
 export function useDeleteUser() {
@@ -794,24 +491,19 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: async (userId) => {
-      await new Promise((r) => setTimeout(r, 500));
-      return db.users.delete(userId);
+      return authService.deleteAccount(userId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["serverUsers"]);
-      queryClient.invalidateQueries(["customers"]);
       showToast({
         title: "Thành công",
-        message: "Đã xóa tài khoản vĩnh viễn!",
+        message: "Đã xóa tài khoản!",
         type: "success",
       });
     },
     onError: (err) => {
-      showToast({
-        title: "Lỗi",
-        message: err.message,
-        type: "error",
-      });
+      const msg = err.response?.data?.message || "Xóa thất bại.";
+      showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
 }

@@ -41,7 +41,7 @@ export const routes = [
   {
     path: "/admin", // For admin dashboard
     page: AdminPage,
-    isPrivate: true,
+    // isPrivate: true,
     // isShowHeader: true,
   },
   {

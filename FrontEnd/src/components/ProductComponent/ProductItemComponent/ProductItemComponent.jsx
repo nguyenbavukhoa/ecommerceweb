@@ -1,20 +1,18 @@
-import ImageWithFallback from "../../ImageWithFallbackComponent/ImageWithFallback";
-function ProductItem({ product, onDetail }) {
+import React from "react";
+import ImageWithFallback from "../../../components/ImageWithFallbackComponent/ImageWithFallback";
+
+function ProductItemComponent({ product, onDetail }) {
   if (!product) return null;
 
-  const name = product.name || "No name";
-  const price = product.priceBase ?? 0; // nếu undefined, đặt 0
-  const img = product.imgMain || "/images/default.png";
+  // Dữ liệu đã chuẩn hóa từ Service
+  const name = product.name || "Sản phẩm";
+  const price = product.priceBase ?? 0;
+  const img = product.imgMain || "";
 
-  // Hàm onDetail (từ props) đã có sẵn ID,
-  // nên chúng ta chỉ cần gọi nó.
+  // Xử lý click
   const handleDetailClick = (e) => {
-    // Chỉ preventDefault nếu 'e' tồn tại (tức là click từ thẻ <a>)
-    if (e) {
-      e.preventDefault();
-    }
-    // --- Gọi onDetail() mà không cần truyền ID ---
-    onDetail();
+    if (e) e.preventDefault();
+    if (onDetail) onDetail(); // Gọi hàm callback
   };
 
   return (
@@ -22,9 +20,10 @@ function ProductItem({ product, onDetail }) {
       <article className="card-product">
         <div className="card-header">
           <a href="#" className="card-image-link" onClick={handleDetailClick}>
-            <ImageWithFallback className="card-image" src={img} alt={img} />
+            <ImageWithFallback className="card-image" src={img} alt={name} />
           </a>
         </div>
+
         <div className="food-info">
           <div className="card-content">
             <div className="card-title">
@@ -37,10 +36,14 @@ function ProductItem({ product, onDetail }) {
               </a>
             </div>
           </div>
+
           <div className="card-footer">
             <div className="product-price">
               <span className="current-price">
-                {price.toLocaleString("vi-VN")}₫
+                {price.toLocaleString("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                })}
               </span>
             </div>
             <div className="product-buy">
@@ -58,4 +61,4 @@ function ProductItem({ product, onDetail }) {
   );
 }
 
-export default ProductItem;
+export default ProductItemComponent;

@@ -2,74 +2,55 @@ import React, { useState } from "react";
 import MainWrapperComponent from "../../components/MainWrapperComponent/MainWrapper";
 import ProductDetailsComponent from "../../components/ProductComponent/ProductDetailsComponent/ProductDetailsComponent";
 import { useToast } from "../../context/ToastContext";
-// import CartModal from "../../components/CartComponent/CartModal";
+
 function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProductId, setSelectedProduct] = useState(undefined);
+  const [selectedProduct, setSelectedProduct] = useState(null); // Lưu cả object product
   const { showToast } = useToast();
 
-  const handleOpenProductDetail = (productId) => {
-    setSelectedProduct(productId);
+  // Hàm này sẽ được truyền xuống tận ProductItem
+  const handleOpenProductDetail = (product) => {
+    setSelectedProduct(product);
     setModalOpen(true);
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden"; // Chặn scroll background
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
+    // Để lại null sau khi đóng để reset
+    setTimeout(() => setSelectedProduct(null), 200);
     document.body.style.overflow = "auto";
-  };
-
-  const handleAddToCart = (quantity, note) => {
-    const currentUser = localStorage.getItem("currentuser");
-    if (!currentUser) {
-      showToast({
-        title: "Warning",
-        message: "Chưa đăng nhập tài khoản !",
-        type: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-    // Xử lý thêm vào giỏ hàng
-    handleCloseModal();
-  };
-
-  const handleOrderNow = (quantity, note) => {
-    const currentUser = localStorage.getItem("currentuser");
-    if (!currentUser) {
-      showToast({
-        title: "Warning",
-        message: "Chưa đăng nhập tài khoản !",
-        type: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-    // Xử lý đặt hàng ngay
-    handleCloseModal();
   };
 
   return (
     <>
+      {/* Truyền hàm mở modal xuống */}
       <MainWrapperComponent onProductDetail={handleOpenProductDetail} />
 
-      {/* Modal với class open khi modalOpen = true */}
-      <div className={`modal product-detail${modalOpen ? " open" : ""}`}>
+      {/* --- MODAL PRODUCT DETAIL (Cấu trúc HTML của bạn) --- */}
+      <div
+        className={`modal product-detail${modalOpen ? " open" : ""}`}
+        onClick={handleCloseModal}
+      >
+        {/* Nút đóng */}
         <button className="modal-close close-popup" onClick={handleCloseModal}>
           <i className="fa-thin fa-xmark"></i>
         </button>
-        <div className="modal-container mdl-cnt" id="product-detail-content">
-          {selectedProductId && (
+
+        {/* Container nội dung */}
+        <div
+          className="modal-container mdl-cnt"
+          id="product-detail-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {selectedProduct && (
             <ProductDetailsComponent
-              productId={selectedProductId}
+              product={selectedProduct} // Truyền object product vào
               onClose={handleCloseModal}
-              onAddToCart={handleAddToCart}
-              onOrderNow={handleOrderNow}
             />
           )}
         </div>
       </div>
-      {/* <CartModal /> */}
     </>
   );
 }

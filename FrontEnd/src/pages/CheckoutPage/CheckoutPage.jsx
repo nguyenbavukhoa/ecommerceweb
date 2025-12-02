@@ -7,6 +7,7 @@ import DeliveryAddress from "../../components/DeliveryAddress/DeliveryAddress";
 import styles from "./CheckoutPage.module.css";
 import VNPAYModal from "./Modals/VNPAYModal";
 import { useToast } from "../../context/ToastContext";
+// Vẫn giữ import db để tránh lỗi nếu bạn có dùng biến db ở đâu đó, nhưng logic order không dùng nữa
 import { db } from "../../data/mockData";
 import VnpayLogo from "../../assets/icon/vnpay_logo.svg";
 
@@ -23,8 +24,14 @@ const CheckoutPage = () => {
   const { filters } = useFilters();
   const currentStoreId = filters.storeId;
 
-  const { state, handleInputChange, handlePaymentMethodChange } =
-    useCheckoutForm(auth);
+  // Lấy handlePlaceOrder từ hook
+  const {
+    state,
+    handleInputChange,
+    handlePaymentMethodChange,
+    handlePlaceOrder,
+    loading,
+  } = useCheckoutForm();
 
   const selectedItems = cartItems.filter((item) => item.selected);
   const subTotal = selectedItems.reduce(
@@ -37,70 +44,9 @@ const CheckoutPage = () => {
   const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [isVnPayModalOpen, setIsVnPayModalOpen] = useState(false);
 
-  // 3. Hàm sinh tọa độ ngẫu nhiên QUANH STORE HIỆN TẠI
-  const getRandomLocation = () => {
-    // Lấy thông tin store từ DB để lấy tọa độ gốc
-    const currentStore = db.stores.getOne(currentStoreId);
-    // Fallback về Quận 1 nếu không tìm thấy (đề phòng lỗi)
-    const centerPos = currentStore?.location || [10.776019, 106.702068];
+  // [ĐÃ XÓA] Các hàm getRandomLocation, createOrderData (Logic cũ Mock)
 
-    const [lat, lng] = centerPos;
-    const rLat = lat + (Math.random() - 0.5) * 0.06; // Bán kính ~3km
-    const rLng = lng + (Math.random() - 0.5) * 0.06;
-    return [rLat, rLng];
-  };
-
-  const createOrderData = () => {
-    const now = new Date();
-    const timeString = `${now.getHours().toString().padStart(2, 0)}:${now
-      .getMinutes()
-      .toString()
-      .padStart(2, 0)} ${now.getDate()}/${
-      now.getMonth() + 1
-    }/${now.getFullYear()}`;
-
-    // Lấy tên cửa hàng
-    const currentStore = db.stores.getOne(currentStoreId);
-    const storeName = currentStore ? currentStore.name : "KHK Food";
-
-    return {
-      id: Date.now(),
-      orderTime: timeString,
-      totalPrice: finalTotal,
-      note: state.note,
-      orderStatus: "PLACED",
-      userId: auth ? auth.id : "GUEST",
-
-      // [QUAN TRỌNG] Gán đúng Store ID và Tên Store
-      restaurantId: currentStoreId,
-      storeName: storeName,
-
-      orderItems: selectedItems.map((item) => ({
-        id: Date.now() + Math.random(),
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        imgUrl: item.imgUrl,
-        note: item.note,
-        productId: item.productId,
-        optionValuesDTO: item.optionValuesDTO,
-      })),
-      deliveryInfo: {
-        name: deliveryInfo.name,
-        phone: deliveryInfo.phone,
-        address: deliveryInfo.address,
-        type: deliveryInfo.type,
-      },
-      paymentMethod: state.paymentMethod,
-      droneId: null,
-
-      // Tọa độ khách hàng (để Drone bay tới đúng chỗ)
-      customerLocation: getRandomLocation(),
-      customerAddress: deliveryInfo.address,
-    };
-  };
-
-  const handleCheckoutClick = () => {
+  const handleCheckoutClick = async () => {
     if (selectedItems.length === 0) {
       showToast({
         title: "Thông báo",
@@ -119,33 +65,24 @@ const CheckoutPage = () => {
       return;
     }
 
+    // deliveryInfo ở đây chính là object địa chỉ lấy từ DeliveryAddress
+    // Nó đã chứa id (userInfoId). Ta truyền thẳng nó vào hook.
     if (state.paymentMethod === "VNPAY") {
       setIsVnPayModalOpen(true);
     } else {
-      const newOrder = createOrderData();
-      db.orders.add(newOrder);
-      processOrderSuccess();
+      // Gọi API thật thông qua hook
+      await handlePlaceOrder(deliveryInfo);
     }
   };
 
-  const processOrderSuccess = () => {
-    if (state.paymentMethod === "VNPAY") {
-      const newOrder = createOrderData();
-      db.orders.add(newOrder);
-      setIsVnPayModalOpen(false);
-    }
+  const processOrderSuccess = async () => {
+    // Đóng modal VNPAY
+    setIsVnPayModalOpen(false);
 
-    clearSelectedItems();
-
-    showToast({
-      title: "Thành công",
-      message: "Đặt hàng thành công! Cảm ơn bạn đã mua hàng.",
-      type: "success",
-    });
-
-    setTimeout(() => {
-      navigate("/");
-    }, 1500);
+    // Gọi API thật thông qua hook (Logic thanh toán thành công)
+    // Lưu ý: handlePlaceOrder trong hook cần xử lý tham số thứ 2 là isSuccessPayment (nếu cần)
+    // Ở đây ta gọi đơn giản để tạo đơn
+    await handlePlaceOrder(deliveryInfo);
   };
 
   return (
@@ -270,11 +207,12 @@ const CheckoutPage = () => {
 
               <button
                 className={`${styles.completeCheckoutBtn} ${
-                  selectedItems.length === 0 ? styles.disabled : ""
+                  selectedItems.length === 0 || loading ? styles.disabled : ""
                 }`}
                 onClick={handleCheckoutClick}
+                disabled={loading}
               >
-                Đặt hàng
+                {loading ? "Đang xử lý..." : "Đặt hàng"}
               </button>
             </div>
           </div>

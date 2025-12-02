@@ -7,6 +7,7 @@ import {
   useCategories,
   useStores,
 } from "../../../context/FilterProvider";
+// [QUAN TRỌNG] Import đúng tên Context (nếu bạn đã đổi tên file provider)
 import { useCart } from "../../../context/CartProvider";
 import { useAuth } from "../../../context/AuthContext";
 import { useState, useEffect } from "react";
@@ -20,8 +21,14 @@ const scrollToProducts = () => {
 };
 
 export default function HeaderComponent() {
+  // 1. Lấy dữ liệu từ CartContext
+  // getAmountCart là hàm tính tổng số lượng item
   const { openCart, getAmountCart } = useCart();
-  const { auth, logout, isLoggedIn } = useAuth();
+
+  // 2. Lấy dữ liệu từ AuthContext
+  // Bỏ isLoggedIn, chỉ cần check biến 'auth'
+  const { auth, logout } = useAuth();
+
   const navigate = useNavigate();
 
   const { filters, setFilters } = useFilters();
@@ -31,6 +38,7 @@ export default function HeaderComponent() {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // Thêm state cho dropdown user
 
   // --- LOGIC SEARCH & FILTER ---
   useEffect(() => {
@@ -69,7 +77,10 @@ export default function HeaderComponent() {
     }
   };
 
-  const totalAmount = getAmountCart() ?? 0;
+  // 3. Tính toán số lượng giỏ hàng
+  // Gọi hàm getAmountCart() để lấy số
+  const totalAmount = getAmountCart ? getAmountCart() : 0;
+
   const location = useLocation();
   const hideHeaderBottomOnPaths = ["/order-history", "/checkout"];
   const isHeaderBottomVisible = !hideHeaderBottomOnPaths.includes(
@@ -80,6 +91,9 @@ export default function HeaderComponent() {
     setShowMobileSearch(false);
   }, [location.pathname]);
 
+  // 4. Xử lý tên hiển thị (Ưu tiên accountName từ API, fallback sang fullName)
+  const displayName = auth?.accountName || auth?.fullName || "Khách hàng";
+
   return (
     <>
       <header>
@@ -87,25 +101,24 @@ export default function HeaderComponent() {
           <div className={styles.container}>
             {/* GROUP 1: LOGO & STORE SELECTOR */}
             <div className={styles.headerLeftGroup}>
-              {/* LOGO */}
               <div className={styles.headerLogo}>
                 <a href="/">
                   <img src={logo} alt="" className={styles.headerLogoImg} />
                 </a>
               </div>
 
-              {/* STORE SELECTOR (Nằm cạnh Logo) */}
               <div className={styles.storeSelectorWrapper}>
                 <i className="fa-solid fa-location-dot location-icon"></i>
                 <select
-                  value={filters.storeId}
+                  value={filters.storeId || ""}
                   onChange={handleStoreChange}
                   className={styles.storeSelect}
                 >
                   {stores.map((store) => (
                     <option key={store.id} value={store.id}>
-                      {store.name.replace("KHK Food ", "")}{" "}
-                      {/* Rút gọn tên hiển thị */}
+                      {store.name
+                        ? store.name.replace("KHK Food ", "")
+                        : store.id}
                     </option>
                   ))}
                 </select>
@@ -155,11 +168,20 @@ export default function HeaderComponent() {
                   ></i>
                 </li>
 
-                {/* USER */}
-                <li className={styles.item}>
-                  <i className="fa-light fa-user"></i>
+                {/* USER DROPDOWN */}
+                <li
+                  className={styles.item}
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  style={{ position: "relative" }} // Để dropdown căn theo item này
+                >
+                  <i
+                    className={`fa-light fa-user ${
+                      auth ? styles.authActive : ""
+                    }`}
+                  ></i>
+
                   <div className={styles.authContainer}>
-                    {!isLoggedIn ? (
+                    {!auth ? (
                       <>
                         <span className={styles.textDndk}>
                           Đăng nhập / Đăng ký
@@ -171,66 +193,74 @@ export default function HeaderComponent() {
                       </>
                     ) : (
                       <>
-                        <span className={styles.textDndk}>Tài khoản</span>
+                        <span className={styles.textDndk}>Xin chào</span>
                         <span className={styles.textTk}>
-                          {auth.accountName}{" "}
+                          {displayName}{" "}
                           <i className="fa-sharp fa-solid fa-caret-down"></i>
                         </span>
                       </>
                     )}
                   </div>
 
-                  <ul className={styles.dropdownMenu}>
-                    {!isLoggedIn ? (
-                      <>
-                        <li>
-                          <Link to="/auth?action=login">
-                            <i className="fa-light fa-right-to-bracket"></i>{" "}
-                            Đăng nhập
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/auth?action=register">
-                            <i className="fa-light fa-user-plus"></i> Đăng ký
-                          </Link>
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          <a href="/user-info">
-                            <i className="fa-light fa-circle-user"></i> Tài
-                            khoản của tôi
-                          </a>
-                        </li>
-                        <li>
-                          <a href="/order-history">
-                            <i className="fa-regular fa-bags-shopping"></i> Đơn
-                            hàng
-                          </a>
-                        </li>
-                        <li className={styles.border}>
-                          <a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              logout();
-                              navigate("/");
-                            }}
-                          >
-                            <i className="fa-light fa-right-from-bracket"></i>{" "}
-                            Thoát tài khoản
-                          </a>
-                        </li>
-                      </>
-                    )}
-                  </ul>
+                  {/* DROPDOWN MENU */}
+                  {isUserDropdownOpen && (
+                    <ul
+                      className={styles.dropdownMenu}
+                      style={{ display: "block" }}
+                    >
+                      {!auth ? (
+                        <>
+                          <li>
+                            {/* Dùng URL /auth như bạn đã sửa ở bước trước */}
+                            <Link to="/auth?action=login">
+                              <i className="fa-light fa-right-to-bracket"></i>{" "}
+                              Đăng nhập
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/auth?action=register">
+                              <i className="fa-light fa-user-plus"></i> Đăng ký
+                            </Link>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li>
+                            <Link to="/user-info">
+                              <i className="fa-light fa-circle-user"></i> Tài
+                              khoản
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/order-history">
+                              <i className="fa-regular fa-bags-shopping"></i>{" "}
+                              Đơn hàng
+                            </Link>
+                          </li>
+                          <li className={styles.border}>
+                            <a
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                logout();
+                                navigate("/");
+                              }}
+                            >
+                              <i className="fa-light fa-right-from-bracket"></i>{" "}
+                              Đăng xuất
+                            </a>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  )}
                 </li>
 
                 {/* CART */}
                 <li className={styles.item} onClick={openCart}>
                   <div className={styles.cartIconMenu}>
                     <i className="fa-light fa-basket-shopping"></i>
+                    {/* Hiển thị số lượng item */}
                     <span className={styles.count}>{totalAmount}</span>
                   </div>
                   <span>Giỏ hàng</span>
@@ -291,8 +321,8 @@ function HeaderBottom() {
   const handleCategoryChange = (e, catId) => {
     e.preventDefault();
     setFilters({ category: catId });
-    if (location.pathname === "/") setTimeout(scrollToProducts, 0);
-    else navigate(`/`);
+    if (location.pathname !== "/") navigate(`/`);
+    else setTimeout(scrollToProducts, 0);
   };
 
   return (

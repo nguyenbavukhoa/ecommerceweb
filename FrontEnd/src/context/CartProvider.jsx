@@ -1,67 +1,123 @@
-// src/context/CartProvider.jsx
-import { useState, createContext, useContext } from "react";
-import { useCartAPI } from "../hooks/useCartAPI";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-// 1. Import useFilters
-import { useFilters } from "./FilterProvider";
+import cartService from "../services/cartService";
+import { useToast } from "./ToastContext";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const { auth } = useAuth();
 
-  // 2. Lấy storeId hiện tại
-  const { filters } = useFilters();
-  const currentStoreId = filters.storeId;
+  // Kiểm tra biến đăng nhập
+  const isLoggedIn = !!auth || !!localStorage.getItem("accessToken");
 
-  // 3. Truyền currentStoreId vào hook
-  const {
-    cartItems, // Đây là list đã được lọc theo store
-    loading,
-    error,
-    toggleItemSelected,
-    updateItemQuantity,
-    removeItemFromCart,
-    addItemToCart,
-    clearSelectedItems,
-  } = useCartAPI(auth?.id, currentStoreId);
+  const { showToast } = useToast();
 
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const vnd = (price) =>
-    Number(price).toLocaleString("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    });
+  // 1. Refresh Cart
+  const refreshCart = async () => {
+    setLoading(true);
+    try {
+      console.log("🔄 [CartProvider] refreshCart START...");
+      console.log("🔑 [CartProvider] Auth Status:", isLoggedIn);
 
-  const getCartTotal = () => {
-    return (
-      cartItems
-        ?.filter((item) => item.selected)
-        ?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0
-    );
-  };
+      const items = await cartService.getCart(isLoggedIn);
 
-  const getAmountCart = () => {
-    return cartItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-  };
+      console.log("📦 [CartProvider] Received items form Service:", items);
 
-  const increasingNumber = (id, currentQuantity) => {
-    updateItemQuantity(id, currentQuantity + 1);
-  };
-
-  const decreasingNumber = (id, currentQuantity) => {
-    if (currentQuantity > 1) {
-      updateItemQuantity(id, currentQuantity - 1);
-    } else {
-      removeItemFromCart(id);
+      setCartItems(items || []);
+    } catch (error) {
+      console.error("❌ [CartProvider] refreshCart Failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const hasSelectedItems = cartItems?.some((item) => item.selected);
+  // Load khi trạng thái đăng nhập thay đổi
+  useEffect(() => {
+    console.log(
+      "🔄 [CartProvider] isLoggedIn changed -> triggering refreshCart"
+    );
+    refreshCart();
+  }, [isLoggedIn]);
+
+  // Các hàm chức năng (Giữ nguyên)
+  const addItemToCart = async (item) => {
+    try {
+      await cartService.addToCart(isLoggedIn, item);
+      await refreshCart();
+      setIsOpen(true);
+      showToast({
+        title: "Thành công",
+        message: "Đã thêm món!",
+        type: "success",
+      });
+      return { success: true };
+    } catch (error) {
+      console.error(error);
+      showToast({
+        title: "Lỗi",
+        message: "Không thể thêm món.",
+        type: "error",
+      });
+      return { success: false };
+    }
+  };
+
+  const deleteCartItem = async (itemId) => {
+    try {
+      setCartItems((prev) => prev.filter((i) => i.id !== itemId));
+      await cartService.removeItem(isLoggedIn, itemId);
+      await refreshCart();
+    } catch (error) {
+      refreshCart();
+    }
+  };
+
+  const updateItemQuantity = async (itemId, quantity) => {
+    if (quantity < 1) return;
+    try {
+      setCartItems((prev) =>
+        prev.map((i) => (i.id === itemId ? { ...i, quantity } : i))
+      );
+      await cartService.updateQuantity(isLoggedIn, itemId, quantity);
+    } catch (error) {
+      refreshCart();
+    }
+  };
+
+  const toggleItemSelected = async (itemId, isSelected) => {
+    try {
+      setCartItems((prev) =>
+        prev.map((i) => (i.id === itemId ? { ...i, selected: isSelected } : i))
+      );
+      await cartService.toggleSelection(isLoggedIn, itemId, isSelected);
+    } catch (error) {
+      refreshCart();
+    }
+  };
+
+  const increasingNumber = (id, qty) => updateItemQuantity(id, qty + 1);
+  const decreasingNumber = (id, qty) => {
+    if (qty > 1) updateItemQuantity(id, qty - 1);
+    else deleteCartItem(id);
+  };
+
+  const getCartTotal = () =>
+    cartItems
+      .filter((i) => i.selected)
+      .reduce((t, i) => t + i.price * i.quantity, 0);
+  const getAmountCart = () => cartItems.reduce((t, i) => t + i.quantity, 0);
+  const vnd = (p) =>
+    Number(p).toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+  const openCart = () => setIsOpen(true);
+  const closeCart = () => setIsOpen(false);
+  const hasSelectedItems = cartItems.some((i) => i.selected);
+  const clearSelectedItems = async () => {};
 
   return (
     <CartContext.Provider
@@ -70,18 +126,19 @@ export const CartProvider = ({ children }) => {
         openCart,
         closeCart,
         cartItems,
-        addItemToCart,
         loading,
-        error,
-        vnd,
-        getCartTotal,
-        getAmountCart,
-        toggleItemSelected,
-        deleteCartItem: removeItemFromCart,
+        addItemToCart,
+        deleteCartItem,
         increasingNumber,
         decreasingNumber,
-        hasSelectedItems,
+        updateItemQuantity,
+        toggleItemSelected,
         clearSelectedItems,
+        getCartTotal,
+        getAmountCart,
+        hasSelectedItems,
+        vnd,
+        refreshCart,
       }}
     >
       {children}
