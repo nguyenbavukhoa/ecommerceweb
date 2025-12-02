@@ -144,9 +144,9 @@ public class AccountServiceImpl implements AccountService {
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
         if(registrationForm.getRole() == AccountRole.STAFF) {
-            account.setActive(true);
+            account.setStatus(true);
         }else {
-            account.setActive(false);
+            account.setStatus(false);
         }
 
         Account savedAccount = accountRepository.save(account);

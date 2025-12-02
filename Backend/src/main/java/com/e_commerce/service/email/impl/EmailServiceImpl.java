@@ -258,7 +258,7 @@ public class EmailServiceImpl implements EmailService {
         switch (status) {
             case CONFIRMED -> body = getOrderConfirmationEmailContent(customerName, orderId, formatAmount(amount));
             case IN_PROGRESS -> body = getOrderInProgressEmailContent(customerName, orderId);
-            case COMPLETED -> body = getOrderCompletedEmailContent(customerName, orderId);
+            case DELIVERED -> body = getOrderCompletedEmailContent(customerName, orderId);
             case CANCELLED -> body = getOrderCanceledEmailContent(customerName, orderId);
             case REJECTED -> body = getOrderRejectedEmailContent(customerName, orderId);
             default -> body = getGenericOrderStatusEmail(customerName, orderId, status.name());

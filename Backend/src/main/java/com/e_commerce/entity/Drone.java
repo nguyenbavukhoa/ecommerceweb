@@ -1,13 +1,15 @@
 package com.e_commerce.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.e_commerce.enums.DroneStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -18,7 +20,26 @@ public class Drone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String name;
-    private String status;
-    private Integer battery;
+
+    @Column(unique = true, nullable = false)
+    private String serial;
+
+    private String model;
+
+    @Column(name = "max_range_km")
+    private Double maxRangeKm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 32)
+    private DroneStatus status = DroneStatus.IDLE;
+
+    @Column(name = "battery_pct")
+    private Double batteryPct;
+
+    @Column(name = "avg_speed_kmh")
+    private Double avgSpeedKmh = 30.0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 }

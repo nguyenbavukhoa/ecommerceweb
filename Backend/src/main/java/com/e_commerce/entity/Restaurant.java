@@ -27,7 +27,11 @@ public class Restaurant {
 
     private Boolean active = true;
 
-    private String address;
+    @Column(name = "lat")
+    private Double lat; // vĩ độ
+
+    @Column(name = "lng")
+    private Double lng; // kinh độ
 
     private String phone;
 
