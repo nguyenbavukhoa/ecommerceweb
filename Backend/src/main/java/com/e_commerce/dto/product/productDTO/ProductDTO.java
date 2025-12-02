@@ -24,4 +24,6 @@ public class ProductDTO {
     private String description;
 
     private String imgMain;
+
+    private Integer storeId;
 }

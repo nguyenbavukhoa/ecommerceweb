@@ -29,4 +29,5 @@ public class OrderDTO {
 
     private List<OrderItemsDTO> orderItems;
 
+    private Integer storeId;
 }

@@ -27,6 +27,7 @@ public class OrdersMapper {
                 .orderTime(order.getOrderTime())
                 .note(order.getNote())
                 .orderItems(OrderItemMapper.convertPageToList(order.getOrderItems()))
+                .storeId(order.getRestaurant().getId())
                 .build();
     }
 

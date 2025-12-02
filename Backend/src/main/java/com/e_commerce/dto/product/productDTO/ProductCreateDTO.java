@@ -35,4 +35,6 @@ public class ProductCreateDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Base price must be greater than 0")
     private BigDecimal priceBase;
 
+    @NotNull(message = "Restaurant is required")
+    private Integer restaurantId;
 }
