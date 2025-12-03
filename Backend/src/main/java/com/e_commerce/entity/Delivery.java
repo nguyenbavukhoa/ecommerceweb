@@ -42,4 +42,13 @@ public class Delivery {
 
     @Column(name = "actual_delivery_time")
     private LocalDateTime actualDeliveryTime; // Thời gian giao hàng thực tế
+
+    @Column(name = "current_lat")
+    private Double currentLat;
+
+    @Column(name = "current_lng")
+    private Double currentLng;
+
+    @Column(name = "progress_pct") // % hoàn thành hành trình
+    private Double progressPct;
 }

@@ -13,6 +13,7 @@ import com.e_commerce.repository.drone.DeliveryRepository;
 import com.e_commerce.repository.drone.DroneRepository;
 import com.e_commerce.service.drone.DeliveryService;
 import com.e_commerce.service.drone.DroneService;
+import com.e_commerce.service.drone.DroneTrackingService;
 import com.e_commerce.service.order.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
@@ -32,6 +33,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final TaskScheduler taskScheduler;
     private static final double EARTH_RADIUS_KM = 6371.0;
     private final DroneRepository droneRepository;
+    private final DroneTrackingService droneTrackingService;
 
     @Override
     public List<DroneDTO> getCandidateDronesForOrder(Integer orderId) {
@@ -89,6 +91,9 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .status(DeliveryStatus.IN_PROGRESS)
                 .rangeKm(requiredRangeKm)
                 .estimatedDeliveryTime(estimatedDeliveryTime)
+                .currentLat(order.getRestaurant().getLat())
+                .currentLng(order.getRestaurant().getLng())
+                .progressPct(0.0)
                 .build();
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
@@ -96,6 +101,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         droneService.updateDroneStatus(droneId, DroneStatus.ASSIGNED);
 
         orderService.updateOrderStatus(orderId, OrderStatus.OUT_FOR_DELIVERY);
+
+        droneTrackingService.startTracking(savedDelivery.getId(), seconds);
 
         taskScheduler.schedule(() -> completeDelivery(savedDelivery.getId()),
                 Instant.now().plusSeconds(seconds));

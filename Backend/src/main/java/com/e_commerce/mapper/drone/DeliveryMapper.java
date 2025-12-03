@@ -13,6 +13,11 @@ public class DeliveryMapper {
                 .rangeKm(delivery.getRangeKm())
                 .estimatedDeliveryTime(delivery.getEstimatedDeliveryTime())
                 .actualDeliveryTime(delivery.getActualDeliveryTime())
+                .currentLat(delivery.getCurrentLat())
+                .currentLng(delivery.getCurrentLng())
+                .progressPct(delivery.getProgressPct())
+                .droneId(delivery.getDrone() != null ? delivery.getDrone().getId() : null)
+                .orderId(delivery.getOrder() != null ? delivery.getOrder().getId() : null)
                 .build();
     }
 
@@ -22,6 +27,9 @@ public class DeliveryMapper {
                 .rangeKm(deliveryDTO.getRangeKm())
                 .estimatedDeliveryTime(deliveryDTO.getEstimatedDeliveryTime())
                 .actualDeliveryTime(deliveryDTO.getActualDeliveryTime())
+                .currentLat(deliveryDTO.getCurrentLat())
+                .currentLng(deliveryDTO.getCurrentLng())
+                .progressPct(deliveryDTO.getProgressPct())
                 .build();
     }
 }

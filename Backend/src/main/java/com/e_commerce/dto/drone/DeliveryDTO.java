@@ -14,13 +14,16 @@ import java.time.LocalDateTime;
 @Builder
 public class DeliveryDTO {
     private Integer id;
-
+    private Integer orderId;
+    private Integer droneId;
     private DeliveryStatus status;
 
+    private Double currentLat;
+    private Double currentLng;
+    private Double progressPct;
+
     private Double rangeKm;
-
     private LocalDateTime estimatedDeliveryTime;
-
     private LocalDateTime actualDeliveryTime;
 }
 
