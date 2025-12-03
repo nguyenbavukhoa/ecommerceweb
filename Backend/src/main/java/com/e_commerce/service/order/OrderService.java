@@ -33,4 +33,6 @@ public interface OrderService {
     PageDTO<OrderDTO> getAllOrders(int page, int size, OrderFilter orderFilter);
 
     PageDTO<OrderDTO> getOrdersByRestaurant(int page, int size, Integer restaurantId);
+
+    void deleteOrder(Integer orderId);
 }

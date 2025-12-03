@@ -280,5 +280,11 @@ public class OrderServiceImpl implements OrderService {
         return ordersMapper.convertEntityPageToDTOPage(ordersRepository.findByRestaurantId(restaurantId, pageable));
     }
 
+    @Override
+    public void deleteOrder(Integer orderId) {
+        Orders order = getOrderEntityById(orderId);
+        ordersRepository.delete(order);
+    }
+
 
 }

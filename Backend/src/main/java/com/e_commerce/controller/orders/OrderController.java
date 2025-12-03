@@ -75,4 +75,14 @@ public class OrderController {
                 new ApiResponse<>(true,"Get orders by restaurant successfully",result,null,request.getRequestURI()));
     }
 
+    @DeleteMapping("/delete/{orderId}")
+    public ResponseEntity<ApiResponse<Void>> deleteOrder(
+            @PathVariable Integer orderId,
+            HttpServletRequest request
+    ){
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true,"Delete order successfully",null,null,request.getRequestURI()));
+    }
+
 }
