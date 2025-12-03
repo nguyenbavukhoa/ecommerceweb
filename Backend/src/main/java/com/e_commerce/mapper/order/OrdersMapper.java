@@ -6,6 +6,7 @@ import com.e_commerce.dto.order.orderDTO.OrderDTO;
 import com.e_commerce.entity.order.Orders;
 import com.e_commerce.entity.product.Product;
 import com.e_commerce.enums.OrderStatus;
+import com.e_commerce.mapper.account.UserInformationMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class OrdersMapper {
     private final OrderItemMapper OrderItemMapper;
+    private final UserInformationMapper userInformationMapper;
 
     public OrderDTO convertEntityToDTO(Orders order) {
         return OrderDTO.builder()
@@ -28,6 +30,7 @@ public class OrdersMapper {
                 .note(order.getNote())
                 .orderItems(OrderItemMapper.convertPageToList(order.getOrderItems()))
                 .storeId(order.getRestaurant().getId())
+                .userInfo(userInformationMapper.convertEntityToDTO(order.getUserInformation()))
                 .build();
     }
 

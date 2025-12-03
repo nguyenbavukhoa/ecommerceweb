@@ -65,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
             log.info("Image upload result: {}", imageUrl);
             product.setImgMain((String) imageUrl.get("url"));
         } else {
-            throw new CustomException(ErrorResponse.PRODUCT_IMAGE_INVALID);
+            product.setImgMain(null);
         }
         return productMapper.covertEntityToDTO(productRepository.save(product));
     }

@@ -32,7 +32,7 @@ public class AccountMapper {
                 .email(registrationForm.getEmail())
                 .accountName(registrationForm.getAccountName())
                 .role(registrationForm.getRole())
-                .status(false)
+                .status(true)
                 .active(true)
                 .build();
     }

@@ -1,5 +1,6 @@
 package com.e_commerce.dto.order.orderDTO;
 
+import com.e_commerce.dto.auth.userInfoDTO.UserInfoDTO;
 import com.e_commerce.dto.order.orderItemsDTO.OrderItemsDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -30,4 +31,6 @@ public class OrderDTO {
     private List<OrderItemsDTO> orderItems;
 
     private Integer storeId;
+
+    private UserInfoDTO userInfo;
 }

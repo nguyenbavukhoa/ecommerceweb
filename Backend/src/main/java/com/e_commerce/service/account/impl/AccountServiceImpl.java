@@ -143,7 +143,7 @@ public class AccountServiceImpl implements AccountService {
         account.setId(IdGenerator.getGenerationId());
         account.setPassword(passwordEncoder.encode(registrationForm.getPassword()));
 
-        if(registrationForm.getRole() == AccountRole.STAFF) {
+        if(registrationForm.getRole() == AccountRole.STAFF || registrationForm.getRole() == AccountRole.ADMIN) {
             account.setStatus(true);
         }else {
             account.setStatus(false);
