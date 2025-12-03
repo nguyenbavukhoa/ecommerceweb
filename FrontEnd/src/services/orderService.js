@@ -156,6 +156,70 @@ const orderService = {
       return { content: [], totalPages: 0, totalElements: 0 };
     }
   },
+
+  // --- [MỚI] HÀM RIÊNG CHO DRONE MAP (Lấy hết đơn của quán) ---
+  getAllOrdersForMap: async (storeId) => {
+    let allOrders = [];
+    let currentPage = 1; // Bắt đầu từ trang 1 (Đúng)
+    let totalPages = 1;
+
+    console.log(
+      `🚁 [OrderService] Đang lấy toàn bộ đơn cho DroneMap (Store: ${storeId})...`
+    );
+
+    try {
+      do {
+        // Gọi API lấy đơn hàng của nhà hàng
+        const response = await axiosClient.get(
+          `/orders/restaurant/${storeId}`,
+          {
+            params: {
+              page: currentPage,
+              size: 20,
+            },
+          }
+        );
+
+        // Xử lý cấu trúc trả về
+        let rootData = response.data || response;
+
+        let fetchedContent = [];
+        let fetchedTotalPages = 0;
+
+        // Kiểm tra cấu trúc phân trang chuẩn: { content: [], totalPages: ... }
+        if (rootData && rootData.content) {
+          fetchedContent = rootData.content;
+          fetchedTotalPages = rootData.totalPages || 0;
+        }
+        // Cấu trúc lồng: { data: { content: [] } }
+        else if (rootData.data && rootData.data.content) {
+          fetchedContent = rootData.data.content;
+          fetchedTotalPages = rootData.data.totalPages || 0;
+        }
+
+        if (fetchedContent.length > 0) {
+          allOrders = [...allOrders, ...fetchedContent];
+          // Cập nhật tổng số trang thực tế từ server
+          totalPages = fetchedTotalPages;
+        } else {
+          break;
+        }
+
+        currentPage++;
+
+        // [SỬA QUAN TRỌNG] Phải là <= để lấy được trang cuối cùng
+      } while (currentPage <= totalPages);
+
+      console.log(
+        `✅ [OrderService] DroneMap đã tải xong ${allOrders.length} đơn hàng.`
+      );
+      return allOrders;
+    } catch (error) {
+      console.error("❌ [OrderService] DroneMap Fetch Error:", error);
+      return [];
+    }
+  },
+
   // 4. CẬP NHẬT TRẠNG THÁI - [ĐÃ SỬA METHOD PATCH]
   updateStatus: async (orderId, status) => {
     try {

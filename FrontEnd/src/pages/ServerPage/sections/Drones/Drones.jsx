@@ -1,464 +1,123 @@
-import React, { useState, useEffect } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  Polyline,
-  useMap,
-} from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import React, { useState } from "react";
 import styles from "./Drones.module.scss";
 import { useQuery } from "@tanstack/react-query";
-// [FIX] Dùng đúng đường dẫn data như bạn cung cấp
-import { db, SEED_HUBS } from "../../../../data/mockData";
 import { useToast } from "../../../../context/ToastContext";
 import DroneDetailModal from "../../components/Modals/DroneDetailModal";
-import OrderDetailModal from "../../../../components/OrderDetailModal/OrderDetailModal";
+import droneService from "../../../../services/droneService";
+// Bỏ CommonModal import vì đã dùng DroneDetailModal rồi
 
-// --- ICONS ---
-const droneIconNormal = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
-const droneIconActive = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
-  className: "pulsing-icon",
-});
-const hubIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/921/921347.png",
-  iconSize: [50, 50],
-  iconAnchor: [25, 25],
-});
-const storeIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-});
-const customerIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-});
+// Helper hiển thị trạng thái
+const getStatusLabel = (status) => {
+  let cls = "ready";
+  if (status === "IDLE") cls = "ready";
+  else if (["DELIVERING", "MOVING_TO_STORE", "RETURNING"].includes(status))
+    cls = "busy";
+  else if (status === "MAINTENANCE" || status === "OFFLINE")
+    cls = "maintenance";
+  // Fallback nếu có status cũ
+  else if (status === "CHARGING") cls = "charging";
 
-const CENTER_POS = [10.762622, 106.660172];
-
-// Component ép Map vẽ lại (Fix lỗi map xám)
-const MapUpdater = () => {
-  const map = useMap();
-  useEffect(() => {
-    const timer = setTimeout(() => map.invalidateSize(), 200);
-    return () => clearTimeout(timer);
-  }, [map]);
-  return null;
+  return <span className={`${styles.badge} ${styles[cls]}`}>{status}</span>;
 };
 
 const Drones = () => {
   const { showToast } = useToast();
 
-  // 1. Lấy dữ liệu tham chiếu (Store, Order)
-  // Lưu ý: Drones lấy qua local state để animation, query chỉ để fetch lần đầu hoặc backup
-  const { data: dbDrones = [] } = useQuery({
-    queryKey: ["allDrones"],
-    queryFn: async () => db.drones.getAll(),
-    staleTime: 0,
-  });
-
-  const { data: orders = [], refetch: refetchOrders } = useQuery({
-    queryKey: ["allOrdersForMap"],
-    queryFn: async () => db.orders.getAll(),
-    refetchInterval: 2000, // Cập nhật danh sách đơn hàng định kỳ
-  });
-
-  const { data: allStores = [] } = useQuery({
-    queryKey: ["allStoresForMap"],
-    queryFn: async () => db.stores.getAll(),
-    staleTime: 0,
-  });
-
-  // State local để render mượt
-  const [localDrones, setLocalDrones] = useState([]);
   const [selectedDrone, setSelectedDrone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [trackingDroneId, setTrackingDroneId] = useState(null);
-  // Order modal
-  const [selectedOrderForModal, setSelectedOrderForModal] = useState(null);
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
-  // Sync dữ liệu lần đầu
-  useEffect(() => {
-    if (dbDrones.length > 0 && localDrones.length === 0) {
-      setLocalDrones(dbDrones);
-    }
-  }, [dbDrones]);
+  // 1. LẤY DANH SÁCH DRONE TỪ API
+  const { data: drones = [], refetch } = useQuery({
+    queryKey: ["drones"],
+    queryFn: async () => await droneService.getAllDrones(),
+    refetchInterval: 5000,
+  });
 
-  // --- [FIX QUAN TRỌNG] ĐỒNG BỘ ENGINE VỚI DRONEMAP ---
-  // Sử dụng db.drones.processSimulationTick() thay vì tự tính toán moveTowards
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Gọi "nhịp tim" của hệ thống từ MockData
-      // Hàm này sẽ tự động kiểm tra timestamp để không bị xung đột với tab khác
-      const updatedDrones = db.drones.processSimulationTick();
-
-      if (updatedDrones) {
-        setLocalDrones(updatedDrones);
-      } else {
-        // Nếu không có update (đứng yên), lấy dữ liệu hiện tại để đảm bảo UI không mất
-        setLocalDrones(db.drones.getAll());
-      }
-    }, 100); // 100ms = 10 FPS (Mượt mà)
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Handlers
-  const handleEdit = (drone) => {
+  // Mở Modal Xem chi tiết
+  const handleOpenDetail = (drone) => {
     setSelectedDrone(drone);
     setIsModalOpen(true);
   };
 
-  const handleRecallAll = () => {
-    if (window.confirm("BÁO ĐỘNG: Thu hồi toàn bộ Drone?")) {
-      db.drones.recallAll();
-      setLocalDrones(db.drones.getAll()); // Reset ngay lập tức trên UI
-      showToast({
-        title: "Đã thu hồi",
-        message: "Tất cả Drone đang quay về trạm.",
-        type: "warning",
-      });
-    }
+  // Mở Modal Tạo mới (Truyền null)
+  const handleCreateClick = () => {
+    setSelectedDrone(null); // Null -> Create Mode
+    setIsModalOpen(true);
   };
 
-  const getStatusIcon = (status) => {
-    return ["moving_to_store", "delivering", "returning"].includes(status)
-      ? droneIconActive
-      : droneIconNormal;
-  };
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "ready":
-        return (
-          <span className={`${styles.badge} ${styles.ready}`}>Sẵn sàng</span>
-        );
-      case "moving_to_store":
-        return (
-          <span className={`${styles.badge} ${styles.busy}`}>Đến lấy hàng</span>
-        );
-      case "delivering":
-        return (
-          <span className={`${styles.badge} ${styles.busy}`}>Đang giao</span>
-        );
-      case "returning":
-        return (
-          <span className={`${styles.badge} ${styles.busy}`}>Về trạm</span>
-        );
-      case "charging":
-        return (
-          <span className={`${styles.badge} ${styles.charging}`}>Đang sạc</span>
-        );
-      default:
-        return (
-          <span className={`${styles.badge} ${styles.maintenance}`}>
-            Bảo trì
-          </span>
-        );
-    }
-  };
-
-  const activeDronesCount = localDrones.filter((d) =>
-    ["moving_to_store", "delivering", "returning"].includes(d.status)
-  ).length;
-
-  // Danh sách đơn hàng đang được drone giao (fallback sang drone.currentOrder nếu orders DB không có)
-  const deliveringOrders = localDrones
-    .filter((d) => d.status === "delivering" && (d.currentOrderId || d.currentOrder))
-    .map((d) => orders.find((o) => o.id == d.currentOrderId) || d.currentOrder)
-    .filter(Boolean);
-
-  const handleViewOrder = (order) => {
-    setSelectedOrderForModal(order);
-    setIsOrderModalOpen(true);
-  };
-
-  const handleCompleteOrder = (order) => {
-    try {
-      db.orders.updateStatus(order.id, "COMPLETED");
-      if (order.droneId) {
-        // Ghi lịch sử và update trạng thái drone
-        db.drones.logHistory(order.droneId, order);
-        db.drones.update(order.droneId, {
-          status: "returning",
-          currentOrderId: null,
-        });
-      }
-      // Cập nhật UI ngay
-      setLocalDrones(db.drones.getAll());
-      if (typeof refetchOrders === "function") refetchOrders();
-      showToast({ title: "Thành công", message: `Đã hoàn thành đơn #${order.id}`, type: "success" });
-    } catch (err) {
-      showToast({ title: "Lỗi", message: err.message || "Thực hiện thất bại", type: "error" });
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDrone(null);
   };
 
   return (
     <div className={styles.section}>
-      <div className={styles.header}>
+      <header className={styles.header}>
         <div>
-          <h2 className={styles.title}>🕹️ Trung tâm điều hành Drone</h2>
+          <h2 className={styles.title}>
+            <i className="fa-solid fa-robot"></i> Quản lý Đội bay
+          </h2>
           <p className={styles.subtitle}>
-            Giám sát hạm đội bay theo thời gian thực
+            Theo dõi trạng thái và hiệu suất Drone
           </p>
         </div>
-        <button className={styles.btnEmergency} onClick={handleRecallAll}>
-          <i className="fa-solid fa-triangle-exclamation"></i> THU HỒI
-        </button>
-      </div>
-
-      <div className={styles.dashboardGrid}>
-        <div className={styles.mapContainer}>
-          <div className={styles.mapOverlayStats}>
-            <div className={styles.statItem}>
-              <strong>{localDrones.length}</strong> <span>Tổng</span>
-            </div>
-            <div className={`${styles.statItem} ${styles.active}`}>
-              <strong>{activeDronesCount}</strong> <span>Bay</span>
-            </div>
-          </div>
-
-          <MapContainer center={CENTER_POS} zoom={13} className={styles.map}>
-            <MapUpdater />
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-            {/* VẼ HUBS */}
-            {SEED_HUBS.map((hub) => (
-              <Marker key={hub.id} position={hub.location} icon={hubIcon}>
-                <Popup>
-                  <b>{hub.name}</b>
-                </Popup>
-              </Marker>
-            ))}
-
-            {/* VẼ STORES */}
-            {allStores.map((store) => (
-              <Marker key={store.id} position={store.location} icon={storeIcon}>
-                <Popup>
-                  <b>{store.name}</b>
-                </Popup>
-              </Marker>
-            ))}
-
-            {/* VẼ DRONES & ĐƯỜNG BAY 3 MÀU */}
-            {localDrones.map((drone) => {
-              // Tìm đơn hàng liên quan (fallback sang drone.currentOrder nếu orders DB không có)
-              const order =
-                orders.find((o) => o.id === drone.currentOrderId) ||
-                drone.currentOrder ||
-                null;
-              const store = order
-                ? allStores.find((s) => s.id === order.restaurantId)
-                : null;
-
-              // Tọa độ các điểm
-              const dronePos = [
-                drone.currentLat || CENTER_POS[0],
-                drone.currentLng || CENTER_POS[1],
-              ];
-              const hubPos = SEED_HUBS[0].location; // Giả định Hub 1
-              const storePos = store ? store.location : hubPos;
-              const custPos = order ? order.customerLocation : hubPos;
-
-              const isFlying = [
-                "moving_to_store",
-                "delivering",
-                "returning",
-              ].includes(drone.status);
-
-              return (
-                <React.Fragment key={drone.id}>
-                  <Marker
-                    position={dronePos}
-                    icon={getStatusIcon(drone.status)}
-                    eventHandlers={{
-                      click: () => setTrackingDroneId(drone.id),
-                    }}
-                  >
-                    <Popup>
-                      <div style={{ textAlign: "center" }}>
-                        <strong>{drone.name}</strong>
-                        <br />
-                        Pin:{" "}
-                        <b
-                          style={{
-                            color: drone.battery > 30 ? "green" : "red",
-                          }}
-                        >
-                          {drone.battery}%
-                        </b>
-                        <br />
-                        {getStatusLabel(drone.status)}
-                        {order && (
-                          <div style={{ marginTop: 5, fontSize: 11 }}>
-                            Đơn: #{order.id}
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-
-                  {/* VẼ ĐƯỜNG BAY 3 MÀU CHO TẤT CẢ DRONE ĐANG BAY */}
-                  {isFlying && order && (
-                    <>
-                      {/* 1. Trạm -> Quán (Màu Cam) */}
-                      {drone.status === "moving_to_store" ? (
-                        <Polyline
-                          positions={[dronePos, storePos]}
-                          color="#e67e22"
-                          weight={4}
-                        /> // Đang bay
-                      ) : (
-                        <Polyline
-                          positions={[hubPos, storePos]}
-                          color="#e67e22"
-                          dashArray="5, 8"
-                          weight={2}
-                          opacity={0.5}
-                        /> // Đã qua
-                      )}
-
-                      {/* 2. Quán -> Khách (Màu Xanh lá) */}
-                      {drone.status === "moving_to_store" ? (
-                        <Polyline
-                          positions={[storePos, custPos]}
-                          color="#27ae60"
-                          dashArray="5, 8"
-                          weight={2}
-                          opacity={0.5}
-                        /> // Chưa tới
-                      ) : drone.status === "delivering" ? (
-                        <Polyline
-                          positions={[dronePos, custPos]}
-                          color="#27ae60"
-                          weight={4}
-                        /> // Đang bay
-                      ) : (
-                        <Polyline
-                          positions={[storePos, custPos]}
-                          color="#27ae60"
-                          dashArray="5, 8"
-                          weight={2}
-                          opacity={0.5}
-                        /> // Đã qua
-                      )}
-
-                      {/* 3. Khách -> Trạm (Màu Xám) */}
-                      {drone.status === "returning" ? (
-                        <Polyline
-                          positions={[dronePos, hubPos]}
-                          color="#95a5a6"
-                          weight={4}
-                        /> // Đang bay
-                      ) : (
-                        <Polyline
-                          positions={[custPos, hubPos]}
-                          color="#95a5a6"
-                          dashArray="5, 8"
-                          weight={2}
-                          opacity={0.5}
-                        /> // Chưa tới
-                      )}
-
-                      {/* Marker Khách */}
-                      <Marker position={custPos} icon={customerIcon}>
-                        <Popup>Khách hàng #{order.id}</Popup>
-                      </Marker>
-                    </>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </MapContainer>
+        <div className={styles.actions}>
+          {/* Nút Thêm Drone -> Mở DroneDetailModal với data null */}
+          <button className={styles.btnAdd} onClick={handleCreateClick}>
+            <i className="fa-solid fa-plus"></i> Thêm Drone
+          </button>
         </div>
+      </header>
 
-        {/* LIST */}
-        <div className={styles.sidePanel}>
-          <h3 className={styles.panelTitle}>Đội bay</h3>
-
-          {/* ĐƠN ĐANG GIAO */}
-          {deliveringOrders.length > 0 && (
-            <div className={styles.deliveringPanel}>
-              <h4>Đơn đang giao</h4>
-              <ul className={styles.deliveringList}>
-                {deliveringOrders.map((o) => (
-                  <li key={o.id} className={styles.deliveringItem}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div>
-                        <strong>#{o.id}</strong> — {o.deliveryInfo?.name || o.customerName || o.customer}
-                        <div style={{ fontSize: 12, color: "#666" }}>{o.deliveryInfo?.address || o.customerAddress || o.address}</div>
-                      </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          className={styles.secondaryBtn || ""}
-                          onClick={() => handleViewOrder(o)}
-                        >
-                          Xem chi tiết
-                        </button>
-                        <button
-                          className={styles.primaryBtn || ""}
-                          onClick={() => handleCompleteOrder(o)}
-                        >
-                          Hoàn thành
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <div className={styles.droneList}>
-            {localDrones.map((drone) => (
-              <div
-                key={drone.id}
-                className={styles.droneRow}
-                onClick={() => handleEdit(drone)}
-              >
-                <div className={styles.droneHeader}>
-                  <span className={styles.droneName}>{drone.name}</span>
-                  <span className={styles.droneId}>{drone.id}</span>
-                </div>
-                <div className={styles.droneDetails}>
-                  <span className={styles.batteryLevel}>
-                    <i className="fa-solid fa-battery-half"></i> {drone.battery}
-                    %
-                  </span>
-                  {getStatusLabel(drone.status)}
+      {/* DANH SÁCH DRONE */}
+      <div className={styles.droneGrid}>
+        {drones.length === 0 ? (
+          <div className={styles.emptyState}>Chưa có Drone nào.</div>
+        ) : (
+          drones.map((drone) => (
+            <div
+              key={drone.id}
+              className={styles.droneCard}
+              onClick={() => handleOpenDetail(drone)}
+            >
+              <div className={styles.cardIcon}>
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png"
+                  alt="Drone"
+                />
+              </div>
+              <div className={styles.cardInfo}>
+                <h4>{drone.serial}</h4>
+                <p className={styles.model}>{drone.model}</p>
+                <div className={styles.battery}>
+                  <i
+                    className={`fa-solid ${
+                      drone.batteryPct > 20
+                        ? "fa-battery-full"
+                        : "fa-battery-quarter"
+                    }`}
+                    style={{
+                      color: drone.batteryPct > 20 ? "#10b981" : "#ef4444",
+                    }}
+                  ></i>
+                  {drone.batteryPct ? Number(drone.batteryPct).toFixed(0) : 0}%
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className={styles.cardStatus}>
+                {getStatusLabel(drone.status)}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
+      {/* MODAL CHUNG (CREATE / EDIT) */}
       <DroneDetailModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        droneId={selectedDrone?.id}
-        droneProp={selectedDrone}
-        onSaveSuccess={() => {
-          // Refresh local drones and orders when modal signals a save/complete
-          setIsModalOpen(false);
-          setLocalDrones(db.drones.getAll());
-          if (typeof refetchOrders === "function") refetchOrders();
-        }}
+        onClose={handleCloseModal}
+        drone={selectedDrone} // Null = Create, Object = Edit
+        onUpdateSuccess={refetch}
       />
-      {isOrderModalOpen && selectedOrderForModal && (
-        <OrderDetailModal order={selectedOrderForModal} onClose={() => setIsOrderModalOpen(false)} />
-      )}
     </div>
   );
 };

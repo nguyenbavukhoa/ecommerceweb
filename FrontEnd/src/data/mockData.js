@@ -67,10 +67,17 @@ const SEED_DRONES = (DRONE_FLEET_MOCK || []).map((d) => ({
   battery: d.battery != null ? d.battery : 100,
   // nếu drone có currentOrder.customerLocation thì dùng làm vị trí, ngược lại lấy hub
   currentLat:
-    (d.currentOrder && d.currentOrder.customerLocation && d.currentOrder.customerLocation[0]) || HUB_LOCATION[0],
+    (d.currentOrder &&
+      d.currentOrder.customerLocation &&
+      d.currentOrder.customerLocation[0]) ||
+    HUB_LOCATION[0],
   currentLng:
-    (d.currentOrder && d.currentOrder.customerLocation && d.currentOrder.customerLocation[1]) || HUB_LOCATION[1],
-  currentOrderId: d.currentOrderId || (d.currentOrder && d.currentOrder.id) || null,
+    (d.currentOrder &&
+      d.currentOrder.customerLocation &&
+      d.currentOrder.customerLocation[1]) ||
+    HUB_LOCATION[1],
+  currentOrderId:
+    d.currentOrderId || (d.currentOrder && d.currentOrder.id) || null,
   lastUpdate: d.lastUpdate || 0,
   history: d.history || [],
   totalDeliveries: d.totalDeliveries || 0,
@@ -995,7 +1002,9 @@ export const db = {
         });
 
         updatedDrone.currentOrderId = null;
-        if (Object.prototype.hasOwnProperty.call(updatedDrone, "currentOrder")) {
+        if (
+          Object.prototype.hasOwnProperty.call(updatedDrone, "currentOrder")
+        ) {
           updatedDrone.currentOrder = null;
         }
 

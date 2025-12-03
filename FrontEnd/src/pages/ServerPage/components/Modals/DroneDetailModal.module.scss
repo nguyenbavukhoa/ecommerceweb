@@ -1,189 +1,206 @@
+/* src/pages/ServerPage/sections/Drones/DroneDetailModal.module.scss */
+
+/* --- TỔNG QUAN --- */
 .container {
-  padding: 20px;
+  padding: 20px 25px;
+  font-family: "Inter", sans-serif;
+  color: #374151;
 }
 
-.sectionTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--dark-gray);
-  margin-bottom: 15px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #eee;
-}
-
-/* Settings Section */
-.settingsSection {
-  background-color: #f9fafb;
-  padding: 15px;
-  border-radius: 8px;
+/* --- HEADER (Ảnh & Thông tin chung) --- */
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
   margin-bottom: 25px;
-  border: 1px solid #eee;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f3f4f6;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
 }
 
+.droneImg {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: #f9fafb;
+  border-radius: 50%;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.infoText {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  p {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #6b7280;
+  }
+}
+
+/* BADGES (Trạng thái) */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  /* Màu sắc trạng thái */
+  &.idle {
+    background: #dcfce7;
+    color: #166534; /* Xanh lá */
+  }
+
+  &.maintenance {
+    background: #ffedd5;
+    color: #9a3412; /* Cam */
+  }
+
+  &.offline {
+    background: #f3f4f6;
+    color: #4b5563; /* Xám */
+  }
+}
+
+/* --- SETTINGS SECTION (Form nhập liệu) --- */
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Hàng ngang chứa input */
 .formRow {
   display: flex;
   gap: 20px;
-  margin-bottom: 15px;
+
+  /* Mobile: Xuống dòng */
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 15px;
+  }
 }
 
 .formGroup {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
   label {
-    display: block;
     font-size: 13px;
     font-weight: 600;
-    margin-bottom: 5px;
-    color: #555;
+    color: #4b5563;
   }
-  input,
-  select {
+
+  /* Input & Select Styles */
+  .input,
+  .select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    transition: all 0.2s;
     outline: none;
+
+    /* Trạng thái focus */
     &:focus {
-      border-color: var(--red);
+      border-color: #b5292f;
+      box-shadow: 0 0 0 3px rgba(181, 41, 47, 0.1);
     }
+
+    /* Trạng thái disabled */
     &:disabled {
-      background-color: #eee;
+      background: #f9fafb;
+      color: #9ca3af;
       cursor: not-allowed;
     }
   }
 }
 
-.batteryInfo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.batteryBar {
-  flex: 1;
-  height: 10px;
-  background: #ddd;
-  border-radius: 5px;
-  overflow: hidden;
-  div {
-    height: 100%;
-    transition: width 0.3s;
-  }
-}
-
-.btnSave {
-  background-color: var(--red);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  &:hover {
-    background-color: #a02227;
-  }
-}
-
-/* Đơn hàng đang giao (trong modal Drone) */
-.deliveringBlock {
-  margin-top: 16px;
-}
-.deliveringItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background: #fffaf0;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-}
-.actionBtns {
-  display: flex;
-  gap: 8px;
-}
-.btnPrimarySmall {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.btnSecondarySmall {
-  background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.currentOrderGrid {
+/* --- STATS GRID (Hiển thị thông số khi xem chi tiết) --- */
+.statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  background: #fff;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 10px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr; /* Mobile: 1 cột */
+  }
+}
+
+.statItem {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  span {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+  }
 }
 
-.fieldLabel {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #9ca3af;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.fieldValue {
+/* --- BUTTON SAVE --- */
+.btnSave {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  background-color: #b5292f; /* Màu đỏ chủ đạo */
+  color: white;
+  border: none;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
-  margin: 0;
-}
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
-/* History Table */
-.tableWrapper {
-  max-height: 250px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-  border-radius: 8px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-
-  th {
-    background: #f4f6f8;
-    padding: 10px;
-    text-align: left;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
+  &:hover {
+    background-color: #991b1b;
   }
 
-  td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    color: #333;
+  &:active {
+    transform: scale(0.98);
   }
-}
 
-.emptyState {
-  padding: 30px;
-  text-align: center;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.emptyCell {
-  text-align: center;
-  padding: 20px;
-  color: #9ca3af !important;
+  &:disabled {
+    background-color: #fca5a5;
+    cursor: wait;
+  }
 }

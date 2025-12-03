@@ -53,8 +53,8 @@ const ServerPage = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "Dashboard":
-        return <Dashboard onNavigate={setActiveTab} />;
+      // case "Dashboard":
+      //   return <Dashboard onNavigate={setActiveTab} />;
       case "Users":
         return <Users />;
       case "Stores":
@@ -68,7 +68,8 @@ const ServerPage = () => {
       case "Transactions":
         return <Transactions />;
       default:
-        return <Dashboard onNavigate={setActiveTab} />;
+        // return <Dashboard onNavigate={setActiveTab} />;
+        return <Users />;
     }
   };
 
@@ -110,7 +111,7 @@ const ServerPage = () => {
             // marginLeft: isMobile ? "0px" : isSidebarOpen ? "250px" : "75px",
             transition: "margin-left 200ms ease-in-out",
             minHeight: "100vh",
-            paddingTop: "60px",
+            // paddingTop: "60px",
           }}
         >
           {renderContent()}

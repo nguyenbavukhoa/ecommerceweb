@@ -268,20 +268,60 @@
   }
 }
 
-/* Responsive */
+/* Responsive Mobile */
 @media (max-width: 768px) {
   .container {
-    flex-direction: column-reverse;
-    height: auto;
-    overflow: visible;
+    /* Chuyển sang cột dọc */
+    flex-direction: column;
+    /* Giữ cố định chiều cao bằng màn hình để list scroll được bên trong */
+    height: calc(100vh - 60px);
+    padding: 0;
+    gap: 0;
+    overflow: hidden; /* Ẩn thanh cuộn của body */
   }
 
-  .sidebar {
-    width: 100%;
-    height: 500px;
-  }
+  /* 1. BẢN ĐỒ (Đưa lên trên) */
   .mapWrapper {
-    height: 400px;
-    min-height: 400px;
+    order: 1; /* Ưu tiên hiển thị trước */
+    flex: none; /* Không co giãn tự động */
+    width: 100%;
+    height: 40%; /* Chiếm 40% màn hình trên */
+    border-radius: 0; /* Bỏ bo góc để full màn */
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: none;
+    z-index: 1;
+  }
+
+  /* 2. SIDEBAR (Đưa xuống dưới) */
+  .sidebar {
+    order: 2; /* Hiển thị sau */
+    width: 100%;
+    flex: 1; /* Chiếm toàn bộ khoảng trống còn lại (khoảng 60%) */
+    height: auto; /* Để flex tự tính */
+    border-radius: 20px 20px 0 0; /* Bo tròn 2 góc trên cho đẹp giống bottom sheet */
+    border: none;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    margin-top: -15px; /* Kéo lên đè nhẹ vào map 1 chút cho đẹp */
+  }
+
+  /* Tùy chỉnh bên trong Sidebar cho gọn trên mobile */
+  .header {
+    padding: 10px 15px;
+  }
+
+  .title {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .tabs {
+    margin: 5px 15px 0 15px;
+  }
+
+  .list {
+    padding: 10px 15px;
+    padding-bottom: 80px; /* Chừa chỗ để không bị che bởi browser bar */
   }
 }

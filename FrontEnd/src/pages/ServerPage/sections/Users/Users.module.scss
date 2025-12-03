@@ -1,258 +1,391 @@
+/* src/pages/ServerPage/sections/Users/Users.module.scss */
+
+/* --- 1. GENERAL LAYOUT --- */
 .section {
-  padding: 2rem;
-  background-color: #f9fafb;
+  padding: 20px;
+  background-color: #f3f4f6;
   min-height: 100vh;
+  font-family: "Inter", sans-serif;
+  color: #374151;
 }
 
-/* Control Bar */
+/* --- 2. HEADER & CONTROLS --- */
 .adminControl {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  flex-wrap: wrap;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .pageTitle {
-  font-size: 1.5rem;
-  color: var(--dark-gray);
+  font-size: 22px;
+  color: #111827;
   margin: 0;
   font-weight: 700;
 }
 
+.btnAdd {
+  background-color: #b5292f;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(181, 41, 47, 0.2);
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #991b1b;
+  }
+}
+
+/* --- 3. TAB NAVIGATION --- */
+.tabContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  overflow-x: auto;
+
+  /* Ẩn thanh cuộn scrollbar cho đẹp */
+  &::-webkit-scrollbar {
+    height: 0px;
+    background: transparent;
+  }
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #fff;
+    color: #374151;
+  }
+
+  &.active {
+    background-color: #fff;
+    color: #b5292f;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* --- 4. SEARCH BOX --- */
 .searchBox {
   position: relative;
-  width: 300px;
+
   i {
     position: absolute;
-    left: 15px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #888;
+    color: #9ca3af;
+    font-size: 14px;
+    pointer-events: none;
   }
+
   input {
     width: 100%;
-    padding: 10px 15px 10px 40px;
-    border: 1px solid #ddd;
+    padding: 10px 15px 10px 38px;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     outline: none;
+    font-size: 14px;
+    background: #fff;
+
     &:focus {
-      border-color: var(--red);
+      border-color: #b5292f;
+      box-shadow: 0 0 0 3px rgba(181, 41, 47, 0.1);
     }
   }
 }
 
-.filterGroup select {
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  cursor: pointer;
-}
-
-/* Table */
+/* --- 5. DESKTOP TABLE STYLES (Mặc định) --- */
 .tableContainer {
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+
   th {
-    background-color: #f8f9fa;
-    padding: 15px;
+    background-color: #f9fafb;
+    padding: 14px 16px;
     text-align: left;
+    font-size: 13px;
     font-weight: 600;
-    color: #555;
-    border-bottom: 2px solid #eee;
+    color: #4b5563;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e5e7eb;
   }
+
   td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f3f4f6;
     vertical-align: middle;
-    color: #333;
+    color: #374151;
+    font-size: 14px;
   }
-  tr:hover {
-    background-color: #fcfcfc;
+
+  tr:last-child td {
+    border-bottom: none;
   }
 }
 
 .userName {
   font-weight: 600;
-  color: var(--dark-gray);
-  font-size: 15px;
+  color: #111827;
+  font-size: 14px;
 }
 .userEmail {
   font-size: 13px;
-  color: #777;
-  margin-top: 4px;
+  color: #6b7280;
+  margin-top: 3px;
 }
 
-/* Badges */
+/* --- 6. BADGES & BUTTONS --- */
 .badge {
-  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
+  min-width: 80px;
+
   &.active {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
   }
   &.blocked {
-    background: #ffebee;
-    color: #c62828;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
   }
   &.customer {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
   }
   &.admin {
-    background: #fff3e0;
-    color: #e67e22;
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #ffedd5;
   }
 }
 
-/* Actions */
 .actions {
   display: flex;
   gap: 8px;
 }
-.btnLock {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  &:hover {
-    background-color: #c0392b;
-  }
-}
-.btnUnlock {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  &:hover {
-    background-color: #219150;
-  }
-}
 
-.tabContainer {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-}
-
-.tabBtn {
-  background: none;
-  border: none;
-  padding: 10px 20px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #777;
-  cursor: pointer;
+.btnEdit,
+.btnLock,
+.btnUnlock,
+.btnDelete {
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
-  transition: all 0.2s;
+  border: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-
-  &:hover {
-    background-color: #f5f5f5;
-    color: #333;
-  }
-
-  &.active {
-    background-color: #e3f2fd; /* Xanh dương nhạt */
-    color: #1976d2;
-  }
-}
-
-/* Sửa lại màu badge cho đẹp hơn */
-.badge {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-
-  &.active {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-  }
-  &.blocked {
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-  }
-  &.pending {
-    background: #fff3e0;
-    color: #ef6c00;
-    border: 1px solid #ffe0b2;
-  } /* Màu cam */
-
-  /* Role badges */
-  &.admin {
-    background: #fff3e0;
-    color: #ef6c00;
-    border: 1px solid #ffe0b2;
-  }
-  &.customer {
-    background: #f3e5f5;
-    color: #8e24aa;
-    border: 1px solid #e1bee7;
-  }
-}
-
-/* Thêm nút Duyệt / Từ chối */
-.btnApprove {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
+  justify-content: center;
   cursor: pointer;
-  font-size: 13px;
-  &:hover {
-    background-color: #219150;
-  }
+  font-size: 14px;
 }
 
-.btnReject {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  &:hover {
-    background-color: #c0392b;
-  }
+.btnEdit {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.btnLock {
+  background: #fee2e2;
+  color: #ef4444;
+}
+.btnUnlock {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.btnDelete {
+  background: white;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
 }
 
+/* =========================================
+   7. MOBILE CARD VIEW (Kỹ thuật chính)
+   ========================================= */
 @media (max-width: 768px) {
   .section {
-    padding: 15px;
+    padding: 10px;
+    background: #f9fafb;
   }
+
+  /* Layout Header */
   .adminControl {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
   }
-  .searchBox {
+
+  .btnAdd {
     width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .searchBox {
+    max-width: 100% !important; /* Force full width */
+  }
+
+  /* --- BIẾN TABLE THÀNH CARD --- */
+
+  /* Reset container */
+  .tableContainer {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  /* Biến Table, Thead, Tbody, Tr, Td thành Block elements */
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* Ẩn Header của bảng đi (vì trong card view không dùng header chung) */
+  .table thead {
+    display: none;
+  }
+
+  /* Style cho từng dòng dữ liệu (Card) */
+  .table tr {
+    background: #fff;
+    margin-bottom: 15px; /* Khoảng cách giữa các thẻ */
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    padding: 15px;
+    position: relative;
+  }
+
+  /* Style cho từng ô dữ liệu bên trong Card */
+  .table td {
+    display: flex;
+    justify-content: space-between; /* Nhãn bên trái, giá trị bên phải */
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #f3f4f6;
+    text-align: right; /* Giá trị căn phải */
+  }
+
+  .table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    padding-top: 15px;
+    justify-content: flex-end; /* Nút hành động căn phải */
+  }
+
+  /* --- TẠO NHÃN GIẢ (PSEUDO LABELS) --- 
+     Vì không sửa JSX, ta dùng CSS để thêm chữ vào trước mỗi dòng 
+     dựa theo thứ tự cột: 1=ID, 2=Info, 3=Role, 4=Date, 5=Status, 6=Action
+  */
+
+  /* Cột 1: ID */
+  .table td:nth-of-type(1)::before {
+    content: "ID:";
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 13px;
+  }
+
+  /* Cột 2: Info (Tên/Email) - Làm nổi bật như tiêu đề Card */
+  .table td:nth-of-type(2) {
+    display: block; /* Riêng thằng này cho xuống dòng */
+    text-align: left;
+    padding-top: 0;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #f3f4f6;
+  }
+  /* Tùy chỉnh UserName/Email trong mobile cho to đẹp */
+  .userName {
+    font-size: 16px;
+    color: #b5292f; /* Màu đỏ chủ đạo cho tên */
+  }
+
+  /* Cột 3: Role */
+  .table td:nth-of-type(3)::before {
+    content: "Vai trò:";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 10px;
+    font-size: 13px;
+  }
+
+  /* Cột 4: Date */
+  .table td:nth-of-type(4)::before {
+    content: "Ngày tạo:";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 10px;
+    font-size: 13px;
+  }
+
+  /* Cột 5: Status */
+  .table td:nth-of-type(5)::before {
+    content: "Trạng thái:";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 10px;
+    font-size: 13px;
+  }
+
+  /* Cột 6: Actions (Hành động) */
+  .table td:nth-of-type(6) {
+    justify-content: center; /* Căn giữa các nút */
+    border-top: 1px solid #e5e7eb;
+    margin-top: 5px;
+  }
+
+  /* Làm nút to hơn trên mobile cho dễ bấm */
+  .btnEdit,
+  .btnLock,
+  .btnUnlock,
+  .btnDelete {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
 }
