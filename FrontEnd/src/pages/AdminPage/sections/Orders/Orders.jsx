@@ -1,52 +1,64 @@
-// src/pages/AdminPage/sections/Orders/Orders.jsx
 import React, { useState, useEffect } from "react";
 import { useToast } from "../../../../context/ToastContext";
 import OrderDetailModal from "../../components/Modals/OrderDetailModal";
 import styles from "./Orders.module.scss";
 import { vnd } from "../../utils";
 
-// 1. IMPORT AUTH
 import { useAuth } from "../../../../context/AuthContext";
-
 import { useQueryClient } from "@tanstack/react-query";
 import { useAdminOrders, useFilters } from "../../../../context/FilterProvider";
-import { db } from "../../../../data/mockData";
+import orderService from "../../../../services/orderService";
 
+// [CẬP NHẬT] Thêm IN_PROGRESS vào danh sách
 const ORDER_STATUSES = [
-  { value: "PLACED", label: "Đã đặt hàng" },
+  { value: "PLACED", label: "Mới đặt" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
+  { value: "IN_PROGRESS", label: "Đang xử lý" }, // Khớp với JSON API
   { value: "SHIPPING", label: "Đang giao" },
   { value: "COMPLETED", label: "Hoàn thành" },
   { value: "CANCELLED", label: "Đã hủy" },
 ];
 
-const STATUS_FLOW = ["PLACED", "CONFIRMED", "SHIPPING", "COMPLETED"];
+// Luồng trạng thái logic
+const STATUS_FLOW = [
+  "PLACED",
+  "CONFIRMED",
+  "IN_PROGRESS",
+  "SHIPPING",
+  "COMPLETED",
+];
 
-const Orders = () => {
+const Orders = ({ storeId }) => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-
-  // 2. LẤY STORE ID
   const { user } = useAuth();
-  const currentStoreId = user?.storeId;
+  const currentStoreId = storeId || user?.storeId;
 
   const { filters, setFilters } = useFilters();
 
-  // 3. TRUYỀN STORE ID VÀO HOOK
   const { data, isLoading, error } = useAdminOrders({
     ...filters,
     storeId: currentStoreId,
   });
 
+  // Lấy dữ liệu từ hook
   const { orders = [], totalPages = 0 } = data || {};
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState(filters.name || "");
-  const [timeStart, setTimeStart] = useState("");
-  const [timeEnd, setTimeEnd] = useState("");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // --- CLIENT SIDE FILTERING ---
+  // Lọc dữ liệu hiển thị dựa trên orders lấy về từ API
+  const displayedOrders = orders.filter((order) => {
+    // Lọc theo Status
+    if (statusFilter !== "ALL" && order.orderStatus !== statusFilter)
+      return false;
+    // Lọc theo Mã đơn
+    if (searchTerm && !order.id.toString().includes(searchTerm)) return false;
+    return true;
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,67 +69,44 @@ const Orders = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, filters.name, setFilters]);
 
+  // Logic chặn chuyển trạng thái ngược
   const isStatusDisabled = (currentStatus, targetOptionValue) => {
     if (currentStatus === targetOptionValue) return true;
     if (currentStatus === "COMPLETED" || currentStatus === "CANCELLED")
       return true;
     if (targetOptionValue === "CANCELLED") return false;
+
     const currentIndex = STATUS_FLOW.indexOf(currentStatus);
     const targetIndex = STATUS_FLOW.indexOf(targetOptionValue);
+
     if (currentIndex === -1 || targetIndex === -1) return true;
     return targetIndex <= currentIndex;
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const success = db.orders.updateStatus(orderId, newStatus);
-      if (success) {
-        await queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
-        showToast({
-          title: "Cập nhật thành công",
-          message: `Đơn hàng #${orderId} -> ${newStatus}`,
-          type: "success",
-        });
-      } else {
-        showToast({
-          title: "Lỗi",
-          message: "Không tìm thấy đơn hàng",
-          type: "error",
-        });
-      }
+      await orderService.updateStatus(orderId, newStatus);
+      await queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
+      showToast({
+        title: "Thành công",
+        message: `Đơn hàng #${orderId} -> ${newStatus}`,
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
-      showToast({ title: "Lỗi", message: "Có lỗi xảy ra", type: "error" });
+      showToast({ title: "Lỗi", message: "Cập nhật thất bại", type: "error" });
     }
   };
 
-  const handleStatusFilterChange = (e) => {
-    const value = e.target.value;
-    setStatusFilter(value);
-    setFilters({ status: value !== "ALL" ? value : undefined, page: 1 });
-  };
-
+  const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setFilters({ page: newPage });
   };
-
   const handleCancelSearch = () => {
     setStatusFilter("ALL");
     setSearchTerm("");
-    setTimeStart("");
-    setTimeEnd("");
-    setFilters({
-      page: 1,
-      status: undefined,
-      name: undefined,
-      startDate: undefined,
-      endDate: undefined,
-    });
-  };
-
-  const applyDateFilter = () => {
-    setFilters({ startDate: timeStart, endDate: timeEnd, page: 1 });
+    setFilters({ page: 1, name: undefined });
   };
 
   const openDetailModal = (order) => {
@@ -125,12 +114,15 @@ const Orders = () => {
     setIsModalOpen(true);
   };
 
+  // [CẬP NHẬT] CSS Class cho trạng thái mới
   const getStatusClass = (status) => {
     switch (status) {
       case "PLACED":
         return styles.placed;
       case "CONFIRMED":
         return styles.confirmed;
+      case "IN_PROGRESS":
+        return styles.shipping; // Dùng chung style với shipping (màu xanh dương)
       case "SHIPPING":
         return styles.shipping;
       case "COMPLETED":
@@ -174,26 +166,6 @@ const Orders = () => {
             </form>
           </div>
           <div className={styles.adminControlRight}>
-            <div className={styles.fillterDate}>
-              <div>
-                <label>Từ</label>
-                <input
-                  type="date"
-                  value={timeStart}
-                  onChange={(e) => setTimeStart(e.target.value)}
-                  onBlur={applyDateFilter}
-                />
-              </div>
-              <div>
-                <label>Đến</label>
-                <input
-                  type="date"
-                  value={timeEnd}
-                  onChange={(e) => setTimeEnd(e.target.value)}
-                  onBlur={applyDateFilter}
-                />
-              </div>
-            </div>
             <button
               className={styles.btnResetOrder}
               onClick={handleCancelSearch}
@@ -235,11 +207,11 @@ const Orders = () => {
                       color: "red",
                     }}
                   >
-                    Lỗi: {error.message}
+                    Lỗi kết nối API
                   </td>
                 </tr>
-              ) : orders.length > 0 ? (
-                orders.map((order) => (
+              ) : displayedOrders.length > 0 ? (
+                displayedOrders.map((order) => (
                   <tr key={order.id}>
                     <td data-label="Mã đơn">#{order.id}</td>
                     <td data-label="Ngày đặt">{order.orderTime}</td>
@@ -306,7 +278,7 @@ const Orders = () => {
                     colSpan="6"
                     style={{ textAlign: "center", padding: "20px" }}
                   >
-                    Không có đơn hàng nào tại chi nhánh này.
+                    Không có đơn hàng nào.
                   </td>
                 </tr>
               )}
@@ -314,60 +286,43 @@ const Orders = () => {
           </table>
         </div>
 
-        <div className={styles.pageNav}>
-          <ul className={styles.pageNavList}>
-            <li
-              className={`${styles.pageNavItem} ${
-                filters.page === 1 ? styles.disabled : ""
-              }`}
-            >
-              <a
-                href="#!"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageChange(filters.page - 1);
-                }}
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className={styles.pageNav}>
+            <ul className={styles.pageNavList}>
+              <li
+                className={`${styles.pageNavItem} ${
+                  filters.page === 1 ? styles.disabled : ""
+                }`}
               >
-                &laquo;
-              </a>
-            </li>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => p >= filters.page - 2 && p <= filters.page + 2)
-              .map((p) => (
+                <a href="#!" onClick={() => handlePageChange(filters.page - 1)}>
+                  &laquo;
+                </a>
+              </li>
+              {Array.from({ length: totalPages }, (_, i) => (
                 <li
-                  key={p}
+                  key={i + 1}
                   className={`${styles.pageNavItem} ${
-                    filters.page === p ? styles.active : ""
+                    filters.page === i + 1 ? styles.active : ""
                   }`}
                 >
-                  <a
-                    href="#!"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(p);
-                    }}
-                  >
-                    {p}
+                  <a href="#!" onClick={() => handlePageChange(i + 1)}>
+                    {i + 1}
                   </a>
                 </li>
               ))}
-            <li
-              className={`${styles.pageNavItem} ${
-                filters.page === totalPages ? styles.disabled : ""
-              }`}
-            >
-              <a
-                href="#!"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageChange(filters.page + 1);
-                }}
+              <li
+                className={`${styles.pageNavItem} ${
+                  filters.page === totalPages ? styles.disabled : ""
+                }`}
               >
-                &raquo;
-              </a>
-            </li>
-          </ul>
-        </div>
+                <a href="#!" onClick={() => handlePageChange(filters.page + 1)}>
+                  &raquo;
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
 
       <OrderDetailModal

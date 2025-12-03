@@ -75,51 +75,83 @@ const orderService = {
     }
   },
 
-  // 3. LẤY ĐƠN HÀNG THEO NHÀ HÀNG (ADMIN/STORE) - [ĐÃ CẬP NHẬT]
-  // Hỗ trợ phân trang để phục vụ Admin Table
-  getOrdersByRestaurant: async (storeId, page = 1, size = 10) => {
+  // 3. LẤY ĐƠN HÀNG THEO NHÀ HÀNG (ADMIN/STORE)
+  getOrdersByRestaurant: async (storeId, page = 1) => {
     try {
-      // [FIX] URL đúng theo API Doc: GET /restaurants/{id}/orders
-      console.log(`📡 Calling API: /restaurants/${storeId}/orders`);
+      console.log(
+        `📡 [OrderService] Calling API: /orders/restaurant/${storeId} (Page: ${page})`
+      );
 
-      const response = await axiosClient.get(`/restaurants/${storeId}/orders`, {
-        params: {
-          page: page - 1,
-          size: size,
-        },
+      const response = await axiosClient.get(`/orders/restaurant/${storeId}`, {
+        params: { page: page },
       });
 
-      const data = response.data || response;
+      // [LOGIC FIX] Kiểm tra kỹ cấu trúc trả về để lấy đúng mảng content
+      // response có thể là Axios Response hoặc JSON body tùy vào interceptor
 
-      // [FIX] Xử lý Response: API Doc mẫu trả về Mảng [...] (không phân trang)
-      // Nếu data là mảng -> Map về cấu trúc chuẩn để FilterProvider dùng được
-      if (Array.isArray(data)) {
+      // 1. Lấy JSON Body gốc
+      // Nếu response.success tồn tại -> response là JSON body
+      // Nếu response.data tồn tại -> có thể là Axios Object HOẶC JSON body có field 'data'
+
+      let rootData = response;
+      if (response.data && !response.success) {
+        // Khả năng cao là Axios Object (vì JSON api thường có success:true)
+        rootData = response.data;
+      }
+
+      // 2. Tìm object chứa 'content'
+      // Trường hợp chuẩn: rootData.data.content (JSON: { success: true, data: { content: [] } })
+      if (rootData.data && rootData.data.content) {
         return {
-          content: data,
-          totalPages: 1, // Giả lập 1 trang vì API trả hết list
-          totalElements: data.length,
+          content: rootData.data.content,
+          totalPages: rootData.data.totalPages || 0,
+          totalElements: rootData.data.totalElements || 0,
         };
       }
 
-      // Trường hợp API trả về phân trang (PageImpl) như /orders/all
-      if (data.content) {
+      // Trường hợp Interceptor đã bóc 1 lớp: rootData.content (JSON: { content: [] })
+      if (rootData.content) {
         return {
-          content: data.content,
-          totalPages: data.totalPages || 0,
-          totalElements: data.totalElements || 0,
+          content: rootData.content,
+          totalPages: rootData.totalPages || 0,
+          totalElements: rootData.totalElements || 0,
         };
       }
 
+      // Trường hợp mảng trực tiếp
+      if (Array.isArray(rootData)) {
+        return {
+          content: rootData,
+          totalPages: 1,
+          totalElements: rootData.length,
+        };
+      }
+
+      // Trường hợp mảng nằm trong rootData.data
+      if (rootData.data && Array.isArray(rootData.data)) {
+        return {
+          content: rootData.data,
+          totalPages: 1,
+          totalElements: rootData.data.length,
+        };
+      }
+
+      console.warn(
+        "⚠️ [OrderService] Không tìm thấy dữ liệu đơn hàng hợp lệ.",
+        rootData
+      );
       return { content: [], totalPages: 0, totalElements: 0 };
     } catch (error) {
       console.error("❌ [OrderService] Get Store Orders Failed:", error);
       return { content: [], totalPages: 0, totalElements: 0 };
     }
   },
-  // 4. CẬP NHẬT TRẠNG THÁI (HỦY/DUYỆT ĐƠN)
+  // 4. CẬP NHẬT TRẠNG THÁI - [ĐÃ SỬA METHOD PATCH]
   updateStatus: async (orderId, status) => {
     try {
-      return await axiosClient.get(`/orders/update-status/${orderId}`, {
+      // API: PATCH /orders/update-status/{id}?status=...
+      // Axios Patch tham số thứ 2 là body (để null), tham số thứ 3 là config
+      return await axiosClient.patch(`/orders/update-status/${orderId}`, null, {
         params: { status },
       });
     } catch (error) {
