@@ -58,8 +58,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (ordersRepository.existsByRestaurantIdAndOrderStatusIn(id, ACTIVE_ORDER_STATUSES)) {
             throw new RuntimeException("Cannot delete restaurant with active orders");
         }
-        restaurant.setActive(false);
-        restaurantRepository.save(restaurant);
+        restaurantRepository.delete(restaurant);
     }
 
     @Override
