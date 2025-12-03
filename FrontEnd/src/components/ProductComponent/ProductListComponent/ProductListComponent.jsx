@@ -1,17 +1,12 @@
+import React from "react";
 import ProductItem from "../ProductItemComponent/ProductItemComponent";
 
-function ProductList({ products, onProductDetail, isLoading }) {
-  if (isLoading) {
-    return <div>Loading products...</div>;
-  }
-
+function ProductList({ products, onProductDetail }) {
   if (!products || products.length === 0) {
     return (
       <div className="no-result">
-        <div className="no-result-h">Tìm kiếm không có kết quả</div>
-        <div className="no-result-p">
-          Xin lỗi, chúng tôi không thể tìm được kết quả hợp với tìm kiếm của bạn
-        </div>
+        <div className="no-result-h">Không tìm thấy món ăn nào</div>
+        <div className="no-result-p">Vui lòng thử lại với từ khóa khác</div>
         <div className="no-result-i">
           <i className="fa-light fa-face-sad-cry"></i>
         </div>
@@ -29,7 +24,8 @@ function ProductList({ products, onProductDetail, isLoading }) {
           <ProductItem
             key={product.id}
             product={product}
-            onDetail={() => onProductDetail(product.id)}
+            // Khi click, gọi hàm này để truyền product lên MainWrapper -> HomePage
+            onDetail={() => onProductDetail(product)}
           />
         ))}
       </div>

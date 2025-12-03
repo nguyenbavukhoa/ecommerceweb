@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import CommonModal from "../../../AdminPage/components/Modals/CommonModal";
 import { useToast } from "../../../../context/ToastContext";
-import styles from "./CustomerModal.module.scss"; // Dùng lại style form
+import styles from "./CustomerModal.module.scss"; // Giữ nguyên file style cũ
 
-// 1. IMPORT HOOK
+// 1. IMPORT HOOK API MỚI
 import {
   useServerStores,
   useCreateUser,
@@ -13,7 +13,7 @@ import {
 const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
   const { showToast } = useToast();
 
-  // 2. GỌI HOOK
+  // 2. GỌI HOOK API
   const { data: stores = [] } = useServerStores();
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
@@ -35,14 +35,25 @@ const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
   useEffect(() => {
     if (isOpen) {
       if (isEdit) {
+        // [LOGIC MỚI] Map dữ liệu từ API về Form State cũ
         setForm({
-          // Map dữ liệu từ userToEdit (lưu ý tên trường trong mockData)
-          name: userToEdit.fullName || userToEdit.name || "",
+          name: userToEdit.accountName || userToEdit.fullName || "",
           email: userToEdit.email || "",
           phone: userToEdit.phoneNumber || userToEdit.phone || "",
           password: "", // Không hiển thị pass cũ
-          role: userToEdit.role || "customer",
-          status: userToEdit.status ? "active" : "blocked", // Map boolean/string status
+
+          // Map Role API (UPPERCASE) -> Role Form (lowercase)
+          role:
+            userToEdit.role === "ADMIN" || userToEdit.role === "STORE_OWNER"
+              ? "admin"
+              : "customer",
+
+          // Map Active Boolean -> Status String
+          status:
+            userToEdit.active === true || String(userToEdit.active) === "true"
+              ? "active"
+              : "blocked",
+
           storeId: userToEdit.storeId || "",
           reportNote: userToEdit.reportNote || "",
         });
@@ -70,28 +81,53 @@ const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
 
     // Validate
     if (!form.email || !form.name) {
-      showToast("warning", "Vui lòng nhập tên và email");
+      showToast({
+        title: "Cảnh báo",
+        message: "Vui lòng nhập tên và email",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Validate Password khi tạo mới
+    if (!isEdit && !form.password) {
+      showToast({
+        title: "Cảnh báo",
+        message: "Vui lòng nhập mật khẩu",
+        type: "warning",
+      });
       return;
     }
 
     // Validate riêng cho Admin: Phải chọn nhà hàng
     if (form.role === "admin" && !form.storeId) {
-      showToast("warning", "Đối tác bắt buộc phải chọn Nhà hàng quản lý!");
+      showToast({
+        title: "Cảnh báo",
+        message: "Đối tác bắt buộc phải chọn Nhà hàng quản lý!",
+        type: "warning",
+      });
       return;
     }
 
     try {
-      // Chuẩn bị payload
+      // [LOGIC MỚI] Chuẩn bị payload gửi API
+      // Form dùng 'customer'/'admin' -> API cần 'USER'/'STORE_OWNER'/'ADMIN'
+      let apiRole = "USER";
+      if (form.role === "admin") {
+        // Logic tùy chọn: Nếu chọn admin thì gán là STORE_OWNER hay ADMIN?
+        // Ở đây giả định là STORE_OWNER (Chủ quán) vì có chọn storeId
+        apiRole = "STORE_OWNER";
+      }
+
       const payload = {
-        fullName: form.name, // Map lại tên trường cho khớp DB
+        fullName: form.name, // Map sang accountName
         email: form.email,
         phoneNumber: form.phone,
-        role: form.role.toUpperCase(), // DB lưu 'ADMIN'/'USER'
-        userType: form.role === "admin" ? 1 : 0,
+        role: apiRole,
         storeId: form.role === "admin" ? form.storeId : null,
         reportNote: form.reportNote,
-        // Status: DB dùng boolean (true/false), Form dùng string ('active'/'blocked')
-        status: form.status === "active",
+        // Map string 'active' -> boolean true
+        active: form.status === "active",
       };
 
       if (form.password) payload.password = form.password;
@@ -116,6 +152,7 @@ const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
   const isLoading =
     createUserMutation.isPending || updateUserMutation.isPending;
 
+  // --- UI GIỮ NGUYÊN HOÀN TOÀN ---
   return (
     <CommonModal
       isOpen={isOpen}
@@ -191,6 +228,11 @@ const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
               value={form.email}
               onChange={handleChange}
               disabled={isEdit} // Không cho sửa email
+              style={
+                isEdit
+                  ? { backgroundColor: "#f5f5f5", cursor: "not-allowed" }
+                  : {}
+              }
             />
           </div>
 
@@ -201,6 +243,7 @@ const UserModal = ({ isOpen, onClose, userToEdit, onSaveSuccess }) => {
               name="phone"
               value={form.phone}
               onChange={handleChange}
+              placeholder="0909..."
             />
           </div>
 

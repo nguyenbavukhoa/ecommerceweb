@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./OrderHistoryPage.module.css";
 import ImageWithFallback from "../../components/ImageWithFallbackComponent/ImageWithFallback";
@@ -7,8 +7,9 @@ import OrderDetailModal from "../../components/OrderDetailModal/OrderDetailModal
 
 // 1. IMPORT HOOKS & CONTEXT
 import { useAuth } from "../../context/AuthContext";
-import { db } from "../../data/mockData";
-// [MỚI] Import useFilters để lấy storeId đang chọn
+// [QUAN TRỌNG] Thay db bằng service API
+import orderService from "../../services/orderService";
+import { useToast } from "../../context/ToastContext";
 import { useFilters } from "../../context/FilterProvider";
 
 const STATUSES = [
@@ -27,6 +28,7 @@ const vnd = (amount) =>
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const { showToast } = useToast(); // Để thông báo lỗi/thành công
 
   // [MỚI] Lấy storeId hiện tại từ Filter Context
   const { filters } = useFilters();
@@ -37,29 +39,56 @@ const OrderHistoryPage = () => {
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
-  // --- 2. LẤY & LỌC DỮ LIỆU ĐƠN HÀNG ---
+  // [MỚI] State chứa danh sách đơn hàng từ API
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // --- 2. LẤY DỮ LIỆU TỪ API ---
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const data = await orderService.getMyOrders();
+      setOrders(data || []);
+    } catch (error) {
+      console.error(error);
+      showToast({
+        title: "Lỗi",
+        message: "Không thể tải lịch sử đơn hàng",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (auth) {
+      fetchOrders();
+    }
+  }, [auth]); // Gọi lại khi auth thay đổi
+
+  // --- 3. LỌC DỮ LIỆU (Client Side) ---
   const displayedOrders = useMemo(() => {
-    if (!auth) return [];
+    if (!orders) return [];
 
-    let allOrders = db.orders.getAll();
+    // API /orders/all đã trả về đơn của user hiện tại (dựa vào token), không cần lọc userId nữa
+    let userOrders = orders;
 
-    // 1. Lọc theo User ID hiện tại
-    let userOrders = allOrders.filter((order) => order.userId === auth.id);
-
-    // 2. [MỚI] Lọc theo Store ID hiện tại (Multi-store)
+    // 1. [MỚI] Lọc theo Store ID hiện tại (Multi-store)
+    // Lưu ý: API trả về field là 'storeId' (theo doc), trong khi mock cũ là 'restaurantId'
     if (currentStoreId) {
       userOrders = userOrders.filter(
-        (order) => order.restaurantId === currentStoreId
+        (order) =>
+          (order.storeId || order.restaurantId)?.toString() ===
+          currentStoreId?.toString()
       );
     }
 
-    // 3. Lọc theo trạng thái đang chọn & Sắp xếp
+    // 2. Lọc theo trạng thái đang chọn & Sắp xếp (Mới nhất lên đầu)
     return userOrders
       .filter((order) => order.orderStatus === activeStatus)
       .sort((a, b) => b.id - a.id);
-  }, [auth, activeStatus, currentStoreId]); // Thêm currentStoreId vào dependency
-
-  // ... (Phần còn lại giữ nguyên như cũ) ...
+  }, [orders, activeStatus, currentStoreId]);
 
   const handleViewDetails = (orderId) => {
     setSelectedOrderId(orderId);
@@ -69,6 +98,24 @@ const OrderHistoryPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedOrderId(null);
+  };
+
+  // [MỚI] Xử lý hủy đơn
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm("Bạn có chắc muốn hủy đơn hàng này?")) {
+      try {
+        await orderService.cancelOrder(orderId);
+        showToast({
+          title: "Thành công",
+          message: "Đã hủy đơn hàng",
+          type: "success",
+        });
+        // Refresh lại list
+        fetchOrders();
+      } catch (error) {
+        showToast({ title: "Lỗi", message: "Hủy đơn thất bại", type: "error" });
+      }
+    }
   };
 
   const toggleOrderExpansion = (orderId) => {
@@ -84,7 +131,6 @@ const OrderHistoryPage = () => {
   };
 
   const ActionButtons = ({ order }) => {
-    // ... (Code cũ giữ nguyên)
     switch (order.orderStatus) {
       case "PLACED":
       case "CONFIRMED":
@@ -99,7 +145,7 @@ const OrderHistoryPage = () => {
             {order.orderStatus === "PLACED" && (
               <button
                 className={styles.primaryBtn}
-                onClick={() => alert("Tính năng đang phát triển")}
+                onClick={() => handleCancelOrder(order.id)} // [ĐÃ SỬA] Gọi hàm hủy thật
               >
                 Hủy đơn
               </button>
@@ -181,11 +227,6 @@ const OrderHistoryPage = () => {
       </header>
 
       <main className={styles.orderSection}>
-        {/* Dòng thông báo Store hiện tại (Optional cho UX) */}
-        {/* <div style={{padding: '10px 20px', fontSize: '14px', color: '#666'}}>
-            Đang xem đơn hàng tại: <b>{db.stores.getOne(currentStoreId)?.name}</b>
-        </div> */}
-
         <div className={styles.orderRow}>
           <div className={styles.orderColTitle}>Trạng thái đơn hàng</div>
           <div className={styles.statusFilters}>
@@ -209,113 +250,125 @@ const OrderHistoryPage = () => {
             Danh sách đơn hàng (
             {STATUSES.find((s) => s.id === activeStatus)?.label})
           </div>
-          <div className={styles.orderListContainer}>
-            {displayedOrders.length > 0 ? (
-              displayedOrders.map((order) => {
-                const totalItems = order.orderItems.reduce(
-                  (sum, p) => sum + p.quantity,
-                  0
-                );
-                const totalPrice = order.totalPrice;
-                const statusInfo = STATUSES.find(
-                  (s) => s.id === order.orderStatus
-                );
-                const isExpanded = expandedOrders.has(order.id);
-                const productsToShow = isExpanded
-                  ? order.orderItems
-                  : order.orderItems.slice(0, 1);
 
-                return (
-                  <div key={order.id} className={styles.orderCard}>
-                    <div className={styles.cardHeader}>
-                      <span className={styles.orderId}>
-                        Đơn hàng #{order.id}
-                      </span>
-                      <span
-                        className={`${styles.statusTag} ${
-                          styles[order.orderStatus?.toLowerCase()]
-                        }`}
-                      >
-                        {statusInfo?.label || order.orderStatus}
-                      </span>
-                    </div>
+          {loading ? (
+            <div style={{ padding: "20px", textAlign: "center" }}>
+              Đang tải dữ liệu...
+            </div>
+          ) : (
+            <div className={styles.orderListContainer}>
+              {displayedOrders.length > 0 ? (
+                displayedOrders.map((order) => {
+                  // API trả về orderItems, ta map dữ liệu
+                  const orderItems = order.orderItems || [];
+                  const totalItems = orderItems.reduce(
+                    (sum, p) => sum + p.quantity,
+                    0
+                  );
+                  const totalPrice = order.totalPrice;
+                  const statusInfo = STATUSES.find(
+                    (s) => s.id === order.orderStatus
+                  );
+                  const isExpanded = expandedOrders.has(order.id);
+                  const productsToShow = isExpanded
+                    ? orderItems
+                    : orderItems.slice(0, 1);
 
-                    <div className={styles.productList}>
-                      {productsToShow.map((product) => (
-                        <div key={product.id} className={styles.productRow}>
-                          <ImageWithFallback
-                            src={product.imgUrl}
-                            alt={product.productName}
-                            className={styles.productImage}
-                          />
-                          <div className={styles.productInfo}>
-                            <p className={styles.productName}>
-                              <span className={styles.productQuantity}>
-                                {product.quantity}x
-                              </span>{" "}
-                              {product.productName}
-                            </p>
-                            {product.optionValuesDTO &&
-                              product.optionValuesDTO.length > 0 && (
-                                <p className={styles.productOptions}>
-                                  {product.optionValuesDTO
-                                    .map((opt) => opt.value)
-                                    .join(", ")}
-                                </p>
-                              )}
-                          </div>
-                          <div className={styles.productPrice}>
-                            {vnd(product.price * product.quantity)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {order.orderItems.length > 1 && (
-                      <div className={styles.toggleWrapper}>
-                        <button
-                          className={styles.toggleProductsBtn}
-                          onClick={() => toggleOrderExpansion(order.id)}
-                        >
-                          <span>{isExpanded ? "Thu gọn" : "Xem thêm"}</span>
-                          <i
-                            className={`fa-solid ${
-                              isExpanded ? "fa-chevron-up" : "fa-chevron-down"
-                            }`}
-                          ></i>
-                        </button>
-                      </div>
-                    )}
-
-                    <div className={styles.orderSummary}>
-                      <span>{totalItems} sản phẩm</span>
-                      <span>
-                        Thành tiền:{" "}
-                        <span className={styles.totalPrice}>
-                          {vnd(totalPrice)}
+                  return (
+                    <div key={order.id} className={styles.orderCard}>
+                      <div className={styles.cardHeader}>
+                        <span className={styles.orderId}>
+                          Đơn hàng #{order.id}
                         </span>
-                      </span>
-                    </div>
+                        <span
+                          className={`${styles.statusTag} ${
+                            styles[order.orderStatus?.toLowerCase()]
+                          }`}
+                        >
+                          {statusInfo?.label || order.orderStatus}
+                        </span>
+                      </div>
 
-                    <ActionButtons order={order} />
+                      <div className={styles.productList}>
+                        {productsToShow.map((product) => (
+                          <div key={product.id} className={styles.productRow}>
+                            <ImageWithFallback
+                              src={product.imgUrl}
+                              alt={product.productName}
+                              className={styles.productImage}
+                            />
+                            <div className={styles.productInfo}>
+                              <p className={styles.productName}>
+                                <span className={styles.productQuantity}>
+                                  {product.quantity}x
+                                </span>{" "}
+                                {product.productName}
+                              </p>
+                              {/* API Get Order History hiện tại không trả về optionValuesDTO chi tiết
+                                nên ta chỉ render nếu có dữ liệu để tránh lỗi */}
+                              {product.optionValuesDTO &&
+                                product.optionValuesDTO.length > 0 && (
+                                  <p className={styles.productOptions}>
+                                    {product.optionValuesDTO
+                                      .map((opt) => opt.value)
+                                      .join(", ")}
+                                  </p>
+                                )}
+                            </div>
+                            <div className={styles.productPrice}>
+                              {vnd(product.price * product.quantity)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {orderItems.length > 1 && (
+                        <div className={styles.toggleWrapper}>
+                          <button
+                            className={styles.toggleProductsBtn}
+                            onClick={() => toggleOrderExpansion(order.id)}
+                          >
+                            <span>{isExpanded ? "Thu gọn" : "Xem thêm"}</span>
+                            <i
+                              className={`fa-solid ${
+                                isExpanded ? "fa-chevron-up" : "fa-chevron-down"
+                              }`}
+                            ></i>
+                          </button>
+                        </div>
+                      )}
+
+                      <div className={styles.orderSummary}>
+                        <span>{totalItems} sản phẩm</span>
+                        <span>
+                          Thành tiền:{" "}
+                          <span className={styles.totalPrice}>
+                            {vnd(totalPrice)}
+                          </span>
+                        </span>
+                      </div>
+
+                      <ActionButtons order={order} />
+                    </div>
+                  );
+                })
+              ) : (
+                <div className={`${styles.orderRow} ${styles.noOrders}`}>
+                  <div className={styles.orderColTitle}>
+                    {STATUSES.find((s) => s.id === activeStatus)?.label}
                   </div>
-                );
-              })
-            ) : (
-              <div className={`${styles.orderRow} ${styles.noOrders}`}>
-                <div className={styles.orderColTitle}>
-                  {STATUSES.find((s) => s.id === activeStatus)?.label}
+                  <p>Không có đơn hàng nào tại cửa hàng này.</p>
                 </div>
-                <p>Không có đơn hàng nào tại cửa hàng này.</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <OrderDetailModalWrapper
           orderId={selectedOrderId}
+          orders={orders} // Truyền list orders từ API vào wrapper
           onClose={handleCloseModal}
         />
       </Modal>
@@ -323,8 +376,9 @@ const OrderHistoryPage = () => {
   );
 };
 
-const OrderDetailModalWrapper = ({ orderId, onClose }) => {
-  const order = db.orders.getAll().find((o) => o.id === orderId);
+// Wrapper để tìm order trong list đã fetch (thay vì tìm trong db mock)
+const OrderDetailModalWrapper = ({ orderId, orders, onClose }) => {
+  const order = orders.find((o) => o.id === orderId);
   if (!order) return null;
   return <OrderDetailModal isOpen={true} onClose={onClose} order={order} />;
 };

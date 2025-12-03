@@ -116,7 +116,9 @@ export default function HeaderComponent() {
                 >
                   {stores.map((store) => (
                     <option key={store.id} value={store.id}>
-                      {store.name.replace("KHK Food ", "")}
+                      {store.name
+                        ? store.name.replace("KHK Food ", "")
+                        : store.id}
                     </option>
                   ))}
                 </select>

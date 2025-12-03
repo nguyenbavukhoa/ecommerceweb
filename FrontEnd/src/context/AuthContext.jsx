@@ -35,26 +35,32 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      // API trả về cấu trúc: { success: true, data: { accessToken, accountName, ... } }
+      // API trả về: { success: true, data: { accountName, accessToken, ... } }
+      // Lưu ý: data này KHÔNG CÓ email
       const data = response.data || response;
 
-      // Lấy Token từ kết quả trả về
-      const accessToken = data.accessToken || data.token;
+      const token = data.accessToken || data.token;
 
-      if (accessToken) {
-        // [QUAN TRỌNG] Lưu lại để lần sau dùng
-        localStorage.setItem("accessToken", accessToken);
-
-        // Lưu cả Refresh Token (nếu có) để sau này gia hạn
+      if (token) {
+        localStorage.setItem("accessToken", token);
         if (data.refreshToken) {
           localStorage.setItem("refreshToken", data.refreshToken);
         }
 
-        // Lưu thông tin user (Tên, Role...) để hiển thị lên Header
-        localStorage.setItem("user_info", JSON.stringify(data));
+        // [QUAN TRỌNG] Bổ sung email vào object user
+        // Vì API không trả về email, ta lấy email người dùng vừa nhập vào
+        const userWithEmail = {
+          ...data,
+          email: email, // Thêm dòng này
+          // Nếu API không trả ID, ta tạm dùng email làm ID hoặc chờ API profile
+          id: data.id || data.userId || email,
+        };
 
-        // Cập nhật State để web biết là đã đăng nhập
-        setAuth(data);
+        // Lưu user info đã có email vào localStorage
+        localStorage.setItem("user_info", JSON.stringify(userWithEmail));
+
+        // Cập nhật state
+        setAuth(userWithEmail);
 
         return { success: true, message: "Đăng nhập thành công!" };
       } else {

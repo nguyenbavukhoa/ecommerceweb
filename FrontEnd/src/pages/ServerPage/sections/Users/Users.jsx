@@ -1,68 +1,75 @@
-// src/pages/ServerPage/sections/Users/Users.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useToast } from "../../../../context/ToastContext";
 import {
   useServerUsers,
-  useServerStores,
-  useUpdateUser, // Import Hook Update
+  useUpdateUser,
+  useDeleteUser,
 } from "../../../../context/FilterProvider";
 import UserModal from "../../components/Modals/UserModal";
 import styles from "./Users.module.scss";
 
-// ... (Các hàm getStatusBadge, getRoleBadge giữ nguyên) ...
-const getStatusBadge = (status) => {
-  switch (status) {
-    case "active":
-      return (
-        <span className={`${styles.badge} ${styles.active}`}>Hoạt động</span>
-      );
-    case "blocked":
-      return (
-        <span className={`${styles.badge} ${styles.blocked}`}>Đã khóa</span>
-      );
-    case "pending":
-      return (
-        <span className={`${styles.badge} ${styles.pending}`}>Chờ duyệt</span>
-      );
-    default:
-      return <span>{status}</span>;
-  }
+// Helper hiển thị trạng thái
+const getStatusBadge = (active) => {
+  const isActive = active === true || String(active) === "true";
+  return isActive ? (
+    <span className={`${styles.badge} ${styles.active}`}>Hoạt động</span>
+  ) : (
+    <span className={`${styles.badge} ${styles.blocked}`}>Đã khóa</span>
+  );
 };
 
+// Helper hiển thị quyền hạn (Logic: User vs Phần còn lại)
 const getRoleBadge = (role) => {
-  return role === "admin" ? (
-    <span className={`${styles.badge} ${styles.admin}`}>Đối tác</span>
-  ) : (
-    <span className={`${styles.badge} ${styles.customer}`}>User</span>
-  );
+  const r = role?.toUpperCase() || "USER";
+
+  if (r === "USER") {
+    return (
+      <span className={`${styles.badge} ${styles.customer}`}>Khách hàng</span>
+    );
+  }
+
+  // Các role quản trị
+  let label = r;
+  if (r === "ADMIN") label = "Admin";
+  else if (r === "STORE_OWNER") label = "Chủ quán";
+  else if (r === "STAFF") label = "Nhân viên";
+
+  return <span className={`${styles.badge} ${styles.admin}`}>{label}</span>;
 };
 
 const Users = () => {
   const { showToast } = useToast();
-
-  // 1. Lấy dữ liệu từ Hook (Luôn tươi mới từ DB)
+  // Lấy dữ liệu từ API
   const { data: users = [], isLoading } = useServerUsers();
-  const { data: stores = [] } = useServerStores();
 
-  const updateUserMutation = useUpdateUser(); // Hook để xử lý khóa/duyệt nhanh
+  const updateUserMutation = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("customer");
+  const [activeTab, setActiveTab] = useState("customer"); // 'customer' | 'partner'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // 2. Filter trên dữ liệu lấy về
+  // --- LOGIC LỌC DỮ LIỆU (SỬA THEO YÊU CẦU MỚI) ---
   const filteredUsers = users.filter((u) => {
-    const matchSearch =
-      u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    // Chuẩn hóa role để so sánh (DB có thể lưu 'ADMIN' hoa)
-    const uRole = u.role?.toLowerCase() || "user";
-    const matchRole =
-      activeTab === "customer"
-        ? uRole === "user" || uRole === "customer"
-        : uRole === "admin";
-    return matchSearch && matchRole;
+    // 1. Tìm kiếm
+    const name = u.accountName || u.fullName || "";
+    const email = u.email || "";
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      name.toLowerCase().includes(searchLower) ||
+      email.toLowerCase().includes(searchLower);
+
+    // 2. Phân loại Tab
+    const role = u.role?.toUpperCase() || "USER";
+    const isCustomerRole = role === "USER"; // Chỉ USER là khách
+
+    // Nếu tab hiện tại là 'customer' -> Lấy USER
+    // Nếu tab hiện tại là 'partner' -> Lấy TẤT CẢ CÁI KHÁC (Admin, StoreOwner...)
+    const matchesTab =
+      activeTab === "customer" ? isCustomerRole : !isCustomerRole;
+
+    return matchesSearch && matchesTab;
   });
 
   // --- HANDLERS ---
@@ -76,43 +83,31 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-  // 3. Logic Khóa/Mở khóa (Gọi API thật)
-  const handleToggleStatus = (id) => {
-    const user = users.find((u) => u.id === id);
-    if (!user) return;
+  const handleToggleStatus = (user) => {
+    const isActive = user.active === true || String(user.active) === "true";
+    const newStatus = !isActive;
+    const actionName = newStatus ? "MỞ KHÓA" : "KHÓA";
 
-    const newStatus = user.status === "active" ? false : true; // DB lưu boolean, hoặc string 'blocked' tùy mockData của bạn
-    // Lưu ý: MockData hiện tại dùng boolean (true=active, false=blocked) hoặc string.
-    // Để an toàn, ta check mockData.js: status là boolean.
-    // Nhưng UserModal lại map 'active'/'blocked'. Cần thống nhất.
-    // GIẢI PHÁP: Ở đây ta gửi boolean, bên UserModal đã xử lý map rồi.
-
-    const action = newStatus ? "mở khóa" : "khóa";
-    if (window.confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) {
+    if (
+      window.confirm(
+        `Bạn có chắc muốn ${actionName} tài khoản "${user.email}"?`
+      )
+    ) {
       updateUserMutation.mutate({
         id: user.id,
-        status: newStatus,
+        active: newStatus,
       });
     }
   };
 
-  // Logic Duyệt
-  const handleApproveUser = (id) => {
-    if (window.confirm("Duyệt tài khoản đối tác này?")) {
-      updateUserMutation.mutate({ id, status: true }); // Active
+  const handleDeleteUser = (user) => {
+    if (
+      window.confirm(
+        `Cảnh báo: Bạn chắc chắn muốn XÓA VĨNH VIỄN tài khoản "${user.email}"?`
+      )
+    ) {
+      deleteUserMutation.mutate(user.id);
     }
-  };
-
-  const handleRejectUser = (id) => {
-    if (window.confirm("Từ chối yêu cầu này?")) {
-      // Có thể xóa hoặc set status = false
-      updateUserMutation.mutate({ id, status: false });
-    }
-  };
-
-  // Khi Modal lưu xong, chỉ cần đóng modal. React Query sẽ tự refresh list.
-  const handleSaveSuccess = () => {
-    setIsModalOpen(false);
   };
 
   return (
@@ -128,7 +123,6 @@ const Users = () => {
         </div>
       </div>
 
-      {/* ... (Phần Tab và Search giữ nguyên) ... */}
       <div className={styles.tabContainer}>
         <button
           className={`${styles.tabBtn} ${
@@ -136,46 +130,39 @@ const Users = () => {
           }`}
           onClick={() => setActiveTab("customer")}
         >
-          <i className="fa-light fa-users"></i> Khách hàng
+          <i className="fa-light fa-users"></i> Khách hàng (User)
         </button>
         <button
           className={`${styles.tabBtn} ${
-            activeTab === "admin" ? styles.active : ""
+            activeTab === "partner" ? styles.active : ""
           }`}
-          onClick={() => setActiveTab("admin")}
+          onClick={() => setActiveTab("partner")}
         >
-          <i className="fa-light fa-user-tie"></i> Đối tác & Admin
+          <i className="fa-light fa-user-tie"></i> Quản trị (Admin/Partner)
         </button>
       </div>
 
       <div
         className={styles.searchBox}
-        style={{ marginBottom: "20px", maxWidth: "400px" }}
+        style={{ margin: "20px 0", maxWidth: "400px" }}
       >
         <i className="fa-light fa-magnifying-glass"></i>
         <input
           type="text"
-          placeholder={`Tìm kiếm...`}
+          placeholder="Tìm kiếm theo tên hoặc email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Table */}
       <div className={styles.tableContainer}>
         <table className={styles.table}>
           <thead>
             <tr>
               <th>ID</th>
               <th>Thông tin tài khoản</th>
-              <th>Liên hệ</th>
               <th>Vai trò</th>
-              <th>
-                {activeTab === "customer"
-                  ? "Tổng đơn hàng"
-                  : "Nhà hàng quản lý"}
-              </th>
-              <th>Ghi chú</th>
+              <th>Ngày tạo</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
@@ -184,102 +171,80 @@ const Users = () => {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan="8"
+                  colSpan="6"
                   style={{ textAlign: "center", padding: "20px" }}
                 >
                   Đang tải dữ liệu...
                 </td>
               </tr>
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => {
-                const linkedStore = stores.find((s) => s.id === user.storeId);
-                // Map status từ boolean sang string để hiển thị badge
-                const statusStr = user.status === true ? "active" : "blocked";
-
-                return (
-                  <tr key={user.id}>
-                    <td>
-                      <strong>{user.id}</strong>
-                    </td>
-                    <td>
-                      <div className={styles.userName}>
-                        {user.fullName || user.name}
-                      </div>
-                      <div className={styles.userEmail}>{user.email}</div>
-                    </td>
-                    <td>{user.phoneNumber || user.phone || "---"}</td>
-                    <td>{getRoleBadge(user.role?.toLowerCase())}</td>
-
-                    <td>
-                      {activeTab === "customer" ? (
-                        // Mock data chưa có totalOrders, hiển thị tạm hoặc tính toán
-                        <span style={{ fontWeight: 600 }}>
-                          {user.totalOrders || 0} đơn
-                        </span>
-                      ) : linkedStore ? (
-                        <span style={{ color: "#2980b9", fontWeight: 600 }}>
-                          <i className="fa-light fa-store"></i>{" "}
-                          {linkedStore.name}
-                        </span>
-                      ) : (
-                        <span style={{ color: "#999", fontStyle: "italic" }}>
-                          Chưa gán
-                        </span>
-                      )}
-                    </td>
-
-                    <td>
-                      {user.reportNote ? (
-                        <span style={{ color: "#c0392b" }}>
-                          {user.reportNote}
-                        </span>
-                      ) : (
-                        "---"
-                      )}
-                    </td>
-
-                    <td>{getStatusBadge(statusStr)}</td>
-
-                    <td>
-                      <div className={styles.actions}>
-                        <button
-                          className={styles.btnEdit}
-                          onClick={() => handleEditUser(user)}
-                          title="Sửa"
-                        >
-                          <i className="fa-light fa-pen-to-square"></i>
-                        </button>
-
-                        {/* Nút Khóa/Mở khóa */}
-                        <button
-                          className={
-                            statusStr === "active"
-                              ? styles.btnLock
-                              : styles.btnUnlock
-                          }
-                          onClick={() => handleToggleStatus(user.id)}
-                          title={statusStr === "active" ? "Khóa" : "Mở khóa"}
-                        >
-                          <i
-                            className={`fa-light ${
-                              statusStr === "active"
-                                ? "fa-lock"
-                                : "fa-lock-open"
-                            }`}
-                          ></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+              filteredUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <strong>{user.id}</strong>
+                  </td>
+                  <td>
+                    <div className={styles.userName}>
+                      {user.accountName || user.fullName}
+                    </div>
+                    <div className={styles.userEmail}>{user.email}</div>
+                  </td>
+                  <td>{getRoleBadge(user.role)}</td>
+                  <td>
+                    {user.createAt
+                      ? new Date(user.createAt).toLocaleDateString("vi-VN")
+                      : "---"}
+                  </td>
+                  <td>{getStatusBadge(user.active)}</td>
+                  <td>
+                    <div className={styles.actions}>
+                      <button
+                        className={styles.btnEdit}
+                        onClick={() => handleEditUser(user)}
+                        title="Sửa thông tin"
+                      >
+                        <i className="fa-light fa-pen-to-square"></i>
+                      </button>
+                      <button
+                        className={
+                          user.active === true || String(user.active) === "true"
+                            ? styles.btnLock
+                            : styles.btnUnlock
+                        }
+                        onClick={() => handleToggleStatus(user)}
+                        title={
+                          user.active === true || String(user.active) === "true"
+                            ? "Khóa"
+                            : "Mở khóa"
+                        }
+                      >
+                        <i
+                          className={`fa-light ${
+                            user.active === true ||
+                            String(user.active) === "true"
+                              ? "fa-lock"
+                              : "fa-lock-open"
+                          }`}
+                        ></i>
+                      </button>
+                      <button
+                        className={styles.btnDelete}
+                        onClick={() => handleDeleteUser(user)}
+                        title="Xóa"
+                      >
+                        <i className="fa-light fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td
-                  colSpan="8"
+                  colSpan="6"
                   style={{ textAlign: "center", padding: "20px" }}
                 >
-                  Không tìm thấy dữ liệu.
+                  Không tìm thấy tài khoản nào.
                 </td>
               </tr>
             )}
@@ -291,7 +256,7 @@ const Users = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         userToEdit={selectedUser}
-        onSaveSuccess={handleSaveSuccess}
+        onSaveSuccess={() => setIsModalOpen(false)}
       />
     </div>
   );

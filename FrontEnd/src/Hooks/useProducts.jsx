@@ -1,70 +1,35 @@
 import { useQuery } from "@tanstack/react-query";
-import { db } from "../data/mockData";
+import { useFilters } from "../context/FilterProvider";
+import productService from "../services/productService";
 
-export function useProducts(filters) {
+// [SỬA] Cho phép nhận tham số customParams để override filter mặc định
+export const useProducts = (customParams = {}) => {
+  const { filters } = useFilters();
+
+  // Gộp filter toàn cục với tham số truyền vào (ưu tiên tham số truyền vào)
+  const queryParams = { ...filters, ...customParams };
+
   return useQuery({
-    // Thêm filters.storeId vào queryKey để khi đổi store (nếu có) nó tự fetch lại
-    queryKey: ["products", filters],
+    // Key bao gồm storeId để khi store thay đổi, query tự fetch lại
+    queryKey: [
+      "products",
+      queryParams.storeId, // [QUAN TRỌNG] Key theo storeId thực tế
+      queryParams.category,
+      queryParams.name,
+      queryParams.page,
+    ],
+
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      let result = db.products.getAll();
-
-      // --- 1. QUAN TRỌNG: Lọc theo Store ID trước tiên ---
-      if (filters.storeId) {
-        result = result.filter((p) => p.storeId === filters.storeId);
-      }
-
-      // 2. Lọc theo tên
-      if (filters.name) {
-        const lowerName = filters.name.toLowerCase();
-        result = result.filter((p) => p.name.toLowerCase().includes(lowerName));
-      }
-
-      // 3. Lọc theo danh mục
-      if (filters.category && filters.category !== "all") {
-        const isId = !isNaN(filters.category);
-        if (isId) {
-          result = result.filter(
-            (p) => p.categoryId === parseInt(filters.category)
-          );
-        }
-      }
-
-      // 4. Lọc giá
-      if (filters.minPrice)
-        result = result.filter((p) => p.priceBase >= Number(filters.minPrice));
-      if (filters.maxPrice)
-        result = result.filter((p) => p.priceBase <= Number(filters.maxPrice));
-
-      // 5. Phân trang
-      const pageSize = 8;
-      const totalElements = result.length;
-      const totalPages = Math.ceil(totalElements / pageSize);
-      const currentPage = filters.page || 1;
-      const startIndex = (currentPage - 1) * pageSize;
-
-      // Sắp xếp
-      const sortedResult = result.sort((a, b) => b.id - a.id);
-      const paginatedData = sortedResult.slice(
-        startIndex,
-        startIndex + pageSize
-      );
-
-      return {
-        products: paginatedData,
-        totalPages: totalPages,
-        totalElements: totalElements,
-      };
+      const data = await productService.getAll({
+        storeId: queryParams.storeId, // Truyền ID chính xác vào service
+        category: queryParams.category,
+        name: queryParams.name,
+        page: queryParams.page,
+        size: 12,
+      });
+      return data;
     },
-    staleTime: 0,
+    staleTime: 1 * 60 * 1000, // Cache 1 phút
+    keepPreviousData: true,
   });
-}
-
-export function formatPrice(price) {
-  if (price == null) return "0₫";
-  return Number(price).toLocaleString("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  });
-}
+};

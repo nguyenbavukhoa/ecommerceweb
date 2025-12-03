@@ -1,13 +1,10 @@
-// src/components/DeliveryAddress/AddressEditView.jsx
 import React, { useState } from "react";
 import styles from "./AddressEditView.module.css";
 
-// --- API Placeholder: Search Location ---
+// API Placeholder (Giữ nguyên)
 const searchLocation = async (query) => {
   console.log("Searching for:", query);
-  // TODO: API Integration - Call a Geocoding API (e.g., Google Maps Geocoding API)
-  await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate API call
-  // Return mock results or handle API response
+  await new Promise((resolve) => setTimeout(resolve, 300));
   return [
     { id: "search1", description: `Kết quả tìm kiếm cho: ${query} 1` },
     { id: "search2", description: `Kết quả tìm kiếm cho: ${query} 2` },
@@ -20,6 +17,7 @@ const AddressEditView = ({
   onSelectAddress,
   onAddNew,
   onEditAddress,
+  onDeleteAddress, // [MỚI] Nhận hàm xóa từ props
   onCancel,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,7 +27,6 @@ const AddressEditView = ({
     const query = e.target.value;
     setSearchTerm(query);
     if (query.length > 2) {
-      // Only search if query is long enough
       const results = await searchLocation(query);
       setSearchResults(results);
     } else {
@@ -58,6 +55,7 @@ const AddressEditView = ({
         </button>
         <h3>Địa chỉ giao hàng</h3>
       </div>
+
       <div className={styles.searchSection}>
         <input
           type="text"
@@ -66,15 +64,15 @@ const AddressEditView = ({
           onChange={handleSearchChange}
           className={styles.searchInput}
         />
-        {/* TODO: Display searchResults */}
       </div>
 
-      {/* Hiển thị lại địa chỉ đang chọn */}
+      {/* Hiển thị địa chỉ ĐANG CHỌN */}
       {selectedAddress && (
         <div className={`${styles.addressOption} ${styles.currentSelection}`}>
           <div className={styles.addressIcon}>
             {getIconForType(selectedAddress.type)}
           </div>
+
           <div className={styles.addressDetails}>
             <p className={styles.namePhone}>
               <strong>
@@ -86,20 +84,37 @@ const AddressEditView = ({
               </strong>
             </p>
             <p className={styles.addressText}>{selectedAddress.address}</p>
-            {/* NÚT SỬA MỚI */}
           </div>
-          <button
-            className={styles.editLink}
-            onClick={(e) => {
-              e.stopPropagation(); // Ngăn không cho sự kiện click lan ra div cha
-              onEditAddress(selectedAddress); // Gọi hàm xử lý sửa
-            }}
-          >
-            Sửa
-          </button>
+
+          {/* Nhóm nút thao tác */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            {/* Nút Sửa */}
+            <button
+              className={styles.editLink}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditAddress(selectedAddress);
+              }}
+            >
+              Sửa
+            </button>
+
+            {/* [MỚI] Nút Xóa */}
+            <button
+              className={styles.editLink}
+              style={{ color: "#ff4d4f" }} // Màu đỏ
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteAddress(selectedAddress.id);
+              }}
+            >
+              Xóa
+            </button>
+          </div>
         </div>
       )}
 
+      {/* Danh sách địa chỉ ĐÃ LƯU */}
       <div className={styles.savedAddressesSection}>
         <div className={styles.savedHeader}>
           <h4>Địa chỉ đã lưu</h4>
@@ -118,6 +133,7 @@ const AddressEditView = ({
                 <div className={styles.addressIcon}>
                   {getIconForType(addr.type)}
                 </div>
+
                 <div className={styles.addressDetails}>
                   <p className={styles.namePhone}>
                     <strong>
@@ -130,16 +146,30 @@ const AddressEditView = ({
                   </p>
                   <p className={styles.addressText}>{addr.address}</p>
                 </div>
-                {/* NÚT SỬA MỚI */}
-                <button
-                  className={styles.editLink}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Ngăn không cho sự kiện click lan ra div cha
-                    onEditAddress(addr); // Gọi hàm xử lý sửa
-                  }}
-                >
-                  Sửa
-                </button>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button
+                    className={styles.editLink}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditAddress(addr);
+                    }}
+                  >
+                    Sửa
+                  </button>
+
+                  {/* [MỚI] Nút Xóa */}
+                  <button
+                    className={styles.editLink}
+                    style={{ color: "#ff4d4f" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteAddress(addr.id);
+                    }}
+                  >
+                    Xóa
+                  </button>
+                </div>
               </div>
             ))}
         </div>

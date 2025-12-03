@@ -2,77 +2,73 @@
 import React, { useState } from "react";
 import styles from "./AddressForm.module.css";
 import { useToast } from "../../context/ToastContext";
-// 1. Import AuthContext
 import { useAuth } from "../../context/AuthContext";
 
 const AddressForm = ({ initialData = {}, onSave, onCancel }) => {
   const { showToast } = useToast();
-
-  // 2. Lấy thông tin user hiện tại
   const { auth: currentUser } = useAuth();
 
   const isEditing = !!initialData.id;
 
-  // 3. Logic khởi tạo state: Ưu tiên initialData (nếu sửa), nếu không thì lấy từ currentUser (nếu thêm mới)
-  const [name, setName] = useState(
+  // --- LOGIC KHỞI TẠO STATE ---
+  // Nếu đang sửa (initialData có value) -> Dùng initialData
+  // Nếu thêm mới -> Dùng thông tin user (nếu có) để điền sẵn cho tiện
+  const defaultName =
     initialData.name ||
-      (currentUser ? currentUser.fullName || currentUser.accountName : "")
-  );
-  const [phone, setPhone] = useState(
-    initialData.phone || (currentUser ? currentUser.phone : "")
-  );
+    (currentUser ? currentUser.fullName || currentUser.accountName : "");
+  // Thông tin user có thể không có sđt, nên cần check kỹ
+  const defaultPhone =
+    initialData.phone || (currentUser ? currentUser.phoneNumber : "") || "";
 
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState(defaultPhone);
   const [address, setAddress] = useState(initialData.address || "");
   const [type, setType] = useState(initialData.type || "HOME");
   const [customName, setCustomName] = useState(initialData.customName || "");
   const [driverNote, setDriverNote] = useState(initialData.driverNote || "");
 
-  const handleSave = () => {
-    // ... (Phần validate và logic save giữ nguyên như cũ) ...
-    if (!name.trim()) {
-      showToast({
-        title: "Thông tin trống",
-        message: "Vui lòng nhập họ và tên.",
-        type: "warning",
-      });
-      return;
-    }
-    if (!phone.trim()) {
-      showToast({
-        title: "Thông tin trống",
-        message: "Vui lòng nhập số điện thoại.",
-        type: "warning",
-      });
-      return;
-    }
-    if (!address.trim()) {
-      showToast({
-        title: "Thông tin trống",
-        message: "Vui lòng nhập địa chỉ.",
-        type: "warning",
-      });
-      return;
-    }
-    if (type === "OTHER" && !customName.trim()) {
-      showToast({
-        title: "Thông tin trống",
-        message: "Vui lòng nhập tên cho loại địa chỉ 'Khác'.",
-        type: "warning",
-      });
-      return;
-    }
-
-    onSave({
-      ...initialData,
-      name,
-      phone,
-      address,
-      type,
-      customName: type === "OTHER" ? customName : null,
-      driverNote,
-    });
+  const mapTypeToGender = (type) => {
+    // Cần hàm này cho việc gọi API
+    if (type === "HOME") return "MALE"; // Giả định HOME = MALE
+    if (type === "WORK") return "FEMALE"; // Giả định WORK = FEMALE
+    return "OTHER";
   };
 
+  // --- XỬ LÝ LƯU ---
+  const handleSave = () => {
+    // --- B1: Validation cơ bản ---
+    if (!name || !phone || !address) {
+      showToast({
+        title: "Lỗi",
+        message: "Vui lòng nhập đủ thông tin bắt buộc: Tên, SĐT, Địa chỉ.",
+        type: "error",
+      });
+      return;
+    }
+
+    // --- B2: Chuẩn bị dữ liệu ---
+    const dataToSave = {
+      // [QUAN TRỌNG NHẤT] Giữ lại ID nếu đang SỬA, hoặc là null nếu THÊM MỚI
+      id: initialData.id || null,
+
+      fullName: name,
+      phoneNumber: phone,
+      address: address,
+
+      // Map Type sang Gender theo yêu cầu API
+      gender: mapTypeToGender(type),
+
+      // Các trường phụ
+      type: type,
+      customName: type === "OTHER" ? customName : null,
+      driverNote: driverNote,
+    };
+
+    // B3: Gọi callback
+    onSave(dataToSave);
+  };
+
+  // --- RENDER GIAO DIỆN (GIỮ NGUYÊN) ---
   return (
     <div className={`${styles.addForm} ${styles.addressListWrapper}`}>
       <div className={styles.editHeader}>
@@ -162,7 +158,7 @@ const AddressForm = ({ initialData = {}, onSave, onCancel }) => {
 
       <div className={styles.formActions}>
         <button onClick={handleSave} className={styles.saveBtn}>
-          Lưu địa chỉ
+          {isEditing ? "Cập nhật" : "Lưu địa chỉ"}
         </button>
       </div>
     </div>
