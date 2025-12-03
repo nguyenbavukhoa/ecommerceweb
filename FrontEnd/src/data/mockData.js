@@ -39,20 +39,6 @@ const SEED_STORES = [
     avatar: "https://via.placeholder.com/150",
     location: [10.776019, 106.702068],
   },
-<<<<<<< HEAD
-  // {
-  //   id: "RES-02",
-  //   name: "KHK Food Thủ Đức",
-  //   address: "20 Võ Văn Ngân, TP. Thủ Đức",
-  //   phone: "0909333444",
-  //   description: "Không gian rộng rãi, phù hợp cho sinh viên và gia đình.",
-  //   openTime: "07:00",
-  //   closeTime: "23:00",
-  //   status: "active",
-  //   avatar: "https://via.placeholder.com/150",
-  //   location: [10.850632, 106.771913], // Tọa độ Thủ Đức
-  // },
-=======
   {
     id: "RES-02",
     name: "KHK Food Thủ Đức",
@@ -65,7 +51,6 @@ const SEED_STORES = [
     avatar: "https://via.placeholder.com/150",
     location: [10.850632, 106.771913],
   },
->>>>>>> 645887c900204009619873c37d03da98ae36dad3
 ];
 
 // [CẬP NHẬT] 4. DANH SÁCH DRONE (THÊM TỌA ĐỘ)
@@ -233,62 +218,6 @@ const SEED_PRODUCTS = [
     categoryId: 2,
     optionGroups: [],
   },
-
-<<<<<<< HEAD
-  // // --- SẢN PHẨM CỦA STORE 2 (RES-02): Pizza, Trà sữa ---
-  // {
-  //   id: 6,
-  //   storeId: "RES-02", // Thuộc Store 2
-  //   name: "Pizza Hải Sản",
-  //   status: "ACTIVE",
-  //   priceBase: 129000.0,
-  //   description: "Pizza topping hải sản tươi ngon",
-  //   imgMain: "https://via.placeholder.com/150",
-  //   categoryId: 6,
-  //   optionGroups: [],
-  // },
-  // {
-  //   id: 10,
-  //   storeId: "RES-02", // Thuộc Store 2
-  //   name: "Pizza Truyền Thống",
-  //   status: "ACTIVE",
-  //   priceBase: 109000.0,
-  //   description: "Pizza truyền thống Ý",
-  //   imgMain: "https://via.placeholder.com/150",
-  //   categoryId: 6,
-  //   optionGroups: [],
-  // },
-  // {
-  //   id: 13,
-  //   storeId: "RES-02", // Thuộc Store 2
-  //   name: "Trà Sữa Trân Châu",
-  //   status: "ACTIVE",
-  //   priceBase: 35000.0,
-  //   description: "Trà sữa truyền thống",
-  //   imgMain: "https://via.placeholder.com/150",
-  //   categoryId: 3,
-  //   optionGroups: [
-  //     {
-  //       id: 7,
-  //       name: "Đường",
-  //       values: [
-  //         { id: 71, value: "100% Đường", price: 0 },
-  //         { id: 72, value: "70% Đường", price: 0 },
-  //         { id: 73, value: "50% Đường", price: 0 },
-  //       ],
-  //     },
-  //     {
-  //       id: 8,
-  //       name: "Đá",
-  //       values: [
-  //         { id: 81, value: "100% Đá", price: 0 },
-  //         { id: 82, value: "70% Đá", price: 0 },
-  //         { id: 83, value: "50% Đá", price: 0 },
-  //       ],
-  //     },
-  //   ],
-  // },
-=======
   // --- STORE 2 (RES-02) ---
   {
     id: 6,
@@ -342,7 +271,6 @@ const SEED_PRODUCTS = [
       },
     ],
   },
->>>>>>> 645887c900204009619873c37d03da98ae36dad3
 ];
 
 // 6. USER MẪU
@@ -363,38 +291,7 @@ export const SEED_USERS = [
     createAt: "2025-09-01T10:00:00.000Z",
     addresses: [],
   },
-<<<<<<< HEAD
-  // {
-  //   id: "ADMIN-002",
-  //   fullName: "Quản lý Thủ Đức",
-  //   phoneNumber: "0900333444",
-  //   address: "Tầng 2, KHK Office",
-  //   gender: "Other",
-  //   email: "admin2@khkfood.com",
-  //   password: "123",
-  //   role: "ADMIN",
-  //   userType: 1,
-  //   storeId: "RES-02", // <--- Admin này CHỈ quản lý Store 2
-  //   status: true,
-  //   createAt: "2025-10-15T10:00:00.000Z",
-  //   addresses: [],
-  // },
-  // {
-  //   id: "ADMIN-003",
-  //   fullName: "Admin bị khóa",
-  //   phoneNumber: "0900555666",
-  //   address: "Tầng 3, KHK Office",
-  //   gender: "Other",
-  //   email: "admin-locked@khkfood.com",
-  //   password: "123",
-  //   role: "ADMIN",
-  //   userType: 1,
-  //   storeId: "RES-01",
-  //   status: false, // Bị khóa
-  //   createAt: "2025-11-20T10:00:00.000Z",
-  //   addresses: [],
-  // },
-=======
+
   {
     id: "ADMIN-002",
     fullName: "Quản lý Thủ Đức",
@@ -425,7 +322,6 @@ export const SEED_USERS = [
     createAt: "2025-11-20T10:00:00.000Z",
     addresses: [],
   },
->>>>>>> 645887c900204009619873c37d03da98ae36dad3
   // --- USER ACCOUNTS ---
   {
     id: "USER-001",
@@ -661,12 +557,8 @@ const generateSeedOrders = (count) => {
   return orders.sort((a, b) => b.id - a.id);
 };
 
-<<<<<<< HEAD
-const SEED_ORDERS = generateSeedOrders(1);
-=======
 // [FIX] Tăng số lượng đơn lên 300
 const SEED_ORDERS = generateSeedOrders(300);
->>>>>>> 645887c900204009619873c37d03da98ae36dad3
 
 // ==============================================================================
 // PHẦN 2: DATABASE ENGINE
