@@ -369,7 +369,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<AccountDTO> getAccountAllByRoleUser() {
-        List<AccountRole> roles = List.of(AccountRole.USER, AccountRole.STAFF);
+        List<AccountRole> roles = List.of(AccountRole.USER, AccountRole.ADMIN);
         List<Account> accounts = accountRepository.findByRoles(roles);
         if (accounts.isEmpty()) {
             throw new CustomException(ErrorResponse.ACCOUNT_NOT_FOUND);
