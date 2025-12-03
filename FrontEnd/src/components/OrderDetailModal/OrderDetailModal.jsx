@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import styles from "./OrderDetailModal.module.css";
 import ImageWithFallback from "../ImageWithFallbackComponent/ImageWithFallback";
+import CommonModal from "../common/Modal"; // Import Modal wrapper
 
 // Helper định dạng
 const vnd = (amount) =>
@@ -8,18 +9,27 @@ const vnd = (amount) =>
     amount
   );
 
-// Component Timeline (Cập nhật logic trạng thái mới)
+// Component Timeline (Giữ nguyên logic UI cũ, cập nhật key status)
 const TimelineTracker = ({ order }) => {
-  // Định nghĩa các bước trạng thái (Mới)
   const timelineSteps = [
     { key: "PLACED", label: "Đã đặt hàng" },
     { key: "CONFIRMED", label: "Đã xác nhận" },
     { key: "SHIPPING", label: "Đang giao" },
+    // Map status mới vào các mốc cũ tương đương
     { key: "COMPLETED", label: "Hoàn thành" },
   ];
 
-  // Nếu đơn bị hủy, hiển thị timeline đặc biệt
-  if (order.orderStatus === "CANCELLED") {
+  // Map status API sang status Timeline cũ
+  let currentStatusKey = order.orderStatus;
+
+  // Logic mapping
+  if (currentStatusKey === "IN_PROGRESS") currentStatusKey = "CONFIRMED";
+  if (currentStatusKey === "READY_FOR_DELIVERY") currentStatusKey = "CONFIRMED";
+  if (currentStatusKey === "OUT_FOR_DELIVERY") currentStatusKey = "SHIPPING";
+  if (currentStatusKey === "DELIVERED") currentStatusKey = "COMPLETED";
+
+  // Nếu đơn bị hủy
+  if (["CANCELLED", "REJECTED", "FAILED"].includes(order.orderStatus)) {
     return (
       <div className={styles.timelineWrapper}>
         <div className={styles.timelineContainer}>
@@ -29,15 +39,16 @@ const TimelineTracker = ({ order }) => {
           ></div>
         </div>
         <div className={styles.timelineLabels}>
-          <span className={styles.cancelledLabel}>Đơn hàng đã bị hủy</span>
+          <span className={styles.cancelledLabel}>
+            Đơn hàng đã bị hủy / thất bại
+          </span>
         </div>
       </div>
     );
   }
 
-  // Tìm vị trí trạng thái hiện tại
   const currentStatusIndex = timelineSteps.findIndex(
-    (step) => step.key === order.orderStatus
+    (step) => step.key === currentStatusKey
   );
 
   return (
@@ -46,13 +57,11 @@ const TimelineTracker = ({ order }) => {
         {timelineSteps.map((item, index) => {
           let segmentClass;
           if (index <= currentStatusIndex) {
-            // Đã qua hoặc đang ở: màu xanh
-            // Map class style cũ (delivered ~ completed)
             segmentClass = styles.completed;
             if (index === currentStatusIndex && item.key === "SHIPPING")
               segmentClass = styles.shipping;
           } else {
-            segmentClass = styles.future; // Chưa tới
+            segmentClass = styles.future;
           }
           return (
             <div
@@ -73,21 +82,34 @@ const TimelineTracker = ({ order }) => {
   );
 };
 
-const OrderDetailModal = ({ order, onClose }) => {
-  // Nếu không có order (hoặc đang load), return null hoặc loading
-  if (!order) return null;
+const OrderDetailModal = ({ order, isOpen, onClose }) => {
+  // [LOGIC MỚI] Lấy thông tin giao hàng chuẩn từ API
+  const deliveryInfo = useMemo(() => {
+    if (order?.userInfo) {
+      return {
+        name: order.userInfo.fullName || order.userInfo.accountName,
+        phone: order.userInfo.phoneNumber,
+        address: order.userInfo.address,
+      };
+    }
+    if (order?.deliveryInfo) {
+      return {
+        name: order.deliveryInfo.name || order.deliveryInfo.fullName,
+        phone: order.deliveryInfo.phone || order.deliveryInfo.phoneNumber,
+        address: order.deliveryInfo.address,
+      };
+    }
+    return { name: "Khách hàng", phone: "---", address: "---" };
+  }, [order]);
 
-  // Tính tổng số lượng
-  const totalItems = order.orderItems.reduce((sum, p) => sum + p.quantity, 0);
+  // Nếu dùng CommonModal bọc ngoài thì ko cần check null ở đây, nhưng cứ để cho chắc
+  if (!order || !isOpen) return null;
 
-  // Lấy thông tin giao hàng từ snapshot (nếu có)
-  const deliveryInfo = order.deliveryInfo || {
-    name: "Khách hàng",
-    phone: "---",
-    address: order.customerAddress || "---",
-  };
+  const totalItems =
+    order.orderItems?.reduce((sum, p) => sum + p.quantity, 0) || 0;
 
-  return (
+  // Nội dung Modal (Giữ nguyên cấu trúc HTML/CSS cũ của bạn)
+  const modalContent = (
     <div className={styles.modalView}>
       <div className={styles.modalHeader}>
         <button onClick={onClose} className={styles.backBtn}>
@@ -111,8 +133,9 @@ const OrderDetailModal = ({ order, onClose }) => {
           <div className={styles.cardBody}>
             <div className={styles.infoRow}>
               <span>Hình thức:</span>
-              <strong>Giao hàng bằng Drone 🚁</strong>
+              <strong>Giao hàng tận nơi 🛵</strong>
             </div>
+            {/* Hiển thị Drone ID nếu có (API mới) */}
             {order.droneId && (
               <div className={styles.infoRow}>
                 <span>Drone ID:</span>
@@ -142,10 +165,10 @@ const OrderDetailModal = ({ order, onClose }) => {
             Danh sách sản phẩm ({totalItems} món)
           </div>
           <div className={styles.productList}>
-            {order.orderItems.map((p) => (
+            {order.orderItems?.map((p) => (
               <div key={p.id} className={styles.productRow}>
                 <ImageWithFallback
-                  src={p.imgUrl} // Map imgUrl
+                  src={p.imgUrl}
                   alt={p.productName}
                   className={styles.productImage}
                 />
@@ -156,9 +179,15 @@ const OrderDetailModal = ({ order, onClose }) => {
                     </span>{" "}
                     {p.productName}
                   </p>
-                  {p.optionValuesDTO && p.optionValuesDTO.length > 0 && (
-                    <p className={styles.productOptions}>
-                      {p.optionValuesDTO.map((opt) => opt.value).join(", ")}
+                  {/* Hiển thị Option nếu có (API mới trả optionValuesDTO) */}
+                  {(p.optionValues || p.optionValuesDTO) && (
+                    <p
+                      className={styles.productOptions}
+                      style={{ fontSize: "13px", color: "#666" }}
+                    >
+                      {(p.optionValues || p.optionValuesDTO)
+                        .map((o) => o.value)
+                        .join(", ")}
                     </p>
                   )}
                 </div>
@@ -171,14 +200,13 @@ const OrderDetailModal = ({ order, onClose }) => {
 
           {/* TỔNG TIỀN */}
           <div className={styles.orderSummary}>
-            {/* Giả lập tính tạm tính (vì mockData chỉ lưu totalPrice tổng) */}
             <div className={styles.priceRow}>
               <span>Tổng tiền hàng</span>
-              {/* Tạm tính = Tổng - Ship (15k) */}
+              {/* Tính ngược tạm tính: Tổng - Ship (giả định 15k) */}
               <span>{vnd(order.totalPrice - 15000)}</span>
             </div>
             <div className={styles.priceRow}>
-              <span>Phí giao hàng (Drone)</span>
+              <span>Phí giao hàng</span>
               <span>{vnd(15000)}</span>
             </div>
             <div className={`${styles.priceRow} ${styles.finalTotal}`}>
@@ -215,6 +243,13 @@ const OrderDetailModal = ({ order, onClose }) => {
         </div>
       </div>
     </div>
+  );
+
+  // Bọc trong CommonModal để tận dụng hiệu ứng overlay/animation của bạn
+  return (
+    <CommonModal isOpen={isOpen} onClose={onClose}>
+      {modalContent}
+    </CommonModal>
   );
 };
 

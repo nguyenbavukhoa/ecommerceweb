@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Sidebar.module.scss";
 
 const sidebarItems = [
-  { key: "Statistics", icon: "fa-light fa-chart-simple", label: "Thống kê" },
+  // { key: "Statistics", icon: "fa-light fa-chart-simple", label: "Thống kê" },
   // { key: "Dashboard", icon: "fa-light fa-house", label: "Trang tổng quan" },
   { key: "Products", icon: "fa-light fa-pot-food", label: "Sản phẩm" },
   // { key: "Customers", icon: "fa-light fa-users", label: "Khách hàng" },

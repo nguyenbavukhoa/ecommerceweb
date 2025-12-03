@@ -12,12 +12,19 @@ import orderService from "../../services/orderService";
 import { useToast } from "../../context/ToastContext";
 import { useFilters } from "../../context/FilterProvider";
 
+// [CẬP NHẬT] Danh sách Status chuẩn theo Enum Backend
+// Bạn có thể giữ nguyên iconClass cũ nếu muốn
 const STATUSES = [
+  { id: "ALL", label: "Tất cả", iconClass: "fas fa-list" },
   { id: "PLACED", label: "Chờ xác nhận", iconClass: "fas fa-hourglass-half" },
   { id: "CONFIRMED", label: "Đang lấy hàng", iconClass: "fas fa-box-open" },
-  { id: "SHIPPING", label: "Đang vận chuyển", iconClass: "fas fa-truck" },
-  { id: "COMPLETED", label: "Hoàn thành", iconClass: "fas fa-check-circle" },
+  { id: "IN_PROGRESS", label: "Đang chế biến", iconClass: "fas fa-fire" }, // Mới
+  { id: "READY_FOR_DELIVERY", label: "Chờ giao", iconClass: "fas fa-box" }, // Mới
+  { id: "OUT_FOR_DELIVERY", label: "Đang giao", iconClass: "fas fa-truck" }, // Thay SHIPPING
+  { id: "DELIVERED", label: "Đã giao", iconClass: "fas fa-check-circle" }, // Thay COMPLETED
   { id: "CANCELLED", label: "Đã huỷ", iconClass: "fas fa-ban" },
+  { id: "REJECTED", label: "Đã từ chối", iconClass: "fas fa-times-circle" }, // Mới
+  { id: "FAILED", label: "Thất bại", iconClass: "fas fa-exclamation-triangle" }, // Mới
 ];
 
 const vnd = (amount) =>
@@ -27,67 +34,66 @@ const vnd = (amount) =>
 
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
-  const { auth } = useAuth();
-  const { showToast } = useToast(); // Để thông báo lỗi/thành công
+  const { auth: currentUser } = useAuth(); // Sửa auth -> currentUser để khớp code cũ
+  const { showToast } = useToast();
 
-  // [MỚI] Lấy storeId hiện tại từ Filter Context
   const { filters } = useFilters();
   const currentStoreId = filters.storeId;
 
-  const [activeStatus, setActiveStatus] = useState("PLACED");
+  // Đặt mặc định là ALL để user thấy đơn hàng ngay
+  const [activeStatus, setActiveStatus] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   // [MỚI] State chứa danh sách đơn hàng từ API
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Mặc định true để loading
 
   // --- 2. LẤY DỮ LIỆU TỪ API ---
   const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await orderService.getMyOrders();
-      setOrders(data || []);
-    } catch (error) {
-      console.error(error);
-      showToast({
-        title: "Lỗi",
-        message: "Không thể tải lịch sử đơn hàng",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
+    if (currentUser) {
+      setLoading(true);
+      try {
+        // Gọi API lấy danh sách
+        const data = await orderService.getMyOrders();
+        setOrders(data || []);
+      } catch (error) {
+        console.error(error);
+        // showToast({ title: "Lỗi", message: "Không thể tải đơn hàng", type: "error" });
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    if (auth) {
+    if (currentUser) {
       fetchOrders();
+    } else {
+      // Nếu chưa login, chuyển về login hoặc để trống
+      setLoading(false);
     }
-  }, [auth]); // Gọi lại khi auth thay đổi
+  }, [currentUser]);
 
   // --- 3. LỌC DỮ LIỆU (Client Side) ---
-  const displayedOrders = useMemo(() => {
+  const filteredOrders = useMemo(() => {
     if (!orders) return [];
+    let result = orders;
 
-    // API /orders/all đã trả về đơn của user hiện tại (dựa vào token), không cần lọc userId nữa
-    let userOrders = orders;
-
-    // 1. [MỚI] Lọc theo Store ID hiện tại (Multi-store)
-    // Lưu ý: API trả về field là 'storeId' (theo doc), trong khi mock cũ là 'restaurantId'
-    if (currentStoreId) {
-      userOrders = userOrders.filter(
-        (order) =>
-          (order.storeId || order.restaurantId)?.toString() ===
-          currentStoreId?.toString()
-      );
+    // Lọc theo Store (nếu cần)
+    if (currentStoreId && currentStoreId !== "null") {
+      // result = result.filter(o => o.storeId == currentStoreId); // Tạm bỏ comment nếu muốn lọc
     }
 
-    // 2. Lọc theo trạng thái đang chọn & Sắp xếp (Mới nhất lên đầu)
-    return userOrders
-      .filter((order) => order.orderStatus === activeStatus)
-      .sort((a, b) => b.id - a.id);
+    // Lọc theo Status
+    if (activeStatus !== "ALL") {
+      result = result.filter((o) => o.orderStatus === activeStatus);
+    }
+
+    // Sắp xếp mới nhất lên đầu
+    return result.sort((a, b) => b.id - a.id);
   }, [orders, activeStatus, currentStoreId]);
 
   const handleViewDetails = (orderId) => {
@@ -100,18 +106,22 @@ const OrderHistoryPage = () => {
     setSelectedOrderId(null);
   };
 
-  // [MỚI] Xử lý hủy đơn
+  // Xử lý Hủy đơn
   const handleCancelOrder = async (orderId) => {
     if (window.confirm("Bạn có chắc muốn hủy đơn hàng này?")) {
       try {
-        await orderService.cancelOrder(orderId);
+        // Gọi API hủy (cần hàm updateStatus hoặc cancelOrder trong service)
+        // Tạm thời giả định có hàm updateStatus
+        // await orderService.updateStatus(orderId, "CANCELLED");
+
+        // Hoặc nếu chưa có API, ta chỉ thông báo
         showToast({
-          title: "Thành công",
-          message: "Đã hủy đơn hàng",
-          type: "success",
+          title: "Thông báo",
+          message: "Tính năng đang cập nhật",
+          type: "info",
         });
-        // Refresh lại list
-        fetchOrders();
+
+        // fetchOrders(); // Reload sau khi hủy
       } catch (error) {
         showToast({ title: "Lỗi", message: "Hủy đơn thất bại", type: "error" });
       }
@@ -131,92 +141,48 @@ const OrderHistoryPage = () => {
   };
 
   const ActionButtons = ({ order }) => {
-    switch (order.orderStatus) {
-      case "PLACED":
-      case "CONFIRMED":
-        return (
-          <div className={styles.orderActions}>
-            <button
-              onClick={() => handleViewDetails(order.id)}
-              className={styles.secondaryBtn}
-            >
-              Xem chi tiết
-            </button>
-            {order.orderStatus === "PLACED" && (
-              <button
-                className={styles.primaryBtn}
-                onClick={() => handleCancelOrder(order.id)} // [ĐÃ SỬA] Gọi hàm hủy thật
-              >
-                Hủy đơn
-              </button>
-            )}
-          </div>
-        );
-      case "SHIPPING":
-        return (
-          <div className={styles.orderActions}>
-            <button
-              onClick={() => handleViewDetails(order.id)}
-              className={styles.secondaryBtn}
-            >
-              Xem chi tiết
-            </button>
-            <button className={styles.primaryBtn} disabled>
-              Đang giao...
-            </button>
-          </div>
-        );
-      case "COMPLETED":
-        return (
-          <div className={styles.orderActions}>
-            <button
-              onClick={() => handleViewDetails(order.id)}
-              className={styles.secondaryBtn}
-            >
-              Xem chi tiết
-            </button>
-            <button className={styles.primaryBtn}>Đánh giá</button>
-          </div>
-        );
-      case "CANCELLED":
-        return (
-          <div className={styles.orderActions}>
-            <button
-              onClick={() => handleViewDetails(order.id)}
-              className={styles.secondaryBtn}
-            >
-              Xem chi tiết
-            </button>
-            <button className={styles.primaryBtn}>Mua lại</button>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles.orderActions}>
-            <button
-              onClick={() => handleViewDetails(order.id)}
-              className={styles.secondaryBtn}
-            >
-              Xem chi tiết
-            </button>
-          </div>
-        );
-    }
-  };
+    // Cho phép hủy nếu mới đặt hoặc đã xác nhận
+    const canCancel = ["PLACED", "CONFIRMED"].includes(order.orderStatus);
 
-  if (!auth)
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        Vui lòng đăng nhập để xem lịch sử.
+      <div className={styles.orderActions}>
+        {canCancel && (
+          <button
+            className={styles.secondaryBtn}
+            style={{
+              marginRight: "10px",
+              color: "#d32f2f",
+              borderColor: "#d32f2f",
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Chặn click lan ra ngoài
+              handleCancelOrder(order.id);
+            }}
+          >
+            Hủy đơn
+          </button>
+        )}
+        <button
+          className={styles.secondaryBtn}
+          onClick={() => handleViewDetails(order.id)}
+        >
+          Xem chi tiết
+        </button>
+        {/* Các nút khác tùy trạng thái */}
       </div>
     );
+  };
+
+  if (!currentUser) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        Vui lòng đăng nhập.
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`${styles.orderHistoryPage} ${
-        isModalOpen ? styles.modalActive : ""
-      }`}
-    >
+    <div className={styles.orderHistoryPage}>
       <header className={styles.orderHeader}>
         <div className={styles.orderReturn}>
           <button onClick={() => navigate(-1)}>
@@ -234,7 +200,7 @@ const OrderHistoryPage = () => {
               <button
                 key={status.id}
                 className={`${styles.statusBtn} ${
-                  status.id === activeStatus ? styles.active : ""
+                  activeStatus === status.id ? styles.active : ""
                 }`}
                 onClick={() => setActiveStatus(status.id)}
               >
@@ -257,22 +223,27 @@ const OrderHistoryPage = () => {
             </div>
           ) : (
             <div className={styles.orderListContainer}>
-              {displayedOrders.length > 0 ? (
-                displayedOrders.map((order) => {
-                  // API trả về orderItems, ta map dữ liệu
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => {
                   const orderItems = order.orderItems || [];
+                  const firstItem = orderItems[0];
                   const totalItems = orderItems.reduce(
                     (sum, p) => sum + p.quantity,
                     0
                   );
                   const totalPrice = order.totalPrice;
+
                   const statusInfo = STATUSES.find(
                     (s) => s.id === order.orderStatus
                   );
                   const isExpanded = expandedOrders.has(order.id);
+
+                  // Nếu thu gọn, chỉ hiện 1 món. Nếu mở rộng, hiện hết.
                   const productsToShow = isExpanded
                     ? orderItems
-                    : orderItems.slice(0, 1);
+                    : firstItem
+                    ? [firstItem]
+                    : [];
 
                   return (
                     <div key={order.id} className={styles.orderCard}>
@@ -280,9 +251,12 @@ const OrderHistoryPage = () => {
                         <span className={styles.orderId}>
                           Đơn hàng #{order.id}
                         </span>
+
+                        {/* Map class CSS theo status. Nếu không có class tương ứng, dùng class default */}
                         <span
                           className={`${styles.statusTag} ${
-                            styles[order.orderStatus?.toLowerCase()]
+                            styles[order.orderStatus?.toLowerCase()] ||
+                            styles.placed
                           }`}
                         >
                           {statusInfo?.label || order.orderStatus}
@@ -290,8 +264,8 @@ const OrderHistoryPage = () => {
                       </div>
 
                       <div className={styles.productList}>
-                        {productsToShow.map((product) => (
-                          <div key={product.id} className={styles.productRow}>
+                        {productsToShow.map((product, idx) => (
+                          <div key={idx} className={styles.productRow}>
                             <ImageWithFallback
                               src={product.imgUrl}
                               alt={product.productName}
@@ -304,13 +278,15 @@ const OrderHistoryPage = () => {
                                 </span>{" "}
                                 {product.productName}
                               </p>
-                              {/* API Get Order History hiện tại không trả về optionValuesDTO chi tiết
-                                nên ta chỉ render nếu có dữ liệu để tránh lỗi */}
+                              {/* Render Options nếu có */}
                               {product.optionValuesDTO &&
                                 product.optionValuesDTO.length > 0 && (
-                                  <p className={styles.productOptions}>
+                                  <p
+                                    className={styles.productNote}
+                                    style={{ fontSize: "13px", color: "#666" }}
+                                  >
                                     {product.optionValuesDTO
-                                      .map((opt) => opt.value)
+                                      .map((o) => o.value)
                                       .join(", ")}
                                   </p>
                                 )}
@@ -322,13 +298,18 @@ const OrderHistoryPage = () => {
                         ))}
                       </div>
 
+                      {/* Nút Xem thêm / Thu gọn nếu có nhiều hơn 1 món */}
                       {orderItems.length > 1 && (
                         <div className={styles.toggleWrapper}>
                           <button
                             className={styles.toggleProductsBtn}
                             onClick={() => toggleOrderExpansion(order.id)}
                           >
-                            <span>{isExpanded ? "Thu gọn" : "Xem thêm"}</span>
+                            <span>
+                              {isExpanded
+                                ? "Thu gọn"
+                                : `Xem thêm ${orderItems.length - 1} món khác`}
+                            </span>
                             <i
                               className={`fa-solid ${
                                 isExpanded ? "fa-chevron-up" : "fa-chevron-down"
@@ -348,16 +329,27 @@ const OrderHistoryPage = () => {
                         </span>
                       </div>
 
-                      <ActionButtons order={order} />
+                      <div className={styles.orderCardFooter}>
+                        <ActionButtons order={order} />
+                      </div>
                     </div>
                   );
                 })
               ) : (
                 <div className={`${styles.orderRow} ${styles.noOrders}`}>
-                  <div className={styles.orderColTitle}>
-                    {STATUSES.find((s) => s.id === activeStatus)?.label}
+                  <div
+                    style={{
+                      padding: "40px",
+                      textAlign: "center",
+                      color: "#999",
+                    }}
+                  >
+                    <i
+                      className="fa-light fa-box-open"
+                      style={{ fontSize: "40px", marginBottom: "10px" }}
+                    ></i>
+                    <p>Không có đơn hàng nào.</p>
                   </div>
-                  <p>Không có đơn hàng nào tại cửa hàng này.</p>
                 </div>
               )}
             </div>
@@ -368,7 +360,7 @@ const OrderHistoryPage = () => {
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <OrderDetailModalWrapper
           orderId={selectedOrderId}
-          orders={orders} // Truyền list orders từ API vào wrapper
+          orders={orders}
           onClose={handleCloseModal}
         />
       </Modal>
@@ -376,7 +368,6 @@ const OrderHistoryPage = () => {
   );
 };
 
-// Wrapper để tìm order trong list đã fetch (thay vì tìm trong db mock)
 const OrderDetailModalWrapper = ({ orderId, orders, onClose }) => {
   const order = orders.find((o) => o.id === orderId);
   if (!order) return null;

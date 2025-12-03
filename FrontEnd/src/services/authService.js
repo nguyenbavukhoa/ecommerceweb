@@ -67,6 +67,23 @@ const authService = {
     }
   },
 
+  // 2. TẠO USER (Dành cho Admin) -> Cho phép chọn Role
+  createUser: async (userData) => {
+    try {
+      const payload = {
+        email: userData.email,
+        password: userData.password,
+        accountName: userData.name || userData.fullName, // UI dùng 'name', API cần 'accountName'
+        role: userData.role === "admin" ? "ADMIN" : "USER", // Map role từ UI sang API
+      };
+      // Admin dùng chung API register nhưng có Token quyền Admin
+      return await axiosClient.post("/auth/register", payload);
+    } catch (error) {
+      console.error("Lỗi Create User (Admin):", error);
+      throw error;
+    }
+  },
+
   // 1.3 Lấy tất cả tài khoản
   getAllUsers: async () => {
     try {

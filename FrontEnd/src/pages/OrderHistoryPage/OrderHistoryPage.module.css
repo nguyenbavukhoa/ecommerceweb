@@ -333,3 +333,25 @@
   height: 100vh;
   overflow: hidden;
 }
+
+.in_progress {
+  color: #1976d2;
+  background: #e3f2fd;
+}
+.ready_for_delivery {
+  color: #ed6c02;
+  background: #fff3e0;
+}
+.out_for_delivery {
+  color: #0288d1;
+  background: #e1f5fe;
+}
+.delivered {
+  color: #2e7d32;
+  background: #e8f5e9;
+} /* Giống completed */
+.rejected,
+.failed {
+  color: #d32f2f;
+  background: #ffebee;
+} /* Giống cancelled */
