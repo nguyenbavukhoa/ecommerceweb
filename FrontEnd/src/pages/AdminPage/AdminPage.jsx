@@ -14,7 +14,7 @@ import Orders from "./sections/Orders/Orders";
 import DroneMap from "./sections/DroneMap/DroneMap";
 import StoreSetting from "./sections/StoreSetting/StoreSetting";
 import Statistics from "./sections/Statistics/Statistics";
-
+import StoreWallet from "./sections/StoreWallet/StoreWallet";
 import styles from "./AdminPage.module.css";
 import "./admin-global.css";
 
@@ -60,8 +60,8 @@ const AdminPage = () => {
     }
 
     switch (activeTab) {
-      case "Dashboard":
-        return <Dashboard storeId={currentStoreId} />;
+      // case "Dashboard":
+      //   return <Dashboard storeId={currentStoreId} />;
       case "Products":
         return <Products storeId={currentStoreId} />;
       case "Customers":
@@ -72,9 +72,10 @@ const AdminPage = () => {
         return <StoreSetting storeId={currentStoreId} />;
       case "Statistics":
         return <Statistics storeId={currentStoreId} />;
-      // Lưu ý: Không render DroneMap ở đây nữa
       case "DroneMap":
-        return null;
+        return null; // DroneMap được xử lý riêng bên ngoài
+      case "StoreWallet":
+        return <StoreWallet />;
       default:
         return <Dashboard storeId={currentStoreId} />;
     }

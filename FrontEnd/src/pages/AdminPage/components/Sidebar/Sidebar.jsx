@@ -9,6 +9,7 @@ const sidebarItems = [
   { key: "Orders", icon: "fa-light fa-basket-shopping", label: "Đơn hàng" },
   { key: "DroneMap", icon: "fa-light fa-drone", label: "Bản đồ giao hàng" },
   { key: "StoreSetting", icon: "fa-light fa-store", label: "Cài đặt cửa hàng" },
+  { key: "StoreWallet", icon: "fa-light fa-wallet", label: "Ví doanh thu" },
 ];
 
 const Sidebar = ({ isOpen, activeTab, onTabClick, userName, onLogout }) => {
