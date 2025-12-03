@@ -65,22 +65,77 @@ const orderService = {
   },
 
   // 2. LẤY LỊCH SỬ ĐƠN HÀNG (Sửa theo API Doc: GET /orders/all)
+  // getMyOrders: async () => {
+  //   try {
+  //     console.log("📡 [OrderService] Calling GET /orders/all");
+  //     const response = await axiosClient.get("/orders/all");
+
+  //     // Cấu trúc Response Doc: { success: true, data: { content: [], ... } }
+  //     // axiosClient thường trả về data gốc
+  //     const data = response.data || response;
+
+  //     // Lấy mảng content bên trong
+  //     if (data && data.content) {
+  //       return data.content;
+  //     }
+  //     return [];
+  //   } catch (error) {
+  //     console.error("❌ [OrderService] Get History Failed:", error);
+  //     return [];
+  //   }
+  // },
+  // 2. LẤY LỊCH SỬ ĐƠN HÀNG (ĐÃ SỬA: LẤY TẤT CẢ CÁC TRANG)
   getMyOrders: async () => {
+    let allOrders = [];
+    let currentPage = 1; // Backend tính page từ 1
+    let totalPages = 1;
+
+    console.log("🚀 [OrderService] Bắt đầu lấy toàn bộ lịch sử đơn hàng...");
+
     try {
-      console.log("📡 [OrderService] Calling GET /orders/all");
-      const response = await axiosClient.get("/orders/all");
+      do {
+        // Gọi API lấy từng trang (size=20 để lấy nhanh hơn)
+        const response = await axiosClient.get("/orders/all", {
+          params: { page: currentPage, size: 20 },
+        });
 
-      // Cấu trúc Response Doc: { success: true, data: { content: [], ... } }
-      // axiosClient thường trả về data gốc
-      const data = response.data || response;
+        // Xử lý cấu trúc trả về
+        let rootData = response.data || response;
+        let fetchedContent = [];
+        let fetchedTotalPages = 0;
 
-      // Lấy mảng content bên trong
-      if (data && data.content) {
-        return data.content;
-      }
-      return [];
+        // Case 1: { success: true, data: { content: [], totalPages: ... } }
+        if (rootData.data && rootData.data.content) {
+          fetchedContent = rootData.data.content;
+          fetchedTotalPages = rootData.data.totalPages || 0;
+        }
+        // Case 2: { content: [], totalPages: ... }
+        else if (rootData.content) {
+          fetchedContent = rootData.content;
+          fetchedTotalPages = rootData.totalPages || 0;
+        }
+        // Case 3: Trả về mảng trực tiếp (không phân trang)
+        else if (Array.isArray(rootData)) {
+          return rootData; // Trả về luôn
+        }
+
+        // Gộp đơn hàng vào danh sách tổng
+        if (fetchedContent.length > 0) {
+          allOrders = [...allOrders, ...fetchedContent];
+          totalPages = fetchedTotalPages;
+        } else {
+          break; // Hết dữ liệu
+        }
+
+        currentPage++;
+      } while (currentPage <= totalPages); // Lặp đến khi hết trang
+
+      console.log(
+        `✅ [OrderService] Đã tải xong ${allOrders.length} đơn hàng của User.`
+      );
+      return allOrders;
     } catch (error) {
-      console.error("❌ [OrderService] Get History Failed:", error);
+      console.error("❌ [OrderService] Lỗi lấy lịch sử đơn:", error);
       return [];
     }
   },
