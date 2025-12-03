@@ -53,12 +53,14 @@ public class DroneTrackingServiceImpl implements DroneTrackingService {
 
         double progress = (double) currentStep / totalSteps;
 
-        double currentLat = restaurantLat + (customerLat - restaurantLat) * progress;
-        double currentLng = restaurantLng + (customerLng - restaurantLng) * progress;
+        double easedProgress = Math.pow(progress, 1.8);
+
+        double currentLat = restaurantLat + (customerLat - restaurantLat) * easedProgress;
+        double currentLng = restaurantLng + (customerLng - restaurantLng) * easedProgress;
 
         delivery.setCurrentLat(currentLat);
         delivery.setCurrentLng(currentLng);
-        delivery.setProgressPct(progress * 100);
+        delivery.setProgressPct(easedProgress * 100);
 
         deliveryRepository.save(delivery);
         log.info("Updating delivery {} step {}/{} - progress: {}%, currentLat: {}, currentLng: {}",
