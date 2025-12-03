@@ -14,11 +14,9 @@ const storeService = {
     }
   },
 
-  // 2. LẤY CHI TIẾT 1 CỬA HÀNG (Hiện tại lọc từ list, chờ API Detail)
+  // 2. LẤY CHI TIẾT 1 CỬA HÀNG (Tạm thời lọc từ list vì chưa có API Detail riêng)
   getOne: async (id) => {
     try {
-      // Nếu Backend có API: GET /restaurants/{id} thì gọi ở đây
-      // Tạm thời dùng getAll() rồi find()
       const allStores = await storeService.getAll();
       return allStores.find((s) => s.id.toString() === id.toString());
     } catch (error) {
@@ -29,7 +27,7 @@ const storeService = {
   // 3. TẠO MỚI NHÀ HÀNG
   create: async (storeData) => {
     // API: POST /restaurants
-    // Body: { name, code, address, phone, description, openTime, closeTime, active: true }
+    // Body mẫu: { name, code, lat, lng, phone, description, openTime, closeTime, active }
     return await axiosClient.post("/restaurants", storeData);
   },
 
@@ -39,11 +37,10 @@ const storeService = {
     return await axiosClient.delete(`/restaurants/${id}`);
   },
 
-  // 5. CẬP NHẬT NHÀ HÀNG (Dành cho chức năng duyệt/khóa/sửa)
+  // 5. CẬP NHẬT NHÀ HÀNG
+  // API chưa document rõ, giữ nguyên logic PUT hoặc thông báo chưa hỗ trợ
   update: async (id, data) => {
-    // API chưa document rõ method update, thường là PUT /restaurants/{id}
-    // Nếu chưa có, ta dùng tạm logic update status nếu backend hỗ trợ
-    // Ví dụ: PUT /restaurants/{id}
+    // Tạm thời dùng PUT /restaurants/{id} nếu backend hỗ trợ
     return await axiosClient.put(`/restaurants/${id}`, data);
   },
 };

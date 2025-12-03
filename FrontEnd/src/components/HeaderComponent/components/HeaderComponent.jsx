@@ -32,13 +32,28 @@ export default function HeaderComponent() {
   const navigate = useNavigate();
 
   const { filters, setFilters } = useFilters();
-  const { data: stores = [] } = useStores();
+
+  const { data: stores = [], isLoading: isLoadingStores } = useStores();
 
   const [searchTerm, setSearchTerm] = useState(filters.name);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // Thêm state cho dropdown user
+
+  useEffect(() => {
+    if (!isLoadingStores && stores.length > 0) {
+      const currentStoreExists = stores.find(
+        (s) => s.id.toString() === filters.storeId?.toString()
+      );
+
+      // Nếu chưa chọn hoặc chọn sai ID -> Chọn cái đầu tiên
+      if (!filters.storeId || !currentStoreExists) {
+        console.log("🔄 Auto-selecting first store:", stores[0].id);
+        setFilters({ storeId: stores[0].id });
+      }
+    }
+  }, [stores, isLoadingStores, filters.storeId, setFilters]);
 
   // --- LOGIC SEARCH & FILTER ---
   useEffect(() => {
