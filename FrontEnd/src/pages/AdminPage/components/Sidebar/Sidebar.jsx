@@ -5,11 +5,11 @@ const sidebarItems = [
   { key: "Statistics", icon: "fa-light fa-chart-simple", label: "Thống kê" },
   // { key: "Dashboard", icon: "fa-light fa-house", label: "Trang tổng quan" },
   { key: "Products", icon: "fa-light fa-pot-food", label: "Sản phẩm" },
-  { key: "Customers", icon: "fa-light fa-users", label: "Khách hàng" },
+  // { key: "Customers", icon: "fa-light fa-users", label: "Khách hàng" },
   { key: "Orders", icon: "fa-light fa-basket-shopping", label: "Đơn hàng" },
   { key: "DroneMap", icon: "fa-light fa-drone", label: "Bản đồ giao hàng" },
   { key: "StoreSetting", icon: "fa-light fa-store", label: "Cài đặt cửa hàng" },
-  { key: "StoreWallet", icon: "fa-light fa-wallet", label: "Ví doanh thu" },
+  // { key: "StoreWallet", icon: "fa-light fa-wallet", label: "Ví doanh thu" },
 ];
 
 const Sidebar = ({ isOpen, activeTab, onTabClick, userName, onLogout }) => {

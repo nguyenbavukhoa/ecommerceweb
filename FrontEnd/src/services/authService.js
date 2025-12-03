@@ -89,6 +89,18 @@ const authService = {
     }
   },
 
+  // 5. [MỚI] KHÓA TÀI KHOẢN
+  lockAccount: async (id) => {
+    // API: PUT /auth/{id}/lock
+    return await axiosClient.put(`/auth/${id}/lock`);
+  },
+
+  // 6. [MỚI] MỞ KHÓA TÀI KHOẢN
+  unlockAccount: async (id) => {
+    // API: PUT /auth/{id}/unlock
+    return await axiosClient.put(`/auth/${id}/unlock`);
+  },
+
   // 1.5 Xóa Tài khoản (Admin)
   deleteAccount: async (id) => {
     try {

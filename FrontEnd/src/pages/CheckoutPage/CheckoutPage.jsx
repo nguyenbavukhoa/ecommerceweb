@@ -12,7 +12,7 @@ import { db } from "../../data/mockData";
 import VnpayLogo from "../../assets/icon/vnpay_logo.svg";
 
 // 1. Import useFilters để lấy storeId đang chọn
-import { useFilters } from "../../context/FilterProvider";
+import { useFilters, useStores } from "../../context/FilterProvider";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const CheckoutPage = () => {
 
   // 2. Lấy Store ID hiện tại từ Context
   const { filters } = useFilters();
-  const currentStoreId = filters.storeId;
+  const { data: stores = [] } = useStores();
 
   // Lấy handlePlaceOrder từ hook
   const {
@@ -43,6 +43,27 @@ const CheckoutPage = () => {
 
   const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [isVnPayModalOpen, setIsVnPayModalOpen] = useState(false);
+
+  // [LOGIC QUAN TRỌNG] Xác định Store ID chắc chắn nhất
+  const getTargetStoreId = () => {
+    // 1. Ưu tiên: Lấy từ món hàng trong giỏ (Chính xác nhất nếu giỏ hàng có lưu storeId)
+    if (selectedItems.length > 0 && selectedItems[0].storeId) {
+      return selectedItems[0].storeId;
+    }
+
+    // 2. Thứ hai: Lấy từ filter hiện tại (nếu user chọn trên header)
+    if (filters.storeId) {
+      return filters.storeId;
+    }
+
+    // 3. [MỚI] Cuối cùng: Lấy cửa hàng đầu tiên trong danh sách (Fallback)
+    // Giống logic Header: Nếu chưa chọn gì thì mặc định quán đầu tiên
+    if (stores.length > 0) {
+      return stores[0].id;
+    }
+
+    return null;
+  };
 
   // [ĐÃ XÓA] Các hàm getRandomLocation, createOrderData (Logic cũ Mock)
 
@@ -65,24 +86,30 @@ const CheckoutPage = () => {
       return;
     }
 
-    // deliveryInfo ở đây chính là object địa chỉ lấy từ DeliveryAddress
-    // Nó đã chứa id (userInfoId). Ta truyền thẳng nó vào hook.
+    const targetStoreId = getTargetStoreId();
+
+    if (!targetStoreId) {
+      showToast({
+        title: "Lỗi",
+        message: "Không xác định được cửa hàng. Vui lòng thử lại.",
+        type: "error",
+      });
+      return;
+    }
+
     if (state.paymentMethod === "VNPAY") {
       setIsVnPayModalOpen(true);
     } else {
-      // Gọi API thật thông qua hook
-      await handlePlaceOrder(deliveryInfo);
+      // Gọi API tạo đơn
+      await handlePlaceOrder(deliveryInfo, targetStoreId, false);
     }
   };
 
   const processOrderSuccess = async () => {
-    // Đóng modal VNPAY
     setIsVnPayModalOpen(false);
-
-    // Gọi API thật thông qua hook (Logic thanh toán thành công)
-    // Lưu ý: handlePlaceOrder trong hook cần xử lý tham số thứ 2 là isSuccessPayment (nếu cần)
-    // Ở đây ta gọi đơn giản để tạo đơn
-    await handlePlaceOrder(deliveryInfo);
+    const targetStoreId = getTargetStoreId();
+    // Gọi API tạo đơn (đã thanh toán)
+    await handlePlaceOrder(deliveryInfo, targetStoreId, true);
   };
 
   return (

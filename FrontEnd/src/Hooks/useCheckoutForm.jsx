@@ -37,7 +37,7 @@ export function useCheckoutForm() {
 
   // Hàm xử lý đặt hàng
   // finalDeliveryInfo: Chính là object `selectedAddress` từ CheckoutPage truyền vào
-  const handlePlaceOrder = async (finalDeliveryInfo) => {
+  const handlePlaceOrder = async (finalDeliveryInfo, storeId) => {
     setLoading(true);
 
     const selectedItems = cartItems.filter((i) => i.selected);
@@ -72,6 +72,7 @@ export function useCheckoutForm() {
         userInfoId: userInfoId, // Truyền thẳng ID
         // Truyền kèm thông tin chi tiết để phòng trường hợp Service cần tạo mới (fallback)
         deliveryInfo: finalDeliveryInfo,
+        restaurantId: storeId,
       };
 
       // Gọi Service

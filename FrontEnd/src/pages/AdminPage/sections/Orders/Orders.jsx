@@ -9,24 +9,31 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAdminOrders, useFilters } from "../../../../context/FilterProvider";
 import orderService from "../../../../services/orderService";
 
-// [CẬP NHẬT] Thêm IN_PROGRESS vào danh sách
+// [CẬP NHẬT] Danh sách Status chuẩn theo Enum Backend
 const ORDER_STATUSES = [
   { value: "PLACED", label: "Mới đặt" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
-  { value: "IN_PROGRESS", label: "Đang xử lý" }, // Khớp với JSON API
-  { value: "SHIPPING", label: "Đang giao" },
-  { value: "COMPLETED", label: "Hoàn thành" },
+  { value: "IN_PROGRESS", label: "Đang chế biến" },
+  { value: "READY_FOR_DELIVERY", label: "Chờ giao hàng" },
+  { value: "OUT_FOR_DELIVERY", label: "Đang giao hàng" },
+  { value: "DELIVERED", label: "Đã giao (Hoàn thành)" }, // Thay COMPLETED
   { value: "CANCELLED", label: "Đã hủy" },
+  { value: "REJECTED", label: "Đã từ chối" },
+  { value: "FAILED", label: "Thất bại" },
 ];
 
-// Luồng trạng thái logic
+// Luồng trạng thái xuôi dòng (Happy Path)
 const STATUS_FLOW = [
   "PLACED",
   "CONFIRMED",
   "IN_PROGRESS",
-  "SHIPPING",
-  "COMPLETED",
+  "READY_FOR_DELIVERY",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
 ];
+
+// Các trạng thái kết thúc (Terminal States) - không thể chuyển đi đâu được nữa
+const TERMINAL_STATUSES = ["DELIVERED", "CANCELLED", "REJECTED", "FAILED"];
 
 const Orders = ({ storeId }) => {
   const { showToast } = useToast();
@@ -41,7 +48,6 @@ const Orders = ({ storeId }) => {
     storeId: currentStoreId,
   });
 
-  // Lấy dữ liệu từ hook
   const { orders = [], totalPages = 0 } = data || {};
 
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -50,12 +56,9 @@ const Orders = ({ storeId }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   // --- CLIENT SIDE FILTERING ---
-  // Lọc dữ liệu hiển thị dựa trên orders lấy về từ API
   const displayedOrders = orders.filter((order) => {
-    // Lọc theo Status
     if (statusFilter !== "ALL" && order.orderStatus !== statusFilter)
       return false;
-    // Lọc theo Mã đơn
     if (searchTerm && !order.id.toString().includes(searchTerm)) return false;
     return true;
   });
@@ -69,17 +72,22 @@ const Orders = ({ storeId }) => {
     return () => clearTimeout(timer);
   }, [searchTerm, filters.name, setFilters]);
 
-  // Logic chặn chuyển trạng thái ngược
+  // Logic chặn chuyển trạng thái
   const isStatusDisabled = (currentStatus, targetOptionValue) => {
-    if (currentStatus === targetOptionValue) return true;
-    if (currentStatus === "COMPLETED" || currentStatus === "CANCELLED")
-      return true;
-    if (targetOptionValue === "CANCELLED") return false;
+    // Nếu đang ở trạng thái cuối cùng -> Khóa hết
+    if (TERMINAL_STATUSES.includes(currentStatus)) return true;
 
+    // Luôn cho phép chuyển sang các trạng thái hủy/từ chối nếu chưa xong
+    if (["CANCELLED", "REJECTED", "FAILED"].includes(targetOptionValue))
+      return false;
+
+    // Kiểm tra luồng xuôi
     const currentIndex = STATUS_FLOW.indexOf(currentStatus);
     const targetIndex = STATUS_FLOW.indexOf(targetOptionValue);
 
     if (currentIndex === -1 || targetIndex === -1) return true;
+
+    // Chỉ cho phép đi xuôi (target > current) hoặc giữ nguyên
     return targetIndex <= currentIndex;
   };
 
@@ -114,7 +122,7 @@ const Orders = ({ storeId }) => {
     setIsModalOpen(true);
   };
 
-  // [CẬP NHẬT] CSS Class cho trạng thái mới
+  // [CẬP NHẬT] Map màu sắc cho Status Enum mới
   const getStatusClass = (status) => {
     switch (status) {
       case "PLACED":
@@ -122,13 +130,19 @@ const Orders = ({ storeId }) => {
       case "CONFIRMED":
         return styles.confirmed;
       case "IN_PROGRESS":
-        return styles.shipping; // Dùng chung style với shipping (màu xanh dương)
-      case "SHIPPING":
-        return styles.shipping;
-      case "COMPLETED":
-        return styles.completed;
+        return styles.shipping; // Xanh dương nhạt
+      case "READY_FOR_DELIVERY":
+        return styles.shipping; // Xanh dương
+      case "OUT_FOR_DELIVERY":
+        return styles.shipping; // Xanh dương đậm
+      case "DELIVERED":
+        return styles.completed; // Xanh lá (Thành công)
       case "CANCELLED":
-        return styles.cancelled;
+        return styles.cancelled; // Đỏ
+      case "REJECTED":
+        return styles.cancelled; // Đỏ
+      case "FAILED":
+        return styles.cancelled; // Đỏ
       default:
         return "";
     }
@@ -237,10 +251,10 @@ const Orders = ({ storeId }) => {
                             handleStatusChange(order.id, e.target.value)
                           }
                           className={styles.statusSelect}
-                          disabled={
-                            order.orderStatus === "COMPLETED" ||
-                            order.orderStatus === "CANCELLED"
-                          }
+                          // Disable nếu đã ở trạng thái cuối cùng
+                          disabled={TERMINAL_STATUSES.includes(
+                            order.orderStatus
+                          )}
                         >
                           {ORDER_STATUSES.map((st) => (
                             <option
@@ -255,10 +269,10 @@ const Orders = ({ storeId }) => {
                             </option>
                           ))}
                         </select>
-                        {!(
-                          order.orderStatus === "COMPLETED" ||
-                          order.orderStatus === "CANCELLED"
-                        ) && <i className="fa-solid fa-caret-down"></i>}
+                        {/* Ẩn icon dropdown nếu đã disable */}
+                        {!TERMINAL_STATUSES.includes(order.orderStatus) && (
+                          <i className="fa-solid fa-caret-down"></i>
+                        )}
                       </div>
                     </td>
 
@@ -286,10 +300,10 @@ const Orders = ({ storeId }) => {
           </table>
         </div>
 
-        {/* PAGINATION */}
         {totalPages > 1 && (
           <div className={styles.pageNav}>
             <ul className={styles.pageNavList}>
+              {/* Logic phân trang giữ nguyên */}
               <li
                 className={`${styles.pageNavItem} ${
                   filters.page === 1 ? styles.disabled : ""

@@ -99,7 +99,8 @@ const AdminPage = () => {
       case "StoreWallet":
         return <StoreWallet storeId={currentStoreId} />;
       default:
-        return <Dashboard storeId={currentStoreId} />;
+        // return <Dashboard storeId={currentStoreId} />;
+        return <Products storeId={currentStoreId} />;
     }
   };
 

@@ -39,12 +39,22 @@ const orderService = {
         };
       });
 
+      // [QUAN TRỌNG] Thêm restaurantId vào Payload
+      if (!orderData.restaurantId) {
+        throw new Error(
+          "Lỗi hệ thống: Thiếu thông tin Store ID (restaurantId)."
+        );
+      }
+
       const finalPayload = {
         orderStatus: "PLACED",
         listOrderItems: listOrderItems,
         userInfoId: userInfoId.toString(),
         note: orderData.note || "",
+        restaurantId: orderData.restaurantId,
       };
+
+      console.log("📦 [OrderService] Payload:", finalPayload);
 
       const response = await axiosClient.post("/orders/create", finalPayload);
       return response.data || response;

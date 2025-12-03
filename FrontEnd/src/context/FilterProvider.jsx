@@ -11,7 +11,7 @@ const FilterContext = createContext();
 
 // Khởi tạo filter mặc định (quan trọng: có storeId)
 const initialState = {
-  storeId: "1", // Mặc định Store 1 cho User
+  storeId: "null", // Mặc định Store 1 cho User
   name: "",
   status: "ALL",
   category: "all",
@@ -36,6 +36,7 @@ export const FilterProvider = ({ children }) => {
       );
       // Nếu đổi Store -> Reset category và name về mặc định để tránh lỗi logic
       if (newFilterValues.storeId && newFilterValues.storeId !== prev.storeId) {
+        localStorage.setItem("currentStoreId", newFilterValues.storeId);
         updated.category = "all";
         updated.name = "";
         updated.page = 1;
@@ -64,19 +65,14 @@ export function useServerUsers() {
   return useQuery({
     queryKey: ["serverUsers"],
     queryFn: async () => {
-      // Gọi API lấy danh sách
       const users = await authService.getAllUsers();
-
-      // Map dữ liệu để khớp với UI (nếu cần)
       return users.map((u) => ({
         ...u,
-        // Đảm bảo active luôn là boolean để checkbox/toggle hoạt động đúng
-        active: u.active === true || String(u.active) === "true",
-        // Map accountName sang fullName nếu UI cần dùng fullName
+        active: u.active === true || String(u.active) === "true", // Chuẩn hóa boolean
         fullName: u.accountName || u.fullName,
       }));
     },
-    staleTime: 5000, // Cache 5s
+    staleTime: 5000,
   });
 }
 
@@ -128,9 +124,19 @@ export function useSaveUser() {
 
   return useMutation({
     mutationFn: async (userData) => {
-      await new Promise((r) => setTimeout(r, 500));
-      const isEdit = !!userData.id;
-      return isEdit ? db.users.update(userData) : db.users.create(userData);
+      // await new Promise((r) => setTimeout(r, 500));
+      // const isEdit = !!userData.id;
+      // return isEdit ? db.users.update(userData) : db.users.create(userData);
+      // Trường hợp 1: Khóa/Mở khóa
+      if (userData.active !== undefined) {
+        if (userData.active) {
+          // Muốn active = true -> Gọi Unlock
+          return authService.unlockAccount(userData.id);
+        } else {
+          // Muốn active = false -> Gọi Lock
+          return authService.lockAccount(userData.id);
+        }
+      }
     },
     onSuccess: (updatedUser, variables) => {
       queryClient.invalidateQueries(["customers"]);
@@ -395,11 +401,11 @@ export function useCreateUser() {
 
   return useMutation({
     mutationFn: async (newUserData) => {
-      // API Register yêu cầu: { email, password, accountName, role }
+      // [FIX] Map fullName từ Form sang accountName của API
       const payload = {
         email: newUserData.email,
         password: newUserData.password,
-        accountName: newUserData.fullName, // Map fullName UI -> accountName API
+        accountName: newUserData.fullName,
         role: newUserData.role,
       };
       return authService.register(payload);
@@ -413,8 +419,7 @@ export function useCreateUser() {
       });
     },
     onError: (err) => {
-      const msg =
-        err.response?.data?.message || "Tạo thất bại. Email có thể đã tồn tại.";
+      const msg = err.response?.data?.message || "Tạo thất bại.";
       showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
@@ -427,27 +432,40 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: async (userData) => {
-      // userData có thể chứa: { id, fullName, role, active }
+      // userData: { id, active (boolean), ... }
 
-      const payload = {};
-      if (userData.fullName) payload.accountName = userData.fullName;
-      if (userData.role) payload.role = userData.role;
-      // Nếu có gửi active, map vào payload
-      if (userData.active !== undefined) payload.active = userData.active;
+      // [FIX] Kiểm tra nếu là hành động đổi trạng thái (active)
+      if (userData.active !== undefined) {
+        if (userData.active) {
+          // Muốn active = true -> Gọi Unlock
+          return authService.unlockAccount(userData.id);
+        } else {
+          // Muốn active = false -> Gọi Lock
+          return authService.lockAccount(userData.id);
+        }
+      }
 
-      // Gọi API Update Account
-      return authService.updateAccount(userData.id, payload);
+      // Nếu update thông tin khác (hiện chưa có API, gọi placeholder)
+      return authService.updateAccount(userData.id, userData);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries(["serverUsers"]);
-      showToast({
-        title: "Thành công",
-        message: "Cập nhật tài khoản thành công!",
-        type: "success",
-      });
+
+      if (variables.active !== undefined) {
+        const msg = variables.active
+          ? "Đã mở khóa tài khoản!"
+          : "Đã khóa tài khoản!";
+        showToast({ title: "Thành công", message: msg, type: "success" });
+      } else {
+        showToast({
+          title: "Thành công",
+          message: "Cập nhật thành công!",
+          type: "success",
+        });
+      }
     },
     onError: (err) => {
-      const msg = err.response?.data?.message || "Cập nhật thất bại.";
+      const msg = err.response?.data?.message || "Thao tác thất bại.";
       showToast({ title: "Lỗi", message: msg, type: "error" });
     },
   });
