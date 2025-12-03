@@ -81,4 +81,9 @@ public class DroneServiceImpl implements DroneService {
         return droneMapper.convertToDTO(savedDrone);
     }
 
+    @Override
+    public List<DroneDTO> getAllDrones() {
+        return droneMapper.convertListEntityToListDTO(droneRepository.findAll());
+    }
+
 }

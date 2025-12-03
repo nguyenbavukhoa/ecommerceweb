@@ -19,4 +19,7 @@ public interface DroneService {
     List<DroneDTO> findCandidateDrones(double requiredRangeKm, Integer restaurantId);
 
     DroneDTO createDrone(DroneCreateDTO droneCreateDTO);
+
+    List<DroneDTO> getAllDrones();
+
 }

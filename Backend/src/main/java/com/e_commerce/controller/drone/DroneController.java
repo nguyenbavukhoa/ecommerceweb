@@ -58,4 +58,12 @@ public class DroneController {
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(true, "Drone created successfully", createdDrone, null, request.getRequestURI()));
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<DroneDTO>>> getAllDrones(HttpServletRequest request) {
+        List<DroneDTO> drones = droneService.getAllDrones();
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "All drones fetched successfully", drones, null, request.getRequestURI())
+        );
+    }
 }
