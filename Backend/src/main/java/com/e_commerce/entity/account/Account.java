@@ -41,7 +41,7 @@ public class Account extends Timestamped implements UserDetails {
     private String password;
 
     @Column(name = "status", nullable = false)
-    private Boolean status = false;
+    private Boolean status = true;
 
     @Column(name = "active", nullable = false)
     private Boolean active = true;

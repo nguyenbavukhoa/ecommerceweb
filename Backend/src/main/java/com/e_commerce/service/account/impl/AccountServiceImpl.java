@@ -146,7 +146,7 @@ public class AccountServiceImpl implements AccountService {
         if(registrationForm.getRole() == AccountRole.STAFF || registrationForm.getRole() == AccountRole.ADMIN) {
             account.setStatus(true);
         }else {
-            account.setStatus(false);
+            account.setStatus(true);
         }
 
         Account savedAccount = accountRepository.save(account);
