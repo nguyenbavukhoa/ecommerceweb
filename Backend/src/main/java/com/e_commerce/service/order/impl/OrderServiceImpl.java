@@ -103,6 +103,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItems);
 
         order = ordersRepository.save(order);
+        cartItemsService.deleteAllCartItemsByAccountId();
         return ordersMapper.convertEntityToDTO(order);
     }
 
