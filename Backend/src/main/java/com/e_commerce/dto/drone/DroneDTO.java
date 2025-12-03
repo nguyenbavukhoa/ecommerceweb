@@ -27,4 +27,5 @@ public class DroneDTO {
 
     private Double avgSpeedKmh = 30.0;
 
+    private Integer restaurantId;
 }

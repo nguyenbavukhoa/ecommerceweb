@@ -18,6 +18,7 @@ public class DroneMapper {
                 .maxRangeKm(drone.getMaxRangeKm())
                 .status(drone.getStatus())
                 .avgSpeedKmh(drone.getAvgSpeedKmh())
+                .restaurantId(drone.getRestaurant() != null ? drone.getRestaurant().getId() : null)
                 .build();
     }
 
