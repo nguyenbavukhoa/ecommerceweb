@@ -53,61 +53,28 @@ const SEED_STORES = [
   },
 ];
 
-// [CẬP NHẬT] 4. DANH SÁCH DRONE (THÊM TỌA ĐỘ)
+// [CẬP NHẬT] 4. DANH SÁCH DRONE (LẤY TỪ droneServerMock)
 const HUB_LOCATION = [10.762622, 106.660172]; // Trạm sạc trung tâm (Q10)
 
-const SEED_DRONES = [
-  {
-    id: "DR-001",
-    name: "Drone Alpha",
-    status: "ready", // ready, moving_to_store, delivering, returning, charging, maintenance
-    battery: 100,
-    currentLat: HUB_LOCATION[0],
-    currentLng: HUB_LOCATION[1],
-    currentOrderId: null,
-    lastUpdate: 0,
-  },
-  {
-    id: "DR-002",
-    name: "Drone Beta",
-    status: "ready",
-    battery: 92,
-    currentLat: HUB_LOCATION[0],
-    currentLng: HUB_LOCATION[1],
-    currentOrderId: null,
-    lastUpdate: 0,
-  },
-  {
-    id: "DR-003",
-    name: "Drone Gamma",
-    status: "charging",
-    battery: 45,
-    currentLat: HUB_LOCATION[0],
-    currentLng: HUB_LOCATION[1],
-    currentOrderId: null,
-    lastUpdate: 0,
-  },
-  {
-    id: "DR-004",
-    name: "Drone Delta",
-    status: "maintenance",
-    battery: 10,
-    currentLat: HUB_LOCATION[0],
-    currentLng: HUB_LOCATION[1],
-    currentOrderId: null,
-    lastUpdate: 0,
-  },
-  {
-    id: "DR-005",
-    name: "Drone Epsilon",
-    status: "ready",
-    battery: 88,
-    currentLat: HUB_LOCATION[0],
-    currentLng: HUB_LOCATION[1],
-    currentOrderId: null,
-    lastUpdate: 0,
-  },
-];
+// Lấy dữ liệu drone từ file mock riêng cho phần Drones
+import { DRONE_FLEET_MOCK } from "../pages/ServerPage/sections/Drones/droneServerMock";
+
+// Map dữ liệu từ DRONE_FLEET_MOCK về cấu trúc SEED_DRONES ứng với engine
+const SEED_DRONES = (DRONE_FLEET_MOCK || []).map((d) => ({
+  id: d.id,
+  name: d.name,
+  status: d.status || "ready",
+  battery: d.battery != null ? d.battery : 100,
+  // nếu drone có currentOrder.customerLocation thì dùng làm vị trí, ngược lại lấy hub
+  currentLat:
+    (d.currentOrder && d.currentOrder.customerLocation && d.currentOrder.customerLocation[0]) || HUB_LOCATION[0],
+  currentLng:
+    (d.currentOrder && d.currentOrder.customerLocation && d.currentOrder.customerLocation[1]) || HUB_LOCATION[1],
+  currentOrderId: d.currentOrderId || (d.currentOrder && d.currentOrder.id) || null,
+  lastUpdate: d.lastUpdate || 0,
+  history: d.history || [],
+  totalDeliveries: d.totalDeliveries || 0,
+}));
 
 export const SEED_HUBS = [
   {
@@ -560,6 +527,54 @@ const generateSeedOrders = (count) => {
 // [FIX] Tăng số lượng đơn lên 300
 const SEED_ORDERS = generateSeedOrders(300);
 
+// Thêm đơn giả lập cho Drone DR-001 đang giao (id 9999)
+if (!SEED_ORDERS.find((o) => o.id === 9999)) {
+  SEED_ORDERS.unshift({
+    id: 9999,
+    orderTime: "11:00 20/11/2025",
+    totalPrice: 120000,
+    note: "Giao gấp",
+    orderStatus: "SHIPPING",
+    userId: "USER-001",
+    restaurantId: "RES-01",
+    storeName: "KHK Food Quận 1",
+    orderItems: [],
+    deliveryInfo: {
+      name: "Nguyễn Văn An",
+      phone: "0909123456",
+      address: "123 Lê Lợi, Q.1",
+    },
+    paymentMethod: "CASH",
+    droneId: "DR-001",
+    customerLocation: [10.7635, 106.6615],
+    customerAddress: "123 Lê Lợi, Q.1",
+  });
+}
+
+// Thêm đơn giả lập ORD-221 cho Drone DR-002 đang giao (theo droneServerMock)
+if (!SEED_ORDERS.find((o) => o.id === "ORD-221")) {
+  SEED_ORDERS.unshift({
+    id: "ORD-221",
+    orderTime: "11:00 20/11/2025",
+    totalPrice: 98000,
+    note: "Đơn giao Drone Beta",
+    orderStatus: "SHIPPING",
+    userId: "USER-002",
+    restaurantId: "RES-02",
+    storeName: "KHK Food Thủ Đức",
+    orderItems: [],
+    deliveryInfo: {
+      name: "Nguyễn Văn Bình",
+      phone: "0909000000",
+      address: "Parkson Hùng Vương, Q5",
+    },
+    paymentMethod: "CASH",
+    droneId: "DR-002",
+    customerLocation: [10.757, 106.667],
+    customerAddress: "Parkson Hùng Vương, Q5",
+  });
+}
+
 // ==============================================================================
 // PHẦN 2: DATABASE ENGINE
 // ==============================================================================
@@ -593,12 +608,34 @@ const saveToLS = (key, data) => {
 
 export const initializeDatabase = () => {
   getFromLS(DB_KEYS.PRODUCTS, SEED_PRODUCTS);
-  getFromLS(DB_KEYS.ORDERS, SEED_ORDERS);
+  // Ensure orders are initialized and include our special delivering order (id 9999)
+  const existingOrders = getFromLS(DB_KEYS.ORDERS, SEED_ORDERS);
+  // If the running local DB doesn't have the 9999 order, add it from seed
+  if (!existingOrders.find((o) => o.id === 9999)) {
+    const seeded9999 = SEED_ORDERS.find((o) => o.id === 9999);
+    if (seeded9999) {
+      existingOrders.unshift(seeded9999);
+      saveToLS(DB_KEYS.ORDERS, existingOrders);
+    }
+  }
   getFromLS(DB_KEYS.CATEGORIES, SEED_CATEGORIES);
   getFromLS(DB_KEYS.USERS, SEED_USERS);
   getFromLS(DB_KEYS.STORES, SEED_STORES);
   getFromLS(DB_KEYS.WITHDRAWS, SEED_WITHDRAW_REQUESTS);
-  console.log("⚡ Mock Database initialized!");
+  // Merge/overwrite drone entries so updated seed statuses (e.g. delivering) apply
+  const existingDrones = getFromLS(DB_KEYS.DRONES, SEED_DRONES);
+  const mergedDrones = (SEED_DRONES || []).map((sd) => {
+    const found = (existingDrones || []).find((d) => d.id === sd.id);
+    if (found) {
+      // merge but prefer seed's status/currentOrder/history to ensure UI shows delivering
+      return { ...found, ...sd };
+    }
+    return sd;
+  });
+  // Save merged drones back to LS
+  saveToLS(DB_KEYS.DRONES, mergedDrones);
+
+  console.log("⚡ Mock Database initialized and merged drone/order seeds!");
 };
 
 // --- DATABASE METHODS (Giữ nguyên cấu trúc cũ) ---
@@ -923,12 +960,54 @@ export const db = {
     update: (id, data) => {
       const list = getFromLS(DB_KEYS.DRONES, SEED_DRONES);
       const idx = list.findIndex((d) => d.id === id);
-      if (idx !== -1) {
-        list[idx] = { ...list[idx], ...data };
-        saveToLS(DB_KEYS.DRONES, list);
-        return list[idx];
+      if (idx === -1) return null;
+
+      const prevStatus = list[idx].status;
+      const nextStatus =
+        data && Object.prototype.hasOwnProperty.call(data, "status")
+          ? data.status
+          : prevStatus;
+
+      const updatedDrone = { ...list[idx], ...data };
+
+      // Nếu drone chuyển từ "delivering" -> "ready" thì ghi nhận lịch sử và clear đơn đang giao
+      if (
+        prevStatus === "delivering" &&
+        nextStatus === "ready" &&
+        (list[idx].currentOrderId || list[idx].currentOrder)
+      ) {
+        const orderId = list[idx].currentOrderId || list[idx].currentOrder?.id;
+        let orders = getFromLS(DB_KEYS.ORDERS, SEED_ORDERS);
+        const orderIndex = orders.findIndex((o) => o.id == orderId);
+        const orderPayload =
+          orderIndex !== -1 ? orders[orderIndex] : list[idx].currentOrder;
+
+        if (!updatedDrone.history) updatedDrone.history = [];
+        updatedDrone.history.unshift({
+          id: orderPayload?.id || orderId || `ORD-${Date.now()}`,
+          time: new Date().toLocaleString("vi-VN"),
+          address:
+            orderPayload?.customerAddress ||
+            orderPayload?.deliveryInfo?.address ||
+            orderPayload?.address ||
+            "Chưa xác định",
+          totalPrice: orderPayload?.totalPrice || 0,
+        });
+
+        updatedDrone.currentOrderId = null;
+        if (Object.prototype.hasOwnProperty.call(updatedDrone, "currentOrder")) {
+          updatedDrone.currentOrder = null;
+        }
+
+        if (orderIndex !== -1) {
+          orders[orderIndex].orderStatus = "COMPLETED";
+          saveToLS(DB_KEYS.ORDERS, orders);
+        }
       }
-      return null;
+
+      list[idx] = updatedDrone;
+      saveToLS(DB_KEYS.DRONES, list);
+      return list[idx];
     },
 
     // [LOGIC MỚI] Xử lý toàn bộ việc bay của hệ thống

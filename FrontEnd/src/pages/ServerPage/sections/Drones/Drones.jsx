@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { db, SEED_HUBS } from "../../../../data/mockData";
 import { useToast } from "../../../../context/ToastContext";
 import DroneDetailModal from "../../components/Modals/DroneDetailModal";
+import OrderDetailModal from "../../../../components/OrderDetailModal/OrderDetailModal";
 
 // --- ICONS ---
 const droneIconNormal = new L.Icon({
@@ -67,7 +68,7 @@ const Drones = () => {
     staleTime: 0,
   });
 
-  const { data: orders = [] } = useQuery({
+  const { data: orders = [], refetch: refetchOrders } = useQuery({
     queryKey: ["allOrdersForMap"],
     queryFn: async () => db.orders.getAll(),
     refetchInterval: 2000, // Cập nhật danh sách đơn hàng định kỳ
@@ -84,6 +85,9 @@ const Drones = () => {
   const [selectedDrone, setSelectedDrone] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [trackingDroneId, setTrackingDroneId] = useState(null);
+  // Order modal
+  const [selectedOrderForModal, setSelectedOrderForModal] = useState(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   // Sync dữ liệu lần đầu
   useEffect(() => {
@@ -170,6 +174,37 @@ const Drones = () => {
     ["moving_to_store", "delivering", "returning"].includes(d.status)
   ).length;
 
+  // Danh sách đơn hàng đang được drone giao (fallback sang drone.currentOrder nếu orders DB không có)
+  const deliveringOrders = localDrones
+    .filter((d) => d.status === "delivering" && (d.currentOrderId || d.currentOrder))
+    .map((d) => orders.find((o) => o.id == d.currentOrderId) || d.currentOrder)
+    .filter(Boolean);
+
+  const handleViewOrder = (order) => {
+    setSelectedOrderForModal(order);
+    setIsOrderModalOpen(true);
+  };
+
+  const handleCompleteOrder = (order) => {
+    try {
+      db.orders.updateStatus(order.id, "COMPLETED");
+      if (order.droneId) {
+        // Ghi lịch sử và update trạng thái drone
+        db.drones.logHistory(order.droneId, order);
+        db.drones.update(order.droneId, {
+          status: "returning",
+          currentOrderId: null,
+        });
+      }
+      // Cập nhật UI ngay
+      setLocalDrones(db.drones.getAll());
+      if (typeof refetchOrders === "function") refetchOrders();
+      showToast({ title: "Thành công", message: `Đã hoàn thành đơn #${order.id}`, type: "success" });
+    } catch (err) {
+      showToast({ title: "Lỗi", message: err.message || "Thực hiện thất bại", type: "error" });
+    }
+  };
+
   return (
     <div className={styles.section}>
       <div className={styles.header}>
@@ -219,8 +254,11 @@ const Drones = () => {
 
             {/* VẼ DRONES & ĐƯỜNG BAY 3 MÀU */}
             {localDrones.map((drone) => {
-              // Tìm đơn hàng liên quan
-              const order = orders.find((o) => o.id === drone.currentOrderId);
+              // Tìm đơn hàng liên quan (fallback sang drone.currentOrder nếu orders DB không có)
+              const order =
+                orders.find((o) => o.id === drone.currentOrderId) ||
+                drone.currentOrder ||
+                null;
               const store = order
                 ? allStores.find((s) => s.id === order.restaurantId)
                 : null;
@@ -349,6 +387,39 @@ const Drones = () => {
         {/* LIST */}
         <div className={styles.sidePanel}>
           <h3 className={styles.panelTitle}>Đội bay</h3>
+
+          {/* ĐƠN ĐANG GIAO */}
+          {deliveringOrders.length > 0 && (
+            <div className={styles.deliveringPanel}>
+              <h4>Đơn đang giao</h4>
+              <ul className={styles.deliveringList}>
+                {deliveringOrders.map((o) => (
+                  <li key={o.id} className={styles.deliveringItem}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <strong>#{o.id}</strong> — {o.deliveryInfo?.name || o.customerName || o.customer}
+                        <div style={{ fontSize: 12, color: "#666" }}>{o.deliveryInfo?.address || o.customerAddress || o.address}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          className={styles.secondaryBtn || ""}
+                          onClick={() => handleViewOrder(o)}
+                        >
+                          Xem chi tiết
+                        </button>
+                        <button
+                          className={styles.primaryBtn || ""}
+                          onClick={() => handleCompleteOrder(o)}
+                        >
+                          Hoàn thành
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className={styles.droneList}>
             {localDrones.map((drone) => (
               <div
@@ -377,10 +448,17 @@ const Drones = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         droneId={selectedDrone?.id}
+        droneProp={selectedDrone}
         onSaveSuccess={() => {
+          // Refresh local drones and orders when modal signals a save/complete
           setIsModalOpen(false);
+          setLocalDrones(db.drones.getAll());
+          if (typeof refetchOrders === "function") refetchOrders();
         }}
       />
+      {isOrderModalOpen && selectedOrderForModal && (
+        <OrderDetailModal order={selectedOrderForModal} onClose={() => setIsOrderModalOpen(false)} />
+      )}
     </div>
   );
 };

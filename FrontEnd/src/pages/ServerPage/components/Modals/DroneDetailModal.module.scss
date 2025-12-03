@@ -85,6 +85,67 @@
   }
 }
 
+/* Đơn hàng đang giao (trong modal Drone) */
+.deliveringBlock {
+  margin-top: 16px;
+}
+.deliveringItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #fffaf0;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+}
+.actionBtns {
+  display: flex;
+  gap: 8px;
+}
+.btnPrimarySmall {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btnSecondarySmall {
+  background: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.currentOrderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fieldValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
 /* History Table */
 .tableWrapper {
   max-height: 250px;
@@ -112,4 +173,17 @@
     border-bottom: 1px solid #eee;
     color: #333;
   }
+}
+
+.emptyState {
+  padding: 30px;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.emptyCell {
+  text-align: center;
+  padding: 20px;
+  color: #9ca3af !important;
 }

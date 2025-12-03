@@ -1,169 +1,184 @@
 // src/pages/ServerPage/components/Modals/DroneDetailModal.jsx
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import CommonModal from "../../../AdminPage/components/Modals/CommonModal";
 import styles from "./DroneDetailModal.module.scss";
-import { useToast } from "../../../../context/ToastContext";
-import { db } from "../../../../data/mockData"; // Import DB
-import { useQuery } from "@tanstack/react-query"; // [FIX] Import useQuery
+import { DRONE_FLEET_MOCK } from "../../sections/Drones/droneServerMock";
 
-const DroneDetailModal = ({ isOpen, onClose, droneId, onSaveSuccess }) => {
-  const { showToast } = useToast();
-  const isEdit = !!droneId;
+const STATUS_OPTIONS = [
+  { value: "ready", label: "Sẵn sàng (Ready)" },
+  { value: "maintenance", label: "Bảo trì (Maintenance)" },
+  { value: "charging", label: "Đang sạc (Charging)" },
+  { value: "moving_to_store", label: "Đang đi lấy" },
+  { value: "delivering", label: "Đang giao" },
+  { value: "returning", label: "Đang quay về" },
+];
 
-  // [FIX] Lấy dữ liệu Drone realtime mỗi khi mở modal
-  const { data: drone, refetch } = useQuery({
-    queryKey: ["droneDetail", droneId],
-    queryFn: async () => db.drones.getAll().find((d) => d.id === droneId),
-    enabled: !!droneId && isOpen, // Chỉ fetch khi có ID và Modal mở
-    refetchInterval: 2000, // Tự động refresh để thấy pin/lịch sử cập nhật
-  });
+const DroneDetailModal = ({ isOpen, onClose, droneId }) => {
+  const drone = useMemo(() => {
+    if (!isOpen || !droneId) return null;
+    return DRONE_FLEET_MOCK.find((item) => item.id === droneId) || null;
+  }, [isOpen, droneId]);
 
-  // State form local
-  const [formData, setFormData] = useState({
-    name: "",
-    status: "ready",
-    battery: 100,
-    currentLocation: "Trạm Trung Tâm",
-  });
+  const batteryLevel = Math.min(Math.max(drone?.battery ?? 0, 0), 100);
+  const batteryColor =
+    batteryLevel > 60 ? "#10b981" : batteryLevel > 30 ? "#f59e0b" : "#ef4444";
 
-  // Sync data vào form khi load xong
-  useEffect(() => {
-    if (isOpen && drone) {
-      setFormData({
-        name: drone.name,
-        status: drone.status,
-        battery: drone.battery,
-        currentLocation: drone.currentLocation || "Trạm Trung Tâm",
-      });
-    } else if (isOpen && !isEdit) {
-      setFormData({
-        name: "",
-        status: "ready",
-        battery: 100,
-        currentLocation: "Trạm Trung Tâm",
-      });
-    }
-  }, [isOpen, drone, isEdit]);
-
-  const handleSave = () => {
-    if (!formData.name.trim()) {
-      showToast({
-        title: "Lỗi",
-        message: "Vui lòng nhập tên Drone",
-        type: "warning",
-      });
-      return;
-    }
-
-    if (isEdit) {
-      db.drones.update(droneId, formData);
-      showToast({
-        title: "Thành công",
-        message: "Đã cập nhật",
-        type: "success",
-      });
-    } else {
-      // Logic create (nếu có)
-    }
-
-    if (onSaveSuccess) onSaveSuccess();
-    onClose();
-  };
-
-  if (!drone && isEdit) return null; // Loading...
+  const currentOrder =
+    drone && drone.status?.toLowerCase() === "delivering"
+      ? drone.currentOrder
+      : null;
 
   return (
     <CommonModal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? `THÔNG TIN: ${droneId}` : "THÊM DRONE MỚI"}
+      title={droneId ? `THÔNG TIN: ${droneId}` : "THÊM DRONE MỚI"}
       customWidth="700px"
     >
       <div className={styles.container}>
-        {/* --- PHẦN 1: CÀI ĐẶT --- */}
-        <div className={styles.settingsSection}>
-          <h4 className={styles.sectionTitle}>⚙️ Cài đặt vận hành</h4>
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label>Tên định danh</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Trạng thái</label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-                disabled={
-                  drone?.status === "delivering" ||
-                  drone?.status === "moving_to_store"
-                } // Không sửa khi đang bay
-              >
-                <option value="ready">Sẵn sàng (Ready)</option>
-                <option value="maintenance">Bảo trì (Maintenance)</option>
-                <option value="charging">Đang sạc (Charging)</option>
-                <option value="moving_to_store" disabled>
-                  Đang đi lấy
-                </option>
-                <option value="delivering" disabled>
-                  Đang giao
-                </option>
-              </select>
-            </div>
-          </div>
-          {/* ... Các input khác giữ nguyên ... */}
+        {!drone ? (
+          <div className={styles.emptyState}>Không tìm thấy dữ liệu drone.</div>
+        ) : (
+          <>
+            {/* --- PHẦN 1: THÔNG TIN VẬN HÀNH --- */}
+            <div className={styles.settingsSection}>
+              <h4 className={styles.sectionTitle}>⚙️ Cài đặt vận hành</h4>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Tên định danh</label>
+                  <input type="text" value={drone.name} readOnly />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Trạng thái</label>
+                  <select value={drone.status} disabled>
+                    {STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Vị trí hiện tại</label>
+                  <input
+                    type="text"
+                    value={drone.currentLocation || "Trạm Trung Tâm"}
+                    readOnly
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Tổng lượt giao</label>
+                  <input
+                    type="text"
+                    value={drone.totalDeliveries ?? 0}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className={styles.batteryInfo}>
+                <span>Pin hiện tại:</span>
+                <div className={styles.batteryBar}>
+                  <div
+                    style={{
+                      width: `${batteryLevel}%`,
+                      backgroundColor: batteryColor,
+                    }}
+                  />
+                </div>
+                <strong>{drone.battery}%</strong>
+              </div>
 
-          <button className={styles.btnSave} onClick={handleSave}>
-            Lưu thay đổi
-          </button>
-        </div>
+              {/* --- ĐƠN HÀNG ĐANG GIAO --- */}
+              {currentOrder && (
+                <div className={styles.deliveringBlock}>
+                  <h5 className={styles.sectionTitle}>Đơn hàng đang giao</h5>
+                  <div className={styles.currentOrderGrid}>
+                    <div>
+                      <span className={styles.fieldLabel}>Mã đơn</span>
+                      <p className={styles.fieldValue}>#{currentOrder.id}</p>
+                    </div>
+                    <div>
+                      <span className={styles.fieldLabel}>Thời gian</span>
+                      <p className={styles.fieldValue}>
+                        {currentOrder.time || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className={styles.fieldLabel}>Khách hàng</span>
+                      <p className={styles.fieldValue}>
+                        {currentOrder.customerName || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className={styles.fieldLabel}>Điểm đến</span>
+                      <p className={styles.fieldValue}>
+                        {currentOrder.address || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className={styles.fieldLabel}>Giá trị đơn</span>
+                      <p className={styles.fieldValue}>
+                        {currentOrder.totalPrice
+                          ? `${currentOrder.totalPrice.toLocaleString()}đ`
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <span className={styles.fieldLabel}>Ghi chú</span>
+                      <p className={styles.fieldValue}>
+                        {currentOrder.note || "Đang giao"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-        {/* --- PHẦN 2: LỊCH SỬ (QUAN TRỌNG: SẼ TỰ CẬP NHẬT) --- */}
-        {isEdit && (
-          <div className={styles.historySection}>
-            <h4 className={styles.sectionTitle}>
-              📦 Lịch sử giao hàng ({drone?.history?.length || 0})
-            </h4>
-            <div className={styles.tableWrapper}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Mã đơn</th>
-                    <th>Thời gian</th>
-                    <th>Điểm đến</th>
-                    <th>Giá trị</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {drone?.history && drone.history.length > 0 ? (
-                    drone.history.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <strong>#{item.id}</strong>
-                        </td>
-                        <td>{item.time}</td>
-                        <td>{item.address}</td>
-                        <td>{item.totalPrice?.toLocaleString()}đ</td>
-                      </tr>
-                    ))
-                  ) : (
+            {/* --- PHẦN 2: LỊCH SỬ GIAO HÀNG --- */}
+            <div className={styles.historySection}>
+              <h4 className={styles.sectionTitle}>
+                📦 Lịch sử giao hàng ({drone.history?.length || 0})
+              </h4>
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
                     <tr>
-                      <td colSpan="4" className="text-center">
-                        Chưa có lịch sử bay.
-                      </td>
+                      <th>Mã đơn</th>
+                      <th>Thời gian</th>
+                      <th>Điểm đến</th>
+                      <th>Giá trị</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {drone.history && drone.history.length > 0 ? (
+                      drone.history.map((item, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <strong>#{item.id}</strong>
+                          </td>
+                          <td>{item.time || "-"}</td>
+                          <td>{item.address || "-"}</td>
+                          <td>
+                            {item.totalPrice
+                              ? `${item.totalPrice.toLocaleString()}đ`
+                              : "-"}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className={styles.emptyCell}>
+                          Chưa có lịch sử bay.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </CommonModal>
