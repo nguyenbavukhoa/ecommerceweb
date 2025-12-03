@@ -49,9 +49,9 @@ public class CartItemsServiceImpl implements CartItemsService {
     public CartItemDTO addToCart(CartItemCreateForm cartItemCreateForm) {
 //        log.info("Adding to cart: {}", cartItemCreateForm.getQuantity());
 
-        if(cartItemCreateForm.getQuantity() == null || cartItemCreateForm.getQuantity() <= 0) {
-//            log.info("Invalid quantity: {}", cartItemCreateForm.getQuantity());
-            throw new CustomException(ErrorResponse.CART_ITEM_QUANTITY_INVALID);
+        Integer quantity = cartItemCreateForm.getQuantity();
+        if (quantity == null || quantity <= 0) {
+            quantity = 1; // mặc định 1
         }
 
         Product product = productService.getProductEntityById(cartItemCreateForm.getProductId());
@@ -75,7 +75,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 //        log.info("Existing cart item: {}", existingCartItem);
 
         int existingQuantity = existingCartItem.map(CartItems::getQuantity).orElse(0);
-        int totalRequestedQuantity = existingQuantity + cartItemCreateForm.getQuantity();
+        int totalRequestedQuantity = existingQuantity + quantity;
 
 //        log.info("Existing quantity: {}, New quantity: {}, Total requested quantity: {}",
 //                existingQuantity, cartItemCreateForm.getQuantity(), totalRequestedQuantity);
@@ -106,7 +106,7 @@ public class CartItemsServiceImpl implements CartItemsService {
         cartItems.setId(IdGenerator.getGenerationId());
         cartItems.setCart(carts);
         cartItems.setProduct(product);
-        cartItems.setQuantity(cartItemCreateForm.getQuantity());
+        cartItems.setQuantity(quantity);
 
         cartItems.setSelected(false);
         cartItems.setNote(cartItemCreateForm.getNote());
