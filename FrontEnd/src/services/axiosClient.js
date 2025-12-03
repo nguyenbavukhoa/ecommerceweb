@@ -2,7 +2,7 @@ import axios from "axios";
 
 // --- TỰ ĐỘNG LẤY BASE URL (Giữ nguyên logic cũ) ---
 const getBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  // if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   const { hostname } = window.location;
   const BACKEND_PORT = 8085; // Cổng backend
   if (hostname === "localhost" || hostname === "127.0.0.1") {
