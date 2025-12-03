@@ -49,6 +49,15 @@ public class Delivery {
     @Column(name = "current_lng")
     private Double currentLng;
 
+    @Column(name = "end_lat")
+    private Double endLat;
+
+    @Column(name = "end_lng")
+    private Double endLng;
+
     @Column(name = "progress_pct") // % hoàn thành hành trình
     private Double progressPct;
+
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
 }

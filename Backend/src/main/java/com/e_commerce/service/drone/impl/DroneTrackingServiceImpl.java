@@ -8,6 +8,7 @@ import com.e_commerce.mapper.drone.DeliveryMapper;
 import com.e_commerce.repository.drone.DeliveryRepository;
 import com.e_commerce.service.drone.DroneTrackingService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.time.Instant;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class DroneTrackingServiceImpl implements DroneTrackingService {
     private final DeliveryRepository deliveryRepository;
     private final TaskScheduler taskScheduler;
@@ -32,6 +34,8 @@ public class DroneTrackingServiceImpl implements DroneTrackingService {
                     () -> updatePosition(deliveryId, step, numberOfUpdates),
                     Instant.now().plusSeconds(updateIntervalSeconds * step)
             );
+            log.info("Start tracking delivery {}: total steps {}", deliveryId, numberOfUpdates);
+
         }
     }
 
@@ -42,11 +46,10 @@ public class DroneTrackingServiceImpl implements DroneTrackingService {
 
         if (delivery.getStatus() != DeliveryStatus.IN_PROGRESS) return;
 
-        Orders order = delivery.getOrder();
-        double restaurantLat = order.getRestaurant().getLat();
-        double restaurantLng = order.getRestaurant().getLng();
-        double customerLat = order.getUserInformation().getDeliveryLat();
-        double customerLng = order.getUserInformation().getDeliveryLng();
+        double restaurantLat = delivery.getCurrentLat();
+        double restaurantLng = delivery.getCurrentLng();
+        double customerLat = delivery.getEndLat();
+        double customerLng = delivery.getEndLng();
 
         double progress = (double) currentStep / totalSteps;
 
@@ -58,6 +61,9 @@ public class DroneTrackingServiceImpl implements DroneTrackingService {
         delivery.setProgressPct(progress * 100);
 
         deliveryRepository.save(delivery);
+        log.info("Updating delivery {} step {}/{} - progress: {}%, currentLat: {}, currentLng: {}",
+                deliveryId, currentStep, totalSteps, delivery.getProgressPct(),
+                delivery.getCurrentLat(), delivery.getCurrentLng());
     }
 
     @Override

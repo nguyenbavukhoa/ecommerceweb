@@ -21,9 +21,12 @@ public class DeliveryDTO {
     private Double currentLat;
     private Double currentLng;
     private Double progressPct;
+    private Double endLat;
+    private Double endLng;
 
     private Double rangeKm;
     private LocalDateTime estimatedDeliveryTime;
     private LocalDateTime actualDeliveryTime;
+    private LocalDateTime startTime;
 }
 

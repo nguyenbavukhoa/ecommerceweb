@@ -18,6 +18,9 @@ public class DeliveryMapper {
                 .progressPct(delivery.getProgressPct())
                 .droneId(delivery.getDrone() != null ? delivery.getDrone().getId() : null)
                 .orderId(delivery.getOrder() != null ? delivery.getOrder().getId() : null)
+                .endLat(delivery.getEndLat())
+                .endLng(delivery.getEndLng())
+                .startTime(delivery.getStartTime())
                 .build();
     }
 

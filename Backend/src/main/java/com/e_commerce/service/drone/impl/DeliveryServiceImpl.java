@@ -94,6 +94,9 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .currentLat(order.getRestaurant().getLat())
                 .currentLng(order.getRestaurant().getLng())
                 .progressPct(0.0)
+                .endLng(order.getUserInformation().getDeliveryLng())
+                .endLat(order.getUserInformation().getDeliveryLat())
+                .startTime(LocalDateTime.now())
                 .build();
 
         Delivery savedDelivery = deliveryRepository.save(delivery);

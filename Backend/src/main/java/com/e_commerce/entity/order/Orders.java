@@ -6,6 +6,7 @@ import com.e_commerce.entity.account.UserInformation;
 import com.e_commerce.entity.payment.Payment;
 import com.e_commerce.enums.OrderStatus;
 import com.e_commerce.orther.Timestamped;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -49,7 +50,8 @@ public class Orders extends Timestamped {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Payment> payments;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonBackReference
     private Restaurant restaurant;
 }
