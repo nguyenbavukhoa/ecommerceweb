@@ -1,14 +1,17 @@
 import axios from "axios";
 
 // --- TỰ ĐỘNG LẤY BASE URL (Giữ nguyên logic cũ) ---
+// const getBaseUrl = () => {
+//   // if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+//   const { hostname } = window.location;
+//   const BACKEND_PORT = 8085; // Cổng backend
+//   if (hostname === "localhost" || hostname === "127.0.0.1") {
+//     return `http://localhost:${BACKEND_PORT}/api/v1`;
+//   }
+//   return `http://${hostname}:${BACKEND_PORT}/api/v1`;
+// };
 const getBaseUrl = () => {
-  // if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  const { hostname } = window.location;
-  const BACKEND_PORT = 8085; // Cổng backend
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return `http://localhost:${BACKEND_PORT}/api/v1`;
-  }
-  return `http://${hostname}:${BACKEND_PORT}/api/v1`;
+  return "http://192.168.43.218:8080/api/v1/";
 };
 
 const axiosClient = axios.create({

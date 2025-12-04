@@ -237,10 +237,12 @@ const DroneMap = () => {
   const defaultCenter = [store.lat || 10.776019, store.lng || 106.702068];
 
   // Center Map: Nếu đang track thì theo drone, không thì theo store
-  const mapCenter = trackingData
-    ? [trackingData.currentLat, trackingData.currentLng]
-    : selectedOrder?.customerLocation || defaultCenter;
+  // const mapCenter = trackingData
+  //   ? [trackingData.currentLat, trackingData.currentLng]
+  //   : selectedOrder?.customerLocation || defaultCenter;
 
+  // Bỏ trackingData ra khỏi logic tính tâm bản đồ
+  const mapCenter = selectedOrder?.customerLocation || defaultCenter;
   return (
     <div className={styles.container}>
       {/* SIDEBAR */}
@@ -363,8 +365,8 @@ const DroneMap = () => {
             </Popup>
           </Marker>
           {/* {SEED_HUBS.map((h) => (
-            <Marker key={h.id} position={h.location} icon={hubIcon} />
-          ))} */}
+              <Marker key={h.id} position={h.location} icon={hubIcon} />
+            ))} */}
 
           {/* 2. VẼ DRONE */}
           {/* Nếu đang chọn 1 đơn đang bay -> Vẽ chi tiết Tracking (Line, Customer) */}
