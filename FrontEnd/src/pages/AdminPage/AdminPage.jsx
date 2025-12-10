@@ -1,6 +1,10 @@
+// src/pages/AdminPage/AdminPage.jsx
 import { useState, useEffect } from "react";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { useStoreInfo } from "../../context/FilterProvider";
+// [MỚI] Import useSearchParams
+import { useSearchParams } from "react-router-dom";
 
 // Components
 import Header from "./components/Header/Header";
@@ -22,9 +26,34 @@ const AdminPage = () => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
 
+  // [MỚI] Hook lấy params từ URL
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentStoreId = user?.storeId;
+  const { data: storeInfo } = useStoreInfo(currentStoreId);
+
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("Dashboard");
+
+  // [SỬA] Khởi tạo activeTab: Nếu URL có ?tab=... thì lấy, không thì mặc định Dashboard
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") || "Dashboard"
+  );
+
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 615);
+
+  // [MỚI] Effect: Lắng nghe URL thay đổi để cập nhật Tab
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // [MỚI] Hàm chuyển tab có cập nhật URL
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSearchParams({ tab: newTab }); // Cập nhật URL cho đồng bộ
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 615);
@@ -46,22 +75,16 @@ const AdminPage = () => {
     setSidebarOpen((prev) => !prev);
   };
 
-  // 1. Lấy Store ID
-  const currentStoreId = user?.storeId;
-
-  // 2. Hàm render các tab THƯỜNG (Sẽ bị unmount khi chuyển tab để tiết kiệm bộ nhớ)
   const renderContent = () => {
     if (!currentStoreId && user?.userType === 1) {
       return (
         <div style={{ padding: 20 }}>
-          Lỗi: Tài khoản Admin này chưa được gán Store ID.
+          Lỗi: Tài khoản Admin chưa gán Store ID.
         </div>
       );
     }
 
     switch (activeTab) {
-      // case "Dashboard":
-      //   return <Dashboard storeId={currentStoreId} />;
       case "Products":
         return <Products storeId={currentStoreId} />;
       case "Customers":
@@ -72,29 +95,20 @@ const AdminPage = () => {
         return <StoreSetting storeId={currentStoreId} />;
       case "Statistics":
         return <Statistics storeId={currentStoreId} />;
-      case "DroneMap":
-        return null; // DroneMap được xử lý riêng bên ngoài
       case "StoreWallet":
         return <StoreWallet />;
+      case "DroneMap":
+        return null; // DroneMap render riêng bên dưới
       default:
         return <Dashboard storeId={currentStoreId} />;
     }
   };
 
-  // Kiểm tra quyền
   if (!user || user.userType !== 1) {
     return (
       <div className="adminRoot">
         <div className={styles.accessDeniedSection}>
-          <img
-            className={styles.accessDeniedImg}
-            src="/assets/img/access-denied.webp"
-            alt="Access Denied"
-          />
-          <p style={{ marginTop: "20px", fontSize: "18px", color: "#555" }}>
-            Bạn không có quyền truy cập trang này.{" "}
-            <a href="/admin-login">Đăng nhập Admin</a>
-          </p>
+          <p>Bạn không có quyền truy cập.</p>
         </div>
       </div>
     );
@@ -102,24 +116,23 @@ const AdminPage = () => {
 
   return (
     <div className="adminRoot">
-      <Header onMenuToggle={handleMenuToggle} storeName={user?.storeId} />
+      <Header
+        onMenuToggle={handleMenuToggle}
+        storeName={storeInfo?.name || currentStoreId}
+      />
+
       <div className={styles.container}>
         <Sidebar
           isOpen={isSidebarOpen}
           activeTab={activeTab}
-          onTabClick={setActiveTab}
+          // [SỬA] Truyền hàm handleTabChange mới
+          onTabClick={handleTabChange}
           userName={user.fullName || "Admin"}
           storeId={user.storeId}
           onLogout={handleLogout}
         />
 
         <main className={styles.content}>
-          {/* LOGIC QUAN TRỌNG:
-             1. Nếu không phải tab DroneMap, hiển thị nội dung bình thường (renderContent).
-             2. DroneMap luôn luôn được render nhưng dùng CSS để ẩn hiện.
-             Điều này giúp Drone vẫn "bay" ngầm khi bạn đang xem tab Đơn hàng.
-          */}
-
           {activeTab !== "DroneMap" && renderContent()}
 
           <div

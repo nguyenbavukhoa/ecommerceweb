@@ -1,4 +1,4 @@
-// src/pages/ServerPage/sections/Drones/DroneMap.jsx
+// src/pages/AdminPage/sections/DroneMap/DroneMap.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import {
   MapContainer,
@@ -13,9 +13,10 @@ import "leaflet/dist/leaflet.css";
 import styles from "./DroneMap.module.scss";
 import { useAuth } from "../../../../context/AuthContext";
 import { useToast } from "../../../../context/ToastContext";
-import { db, SEED_HUBS } from "../../../../data/mockData";
+import { db, SEED_HUBS } from "../../../../services/dbService";
 import { useQuery } from "@tanstack/react-query";
 import { vnd } from "../../utils";
+import { useSearchParams } from "react-router-dom";
 
 // --- ICONS ---
 const droneIcon = new L.Icon({
@@ -35,11 +36,11 @@ const customerIcon = new L.Icon({
 });
 const hubIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/921/921347.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconSize: [35, 35],
+  iconAnchor: [17, 35],
 });
 
-// Component ép Map vẽ lại
+// Component cập nhật Map khi resize
 const MapUpdater = () => {
   const map = useMap();
   useEffect(() => {
@@ -49,16 +50,12 @@ const MapUpdater = () => {
   return null;
 };
 
-// Hàm parse ngày
 const parseOrderDate = (timeStr) => {
   if (!timeStr) return new Date();
   const [time, date] = timeStr.split(" ");
+  if (!date) return new Date();
   const [d, m, y] = date.split("/");
   return new Date(`${y}-${m}-${d}`);
-};
-
-const getTodayString = () => {
-  return new Date().toISOString().split("T")[0];
 };
 
 const DroneMap = () => {
@@ -66,77 +63,104 @@ const DroneMap = () => {
   const { showToast } = useToast();
   const storeId = user?.storeId || "RES-01";
 
+  const [searchParams] = useSearchParams();
+  const highlightOrderId = searchParams.get("orderId");
+
   // State
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [activeTab, setActiveTab] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
-  const [startDate, setStartDate] = useState(getTodayString());
-  const [endDate, setEndDate] = useState(getTodayString());
-
-  // Local State cho Drone để animation mượt
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [localDrones, setLocalDrones] = useState([]);
 
-  // Queries
+  // [MỚI] State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Query Store
   const { data: store } = useQuery({
     queryKey: ["storeInfo", storeId],
-    queryFn: () => db.stores.getOne(storeId),
+    queryFn: async () => await db.stores.getOne(storeId),
   });
 
-  // Lấy TOÀN BỘ đơn hàng của quán (để vẽ map kể cả khi đơn đã completed)
+  // Query Orders
   const { data: orders = [], refetch: refetchOrders } = useQuery({
     queryKey: ["storeOrders", storeId],
-    queryFn: () => db.orders.getAll().filter((o) => o.restaurantId === storeId),
+    queryFn: async () => {
+      const all = await db.orders.getAll();
+      return all.filter((o) => o.restaurantId === storeId);
+    },
     refetchInterval: 2000,
   });
 
-  // --- [FIX] SIMULATION ENGINE ĐỒNG BỘ ---
-  // Sử dụng hàm chung processSimulationTick của mockData
+  // Effect: Highlight order từ URL
   useEffect(() => {
-    const interval = setInterval(() => {
-      // 1. Gọi hàm xử lý tập trung (Nó sẽ check timestamp để không xung đột với Server Admin)
-      const updatedDrones = db.drones.processSimulationTick();
+    if (highlightOrderId && orders.length > 0) {
+      const targetOrder = orders.find(
+        (o) => o.id.toString() === highlightOrderId
+      );
+      if (targetOrder) {
+        if (["PLACED", "CONFIRMED"].includes(targetOrder.orderStatus))
+          setActiveTab("pending");
+        else if (["PICKING", "SHIPPING"].includes(targetOrder.orderStatus))
+          setActiveTab("active");
+        else setActiveTab("history");
 
-      // 2. Cập nhật state nội bộ để vẽ Map ngay lập tức
-      if (updatedDrones) {
-        setLocalDrones(updatedDrones);
-      } else {
-        // Nếu không có update (đứng yên), lấy dữ liệu hiện tại
-        setLocalDrones(db.drones.getAll());
+        setSelectedOrder(targetOrder);
       }
-    }, 100); // 10 FPS cho mượt
+    }
+  }, [highlightOrderId, orders]);
 
+  // [FIX] Scroll Jumping: Chỉ scroll khi selectedOrder THAY ĐỔI, không scroll mỗi lần render
+  useEffect(() => {
+    if (selectedOrder) {
+      const element = document.getElementById(`order-card-${selectedOrder.id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [selectedOrder]);
+
+  // Reset trang về 1 khi đổi tab hoặc search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm, startDate, endDate]);
+
+  // Simulation Tick
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const updatedDrones = await db.drones.processSimulationTick();
+      if (updatedDrones) setLocalDrones(updatedDrones);
+    }, 1000); // Tăng lên 1s để đỡ lag
     return () => clearInterval(interval);
   }, []);
 
-  // Sync refetch order thưa hơn
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetchOrders();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [refetchOrders]);
-
-  // Handlers
-  const handleCallDrone = (e, order) => {
+  const handleCallDrone = async (e, order) => {
     e.stopPropagation();
     try {
-      db.orders.dispatchDrone(order.id);
+      await db.orders.dispatchDrone(order.id);
       showToast({
         title: "Thành công",
         message: "Đã điều phối Drone!",
         type: "success",
       });
       refetchOrders();
+      setActiveTab("active");
     } catch (err) {
       showToast({ title: "Lỗi", message: err.message, type: "error" });
     }
   };
 
-  // --- FILTERING (Cho Sidebar) ---
+  // --- FILTERING ---
   const filteredOrders = useMemo(() => {
-    let list = orders;
+    let list = [...orders];
+
+    // Filter by Tab
     if (activeTab === "pending")
-      list = list.filter((o) => o.orderStatus === "CONFIRMED");
+      list = list.filter((o) =>
+        ["PLACED", "CONFIRMED"].includes(o.orderStatus)
+      );
     else if (activeTab === "active")
       list = list.filter((o) =>
         ["PICKING", "SHIPPING"].includes(o.orderStatus)
@@ -146,6 +170,7 @@ const DroneMap = () => {
         ["COMPLETED", "CANCELLED"].includes(o.orderStatus)
       );
 
+    // Filter by Search
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
       list = list.filter(
@@ -155,6 +180,7 @@ const DroneMap = () => {
       );
     }
 
+    // Filter by Date
     if (startDate && endDate) {
       const start = new Date(startDate);
       start.setHours(0, 0, 0, 0);
@@ -165,20 +191,107 @@ const DroneMap = () => {
         return orderDate >= start && orderDate <= end;
       });
     }
+
+    // Sort: Mới nhất lên đầu
     return list.sort((a, b) => b.id - a.id);
   }, [orders, activeTab, searchTerm, startDate, endDate]);
 
+  // --- PAGINATION CALCULATION ---
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(start, start + itemsPerPage);
+  }, [filteredOrders, currentPage]);
+
   const getDroneInfo = (order) => {
     if (!order.droneId) return null;
-    const drone = localDrones.find((d) => d.id === order.droneId); // Dùng localDrones
+    const drone = localDrones.find((d) => d.id === order.droneId);
     return drone ? drone.name : "Unknown Drone";
   };
 
-  if (!store) return <div>Loading Store...</div>;
+  // [FIX LOGIC VẼ ĐƯỜNG] Hàm render đường đi dựa trên status
+  const renderOrderRoute = () => {
+    if (!selectedOrder || !store) return null;
+
+    const { orderStatus, droneId, customerLocation } = selectedOrder;
+    const drone = localDrones.find((d) => d.id === droneId);
+    const dronePos = drone ? [drone.currentLat, drone.currentLng] : null;
+    const storePos = store.location;
+
+    // 1. Đơn đang đi lấy (PICKING): Vẽ từ Drone -> Cửa hàng
+    if (orderStatus === "PICKING" && dronePos) {
+      return (
+        <>
+          <Polyline
+            positions={[dronePos, storePos]}
+            color="#e67e22"
+            dashArray="5, 5"
+            weight={3}
+          />
+          <Marker position={storePos} icon={storeIcon}>
+            <Popup>Điểm lấy hàng</Popup>
+          </Marker>
+        </>
+      );
+    }
+
+    // 2. Đơn đang giao (SHIPPING): Vẽ từ Cửa hàng -> Khách (Drone bay trên đường này)
+    if (orderStatus === "SHIPPING") {
+      return (
+        <>
+          <Polyline
+            positions={[storePos, customerLocation]}
+            color="#b5292f"
+            weight={3}
+          />
+          {/* Nếu có Drone, vẽ thêm đoạn từ Drone -> Khách để thấy progress */}
+          {dronePos && (
+            <Polyline
+              positions={[dronePos, customerLocation]}
+              color="#27ae60"
+              weight={2}
+            />
+          )}
+          <Marker position={customerLocation} icon={customerIcon}>
+            <Popup>Khách hàng</Popup>
+          </Marker>
+        </>
+      );
+    }
+
+    // 3. Đơn lịch sử (COMPLETED/CANCELLED): Chỉ vẽ Cửa hàng -> Khách (Tĩnh)
+    if (["COMPLETED", "CANCELLED"].includes(orderStatus) && customerLocation) {
+      return (
+        <>
+          <Polyline
+            positions={[storePos, customerLocation]}
+            color="#888"
+            dashArray="10, 5"
+            weight={2}
+          />
+          <Marker position={customerLocation} icon={customerIcon}>
+            <Popup>Điểm giao hàng</Popup>
+          </Marker>
+        </>
+      );
+    }
+
+    // 4. Pending: Chỉ hiện Marker Khách
+    if (["PLACED", "CONFIRMED"].includes(orderStatus) && customerLocation) {
+      return (
+        <Marker position={customerLocation} icon={customerIcon}>
+          <Popup>Vị trí khách</Popup>
+        </Marker>
+      );
+    }
+
+    return null;
+  };
+
+  if (!store) return <div>Loading Map...</div>;
 
   return (
     <div className={styles.container}>
-      {/* SIDEBAR (Giữ nguyên) */}
       <div className={styles.sidebar}>
         <div className={styles.header}>
           <h2 className={styles.title}>Quản lý Giao hàng</h2>
@@ -234,16 +347,19 @@ const DroneMap = () => {
         </div>
 
         <div className={styles.list}>
-          {filteredOrders.length === 0 ? (
-            <div className={styles.empty}>Không có đơn hàng.</div>
+          {paginatedOrders.length === 0 ? (
+            <div className={styles.empty}>Không tìm thấy đơn hàng.</div>
           ) : (
-            filteredOrders.map((order) => {
+            paginatedOrders.map((order) => {
               const droneName = getDroneInfo(order);
+              const isHighlighted = selectedOrder?.id === order.id;
+
               return (
                 <div
                   key={order.id}
+                  id={`order-card-${order.id}`} // [FIX] ID cho scroll
                   className={`${styles.card} ${
-                    selectedOrder?.id === order.id ? styles.selected : ""
+                    isHighlighted ? styles.selected : ""
                   }`}
                   onClick={() => setSelectedOrder(order)}
                 >
@@ -274,6 +390,7 @@ const DroneMap = () => {
                       <i className="fa-solid fa-paper-plane"></i> Gọi Drone ngay
                     </button>
                   )}
+
                   {activeTab !== "pending" && (
                     <div
                       className={`${styles.statusBadge} ${
@@ -288,9 +405,29 @@ const DroneMap = () => {
             })
           )}
         </div>
+
+        {/* [MỚI] PHÂN TRANG UI */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+            <span>
+              Trang {currentPage} / {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* MAP */}
       <div className={styles.mapWrapper}>
         <MapContainer
           center={store.location}
@@ -300,7 +437,7 @@ const DroneMap = () => {
           <MapUpdater />
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-          {/* STORE & HUBS */}
+          {/* Store & Hubs Markers */}
           <Marker position={store.location} icon={storeIcon}>
             <Popup>
               <b>{store.name}</b>
@@ -314,140 +451,31 @@ const DroneMap = () => {
             </Marker>
           ))}
 
-          {/* [FIX QUAN TRỌNG] VẼ DRONES & ĐƯỜNG BAY */}
-          {/* Lặp qua localDrones để vẽ tất cả drone đang hoạt động liên quan đến quán */}
+          {/* Drones (Chỉ hiện các Drone đang bay thực sự) */}
           {localDrones.map((drone) => {
-            // Kiểm tra Drone này có đang phục vụ quán không (dựa trên orderId)
-            const order = orders.find((o) => o.id === drone.currentOrderId);
-            if (!order) return null;
-
-            // Kiểm tra trạng thái bay
             const isFlying = [
               "moving_to_store",
               "delivering",
               "returning",
             ].includes(drone.status);
             if (!isFlying) return null;
-
-            const isSelected = selectedOrder?.id === order.id;
-            const dronePos = [drone.currentLat, drone.currentLng];
-            const storePos = store.location;
-            const custPos = order.customerLocation;
-            const hubPos = SEED_HUBS[0].location;
-
             return (
-              <React.Fragment key={drone.id}>
-                <Marker position={dronePos} icon={droneIcon}>
-                  <Popup>
-                    <b>{drone.name}</b>
-                    <br />
-                    Pin: {drone.battery}%
-                  </Popup>
-                </Marker>
-
-                {/* VẼ ĐƯỜNG BAY 3 MÀU (Chỉ khi chọn) */}
-                {isSelected && (
-                  <>
-                    {/* 1. Trạm -> Quán (Cam) */}
-                    {drone.status === "moving_to_store" ? (
-                      <Polyline
-                        positions={[dronePos, storePos]}
-                        color="#e67e22"
-                        weight={4}
-                      />
-                    ) : (
-                      <Polyline
-                        positions={[hubPos, storePos]}
-                        color="#e67e22"
-                        dashArray="5, 8"
-                        opacity={0.6}
-                        weight={2}
-                      />
-                    )}
-
-                    {/* 2. Quán -> Khách (Xanh) */}
-                    {drone.status === "moving_to_store" ? (
-                      <Polyline
-                        positions={[storePos, custPos]}
-                        color="#27ae60"
-                        dashArray="5, 8"
-                        opacity={0.6}
-                        weight={2}
-                      />
-                    ) : drone.status === "delivering" ? (
-                      <Polyline
-                        positions={[dronePos, custPos]}
-                        color="#27ae60"
-                        weight={4}
-                      />
-                    ) : (
-                      <Polyline
-                        positions={[storePos, custPos]}
-                        color="#27ae60"
-                        dashArray="5, 8"
-                        opacity={0.6}
-                        weight={2}
-                      />
-                    )}
-
-                    {/* 3. Khách -> Trạm (Xám) */}
-                    {drone.status === "returning" ? (
-                      <Polyline
-                        positions={[dronePos, hubPos]}
-                        color="#95a5a6"
-                        weight={4}
-                      />
-                    ) : (
-                      <Polyline
-                        positions={[custPos, hubPos]}
-                        color="#95a5a6"
-                        dashArray="5, 8"
-                        opacity={0.6}
-                        weight={2}
-                      />
-                    )}
-
-                    <Marker position={custPos} icon={customerIcon}>
-                      <Popup>Khách hàng #{order.id}</Popup>
-                    </Marker>
-                  </>
-                )}
-              </React.Fragment>
+              <Marker
+                key={drone.id}
+                position={[drone.currentLat, drone.currentLng]}
+                icon={droneIcon}
+              >
+                <Popup>
+                  <b>{drone.name}</b>
+                  <br />
+                  Pin: {drone.battery}%
+                </Popup>
+              </Marker>
             );
           })}
 
-          {/* LỊCH SỬ ĐƠN HOÀN THÀNH */}
-          {selectedOrder && selectedOrder.orderStatus === "COMPLETED" && (
-            <>
-              <Marker
-                position={selectedOrder.customerLocation}
-                icon={customerIcon}
-              >
-                <Popup>Đã giao tại đây</Popup>
-              </Marker>
-              <Polyline
-                positions={[SEED_HUBS[0].location, store.location]}
-                color="#e67e22"
-                dashArray="5, 8"
-                opacity={0.5}
-              />
-              <Polyline
-                positions={[store.location, selectedOrder.customerLocation]}
-                color="#27ae60"
-                dashArray="5, 8"
-                opacity={0.5}
-              />
-              <Polyline
-                positions={[
-                  selectedOrder.customerLocation,
-                  SEED_HUBS[0].location,
-                ]}
-                color="#95a5a6"
-                dashArray="5, 8"
-                opacity={0.5}
-              />
-            </>
-          )}
+          {/* [FIX] VẼ ĐƯỜNG ĐI THEO LOGIC MỚI */}
+          {renderOrderRoute()}
         </MapContainer>
       </div>
     </div>

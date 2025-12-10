@@ -22,8 +22,14 @@ const CartItem = ({ item }) => {
     action();
   };
 
+  // [AN TOÀN] Fallback tên và ảnh để tránh lỗi hiển thị
+  const displayName = item.productName || item.name || "Sản phẩm";
+  const displayImg = item.imgUrl || item.imgMain || "";
+  const displayPrice = item.price || item.priceBase || 0;
+
   return (
     <li className={itemClassName} key={item.id}>
+      {/* Nút Checkbox */}
       <div className={styles.cartItemSelection}>
         <button
           className={styles.confirmBtn}
@@ -37,28 +43,35 @@ const CartItem = ({ item }) => {
         </button>
       </div>
 
+      {/* Ảnh sản phẩm */}
       <ImageWithFallback
-        src={item.imgUrl}
-        alt={item.productName}
+        src={displayImg}
+        alt={displayName}
         className={styles.cartItemImage}
       />
 
+      {/* Thông tin Text */}
       <div className={styles.cartItemInfo}>
-        <p className={styles.cartItemTitle}>{item.productName}</p>
+        <p className={styles.cartItemTitle}>{displayName}</p>
+
+        {/* Option (Topping, Size...) */}
         {item.optionValuesDTO && item.optionValuesDTO.length > 0 && (
           <p className={styles.cartItemOptions}>
             {item.optionValuesDTO.map((option) => option.value).join(" • ")}
           </p>
         )}
+
+        {/* Ghi chú */}
         <p className={styles.cartItemNote}>
           <i className="fa-light fa-pencil"></i>
           <span>{item.note || "Thêm ghi chú..."}</span>
         </p>
       </div>
 
+      {/* Footer: Giá & Số lượng */}
       <div className={styles.cartItemFooter}>
         <div className={styles.cartItemPrice}>
-          <span>{vnd(item.price)}</span>
+          <span>{vnd(displayPrice)}</span>
         </div>
         <div className={styles.cartItemQuantity}>
           <div className={styles.buttons_added}>
@@ -93,6 +106,7 @@ const CartItem = ({ item }) => {
         </div>
       </div>
 
+      {/* Nút Xóa */}
       <div className={styles.cartItemActions}>
         <button
           className={styles.deleteBtn}

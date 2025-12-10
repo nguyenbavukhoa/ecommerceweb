@@ -1,7 +1,8 @@
+// src/pages/ServerPage/components/Modals/ReviewRestaurantModal.jsx
 import React, { useState } from "react";
 import CommonModal from "../../../AdminPage/components/Modals/CommonModal";
-import styles from "./ReviewRestaurantModal.module.scss"; // Sẽ tạo file css này sau
-import { vnd } from "../../utils";
+import styles from "./ReviewRestaurantModal.module.scss";
+import { vnd } from "../../utils"; // Đảm bảo import đúng file utils
 
 const ReviewRestaurantModal = ({
   isOpen,
@@ -23,7 +24,7 @@ const ReviewRestaurantModal = ({
       customWidth="800px"
     >
       <div className={styles.reviewContainer}>
-        {/* --- CỘT TRÁI: THÔNG TIN CƠ BẢN --- */}
+        {/* --- CỘT TRÁI: THÔNG TIN --- */}
         <div className={styles.infoColumn}>
           <div className={styles.group}>
             <label>Tên cửa hàng:</label>
@@ -43,31 +44,31 @@ const ReviewRestaurantModal = ({
             <label>Địa chỉ:</label>
             <p>{restaurant.address}</p>
           </div>
-          <div className={styles.group}>
-            <label>Mã số thuế:</label>
-            <p>{restaurant.taxCode || "Chưa cập nhật"}</p>
-          </div>
-          <div className={styles.group}>
-            <label>GPKD:</label>
-            <p>{restaurant.businessLicense || "Chưa cập nhật"}</p>
-          </div>
+          {/* Các field khác nếu có trong db.json */}
         </div>
 
-        {/* --- CỘT PHẢI: TÀI LIỆU & MENU --- */}
+        {/* --- CỘT PHẢI: TÀI LIỆU --- */}
         <div className={styles.docColumn}>
           <div className={styles.sectionTitle}>Menu Mẫu</div>
           <ul className={styles.menuList}>
-            {restaurant.menuSample?.map((item, idx) => (
-              <li key={idx}>
-                <span>{item.name}</span>
-                <strong>{vnd(item.price)}</strong>
-              </li>
-            )) || <p>Chưa cập nhật menu</p>}
+            {/* Render menu mẫu nếu có data, hoặc placeholder */}
+            {restaurant.menuSample ? (
+              restaurant.menuSample.map((i, idx) => (
+                <li key={idx}>
+                  <span>{i.name}</span> <strong>{vnd(i.price)}</strong>
+                </li>
+              ))
+            ) : (
+              <p style={{ fontStyle: "italic", color: "#999" }}>
+                Chưa cập nhật menu mẫu
+              </p>
+            )}
           </ul>
 
-          <div className={styles.sectionTitle}>Hồ sơ đính kèm</div>
+          <div className={styles.sectionTitle} style={{ marginTop: "20px" }}>
+            Hồ sơ đính kèm
+          </div>
           <div className={styles.docList}>
-            {/* Giả lập nút xem tài liệu */}
             <button
               className={styles.btnDoc}
               onClick={() => setDocPreview("GPKD")}
@@ -82,7 +83,6 @@ const ReviewRestaurantModal = ({
             </button>
           </div>
 
-          {/* Preview giả lập */}
           {docPreview && (
             <div className={styles.docPreviewBox}>
               <p>
@@ -96,7 +96,6 @@ const ReviewRestaurantModal = ({
         </div>
       </div>
 
-      {/* --- FOOTER ACTIONS --- */}
       <div className={styles.modalFooter}>
         <button
           className={styles.btnRequest}

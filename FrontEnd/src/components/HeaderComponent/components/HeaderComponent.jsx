@@ -9,9 +9,99 @@ import {
 } from "../../../context/FilterProvider";
 import { useCart } from "../../../context/CartProvider";
 import { useAuth } from "../../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import AdvancedSearch from "./AdvancedSearch";
+import { useNotification } from "../../../context/NotificationContext"; // Import mới
+
+// --- COMPONENT CON: NOTIFICATION BELL ---
+const NotificationBell = () => {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } =
+    useNotification();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleItemClick = (id) => {
+    markAsRead(id);
+    // Có thể navigate tới chi tiết đơn hàng nếu muốn
+  };
+
+  // Format thời gian
+  const formatTime = (date) => {
+    const d = new Date(date);
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(
+      2,
+      "0"
+    )} ${d.getDate()}/${d.getMonth() + 1}`;
+  };
+
+  return (
+    <div className={styles.item} ref={dropdownRef}>
+      <div
+        className={styles.notifIconWrapper}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <i className={`fa-light fa-bell ${isOpen ? styles.active : ""}`}></i>
+        {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
+      </div>
+
+      <div className={`${styles.notifDropdown} ${isOpen ? styles.active : ""}`}>
+        <div className={styles.notifHeader}>
+          <h4>Thông báo</h4>
+          {unreadCount > 0 && (
+            <button className={styles.markAllBtn} onClick={markAllAsRead}>
+              Đánh dấu đã đọc
+            </button>
+          )}
+        </div>
+        <ul className={styles.notifList}>
+          {notifications.length === 0 ? (
+            <li className={styles.empty}>Bạn chưa có thông báo nào.</li>
+          ) : (
+            notifications.map((notif) => (
+              <li
+                key={notif.id}
+                className={`${styles.notifItem} ${
+                  !notif.isRead ? styles.unread : ""
+                }`}
+                onClick={() => handleItemClick(notif.id)}
+              >
+                <div className={`${styles.iconBox} ${styles[notif.type]}`}>
+                  <i
+                    className={`fa-solid ${
+                      notif.type === "success"
+                        ? "fa-check"
+                        : notif.type === "warning"
+                        ? "fa-exclamation"
+                        : "fa-info"
+                    }`}
+                  ></i>
+                </div>
+                <div className={styles.content}>
+                  <span className={styles.title}>{notif.title}</span>
+                  <span className={styles.desc}>{notif.message}</span>
+                  <span className={styles.time}>{formatTime(notif.time)}</span>
+                </div>
+                {!notif.isRead && <div className={styles.dot}></div>}
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
 const scrollToProducts = () => {
   document
@@ -154,6 +244,10 @@ export default function HeaderComponent() {
                     }`}
                   ></i>
                 </li>
+
+                {/* --- [MỚI] NOTIFICATION BELL --- */}
+                {/* Đặt trước hoặc sau User icon tùy ý */}
+                <NotificationBell />
 
                 {/* USER */}
                 <li className={styles.item}>

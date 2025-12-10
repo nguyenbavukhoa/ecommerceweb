@@ -5,7 +5,7 @@ import styles from "./styles/ProfileContent.module.css";
 const ProfileContent = ({ user, onSave }) => {
   // State form data
   const [formData, setFormData] = useState({
-    fullName: user.fullName || user.accountName || "", // Map đúng tên trường mockData
+    fullName: user.fullName || user.accountName || "",
     phoneNumber: user.phoneNumber || user.phone || "",
     gender: user.gender || "Nam",
     currentPassword: "",
@@ -37,20 +37,26 @@ const ProfileContent = ({ user, onSave }) => {
       return;
     }
 
-    // 2. Validate mật khẩu (nếu có bật đổi pass)
+    // Object dữ liệu sẽ gửi đi
     let finalData = {
-      name: formData.fullName, // Map lại cho hàm updateProfile
-      phone: formData.phoneNumber,
+      name: formData.fullName, // AuthContext sẽ map thành fullName
+      phone: formData.phoneNumber, // AuthContext sẽ map thành phoneNumber
       gender: formData.gender,
     };
 
+    // 2. Validate mật khẩu (nếu có bật đổi pass)
     if (isChangePassword) {
       if (!formData.currentPassword) {
         setError("Vui lòng nhập mật khẩu hiện tại.");
         return;
       }
-      // Logic check pass cũ (Giả lập: coi như đúng nếu nhập gì đó)
-      // Trong thực tế cần gọi API check pass cũ
+
+      // [LOGIC MỚI] Check mật khẩu cũ chính xác
+      // Lưu ý: user.password có được do AuthContext lưu full object user
+      if (formData.currentPassword !== user.password) {
+        setError("Mật khẩu hiện tại không đúng.");
+        return;
+      }
 
       if (formData.newPassword.length < 6) {
         setError("Mật khẩu mới phải từ 6 ký tự trở lên.");
@@ -65,6 +71,7 @@ const ProfileContent = ({ user, onSave }) => {
       finalData.password = formData.newPassword;
     }
 
+    // Gọi hàm save ở Parent (ProfilePage)
     onSave(finalData);
   };
 
@@ -144,55 +151,53 @@ const ProfileContent = ({ user, onSave }) => {
         </div>
 
         {/* Form ẩn hiện */}
-        <div
-          className={`${styles.passwordFields} ${
-            isChangePassword ? styles.open : ""
-          }`}
-        >
-          <div className={styles.formGroup}>
-            <label>Mật khẩu hiện tại</label>
-            <div className={styles.passwordWrapper}>
+        {isChangePassword && (
+          <div className={`${styles.passwordFields} ${styles.open}`}>
+            <div className={styles.formGroup}>
+              <label>Mật khẩu hiện tại</label>
+              <div className={styles.passwordWrapper}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                  className={styles.inputField}
+                  placeholder="Nhập mật khẩu cũ"
+                />
+                <i
+                  className={`fa-regular ${
+                    showPassword ? "fa-eye-slash" : "fa-eye"
+                  } ${styles.eyeIcon}`}
+                  onClick={() => setShowPassword(!showPassword)}
+                ></i>
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Mật khẩu mới</label>
               <input
                 type={showPassword ? "text" : "password"}
-                name="currentPassword"
-                value={formData.currentPassword}
+                name="newPassword"
+                value={formData.newPassword}
                 onChange={handleChange}
                 className={styles.inputField}
-                placeholder="Nhập mật khẩu cũ"
+                placeholder="Tối thiểu 6 ký tự"
               />
-              <i
-                className={`fa-regular ${
-                  showPassword ? "fa-eye-slash" : "fa-eye"
-                } ${styles.eyeIcon}`}
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Nhập lại mật khẩu mới</label>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={styles.inputField}
+                placeholder="Xác nhận mật khẩu"
+              />
             </div>
           </div>
-
-          <div className={styles.formGroup}>
-            <label>Mật khẩu mới</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-              className={styles.inputField}
-              placeholder="Tối thiểu 6 ký tự"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Nhập lại mật khẩu mới</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={styles.inputField}
-              placeholder="Xác nhận mật khẩu"
-            />
-          </div>
-        </div>
+        )}
       </div>
 
       {error && (

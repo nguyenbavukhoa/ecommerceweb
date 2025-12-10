@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import CommonModal from "./CommonModal";
 import styles from "./OrderDetailModal.module.scss";
 import { vnd } from "../../utils";
-import { db } from "../../../../data/mockData";
+// [FIX] Import dbService thay vì mockData
+import { db } from "../../../../services/dbService";
 
 const getStatusLabel = (status) => {
   const map = {
@@ -21,9 +22,32 @@ const getStatusLabel = (status) => {
 };
 
 const OrderDetailModal = ({ isOpen, onClose, order }) => {
+  const [userInfo, setUserInfo] = useState(null);
+
+  // Effect để lấy thông tin User nếu deliveryInfo bị thiếu (Fallback)
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (
+        order &&
+        order.userId &&
+        order.userId !== "GUEST" &&
+        !order.deliveryInfo
+      ) {
+        try {
+          const user = await db.users.getOne(order.userId);
+          setUserInfo(user);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    fetchUser();
+  }, [order]);
+
   const customerInfo = useMemo(() => {
     if (!order) return null;
 
+    // Ưu tiên lấy từ Snapshot đơn hàng (Thông tin lúc đặt)
     if (order.deliveryInfo) {
       return {
         fullName: order.deliveryInfo.name,
@@ -33,15 +57,13 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
       };
     }
 
-    if (order.userId) {
-      const user = db.users.getOne(order.userId);
-      return (
-        user || {
-          fullName: "Khách vãng lai",
-          phoneNumber: "---",
-          address: "---",
-        }
-      );
+    // Fallback: Lấy từ DB User mới nhất
+    if (userInfo) {
+      return {
+        fullName: userInfo.fullName,
+        phoneNumber: userInfo.phoneNumber,
+        address: userInfo.address,
+      };
     }
 
     return {
@@ -49,7 +71,7 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
       phoneNumber: "---",
       address: "---",
     };
-  }, [order]);
+  }, [order, userInfo]);
 
   if (!isOpen || !order) return null;
 
@@ -61,6 +83,8 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
       customWidth="900px"
     >
       <div className={styles.modalDetailOrder}>
+        {/* ... (Phần UI bên trong giữ nguyên hoàn toàn giống file cũ) ... */}
+        {/* ... Chỉ copy lại phần return HTML từ file gốc của bạn vào đây ... */}
         <div className={styles.modalDetailLeft}>
           <h4
             style={{
@@ -72,10 +96,12 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
           >
             Danh sách món ăn ({order.orderItems?.length || 0})
           </h4>
-
           {order.orderItems &&
             order.orderItems.map((item) => (
-              <div className={styles.orderProduct} key={item.id}>
+              <div
+                className={styles.orderProduct}
+                key={item.id || Math.random()}
+              >
                 <div className={styles.orderProductLeft}>
                   <img
                     src={item.imgUrl}
@@ -105,6 +131,44 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
                 </div>
               </div>
             ))}
+
+          {order.trackingLogs && order.trackingLogs.length > 0 && (
+            <div
+              style={{
+                marginTop: "20px",
+                borderTop: "1px solid #eee",
+                paddingTop: "15px",
+              }}
+            >
+              <h4 style={{ marginBottom: "10px", color: "#555" }}>
+                Log vận chuyển ({order.trackingCode})
+              </h4>
+              <div
+                style={{
+                  background: "#f9f9f9",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                }}
+              >
+                {order.trackingLogs.map((log, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      fontSize: "12px",
+                      marginBottom: "5px",
+                      borderBottom: "1px dashed #eee",
+                      paddingBottom: "3px",
+                    }}
+                  >
+                    <strong style={{ color: "#888" }}>{log.time}:</strong>{" "}
+                    {log.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className={styles.modalDetailRight}>
@@ -114,6 +178,14 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
             </h4>
             {customerInfo ? (
               <ul className={styles.customerInfoList}>
+                <li className={styles.detailOrderItem}>
+                  <span className={styles.detailOrderItemLeft}>
+                    <i className="fa-light fa-barcode"></i> Mã vận đơn
+                  </span>
+                  <span className={styles.detailOrderItemRight}>
+                    {order.trackingCode || "---"}
+                  </span>
+                </li>
                 <li className={styles.detailOrderItem}>
                   <span className={styles.detailOrderItemLeft}>
                     <i className="fa-regular fa-user"></i> Người nhận

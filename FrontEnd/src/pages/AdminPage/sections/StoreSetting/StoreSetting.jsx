@@ -1,15 +1,21 @@
+// src/pages/AdminPage/sections/StoreSetting/StoreSetting.jsx
 import React, { useState, useEffect } from "react";
 import { useToast } from "../../../../context/ToastContext";
-import { useStoreInfo } from "../../../..//context/FilterProvider"; // Import hook mới
+// [MỚI] Thêm hook useUpdateStore
+import {
+  useStoreInfo,
+  useUpdateStore,
+} from "../../../../context/FilterProvider";
 import styles from "./StoreSetting.module.scss";
 
-const StoreSetting = () => {
+const StoreSetting = ({ storeId }) => {
+  // Nhận storeId từ props cha
   const { showToast } = useToast();
 
-  // 1. Lấy dữ liệu từ API
-  const { data: storeData, isLoading, error } = useStoreInfo();
+  // 1. Hook lấy dữ liệu và hook update
+  const { data: storeData, isLoading, error } = useStoreInfo(storeId);
+  const updateStoreMutation = useUpdateStore();
 
-  // 2. State form
   const [store, setStore] = useState({
     name: "",
     address: "",
@@ -21,7 +27,6 @@ const StoreSetting = () => {
     avatar: "",
   });
 
-  // 3. Cập nhật state khi có dữ liệu từ API
   useEffect(() => {
     if (storeData) {
       setStore({
@@ -46,18 +51,19 @@ const StoreSetting = () => {
     setStore((prev) => ({ ...prev, isOpen: !prev.isOpen }));
   };
 
+  // [SỬA] Gọi API Update
   const handleSave = () => {
-    // TODO: Gọi API PUT /store/update tại đây
-    console.log("Dữ liệu cần lưu:", store);
-    showToast({
-      title: "Thành công",
-      message: "Cập nhật thông tin quán thành công (Mock)",
-      type: "success",
-    });
+    updateStoreMutation.mutate(
+      { id: storeId, data: store },
+      {
+        onSuccess: () => {
+          // Toast đã được handle trong hook useUpdateStore, không cần gọi lại ở đây
+        },
+      }
+    );
   };
 
   const handleCloseRequest = () => {
-    // Logic mở modal đóng quán (có thể tách ra modal riêng nếu cần)
     if (window.confirm("Bạn có chắc muốn gửi yêu cầu đóng quán vĩnh viễn?")) {
       showToast({
         title: "Đã gửi",
@@ -83,7 +89,6 @@ const StoreSetting = () => {
   return (
     <div className={styles.section}>
       <div className={styles.settingCard}>
-        {/* Header */}
         <div className={styles.header}>
           <h2>⚙️ Cài đặt quán</h2>
           <p className={styles.hint}>
@@ -91,7 +96,6 @@ const StoreSetting = () => {
           </p>
         </div>
 
-        {/* Form Fields */}
         <div className={styles.formGroup}>
           <label>Tên quán</label>
           <input
@@ -186,13 +190,22 @@ const StoreSetting = () => {
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className={styles.actions}>
           <button className={styles.deactivateBtn} onClick={handleCloseRequest}>
             Gửi yêu cầu đóng quán vĩnh viễn
           </button>
-          <button className={styles.saveBtn} onClick={handleSave}>
-            <i className="fa-regular fa-floppy-disk"></i> Lưu thay đổi
+          <button
+            className={styles.saveBtn}
+            onClick={handleSave}
+            disabled={updateStoreMutation.isPending} // Disable khi đang lưu
+          >
+            {updateStoreMutation.isPending ? (
+              "Đang lưu..."
+            ) : (
+              <>
+                <i className="fa-regular fa-floppy-disk"></i> Lưu thay đổi
+              </>
+            )}
           </button>
         </div>
       </div>

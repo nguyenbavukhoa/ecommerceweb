@@ -9,7 +9,7 @@ const AccountInfo = ({ user, onEdit }) => {
         <div className={styles.infoField}>
           <span className={styles.infoLabel}>Họ và tên</span>
           <span className={styles.infoValue}>
-            {user.fullName || user.accountName}
+            {user.fullName || user.accountName || "Chưa cập nhật"}
           </span>
         </div>
         <div className={styles.infoField}>

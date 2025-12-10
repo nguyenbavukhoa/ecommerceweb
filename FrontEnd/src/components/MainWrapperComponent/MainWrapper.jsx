@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useFilters } from "../../context/FilterProvider";
-import { useProducts } from "../../hooks/useProducts";
+import { useProducts } from "../../Hooks/useProducts";
 
 import banner2 from "../../assets/images/banner-2.png";
 import banner3 from "../../assets/images/banner-3.png";

@@ -5,24 +5,42 @@ import AccountInfo from "./AccountInfo";
 import Modal from "../../components/common/Modal";
 import ProfileContent from "./ProfileContent";
 import DeliveryAddress from "../../components/DeliveryAddress/DeliveryAddress";
-import { useAuth } from "../../context/AuthContext"; // Import AuthContext
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext"; // [MỚI] Import Toast
 
 const ProfilePage = () => {
-  const { auth: user, updateProfile } = useAuth(); // Lấy user thực tế
+  const { auth: user, updateProfile } = useAuth();
+  const { showToast } = useToast(); // [MỚI]
+
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState(null);
 
   const handleProfileUpdate = async (updatedData) => {
-    // Gọi hàm updateProfile từ AuthContext (đã viết ở bước trước)
-    // Hàm này sẽ cập nhật cả LocalStorage và Mock DB
-    await updateProfile(updatedData);
-    setIsInfoModalOpen(false);
+    try {
+      // Gọi hàm updateProfile từ AuthContext (đã viết ở bước trước)
+      await updateProfile(updatedData);
+
+      showToast({
+        title: "Thành công",
+        message: "Cập nhật hồ sơ thành công!",
+        type: "success",
+      });
+
+      setIsInfoModalOpen(false);
+    } catch (error) {
+      console.error("Lỗi cập nhật profile:", error);
+      showToast({
+        title: "Lỗi",
+        message: "Cập nhật thất bại. Vui lòng thử lại.",
+        type: "error",
+      });
+    }
   };
 
   if (!user)
     return (
       <div style={{ padding: "40px", textAlign: "center" }}>
-        Vui lòng đăng nhập.
+        Vui lòng đăng nhập để xem hồ sơ.
       </div>
     );
 
@@ -38,6 +56,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Block 2: Sổ địa chỉ */}
+        {/* Lưu ý: DeliveryAddress cần tự xử lý logic fetch/save với API mới */}
         <div className={styles.checkoutRow}>
           <div className={styles.checkoutColTitle}>Sổ địa chỉ nhận hàng</div>
           <div className={styles.contentPadding}>
@@ -48,6 +67,7 @@ const ProfilePage = () => {
 
       {/* Modal Chỉnh sửa */}
       <Modal isOpen={isInfoModalOpen} onClose={() => setIsInfoModalOpen(false)}>
+        {/* Truyền user vào để form có dữ liệu ban đầu */}
         <ProfileContent user={user} onSave={handleProfileUpdate} />
       </Modal>
     </div>

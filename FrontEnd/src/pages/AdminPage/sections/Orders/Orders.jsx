@@ -4,35 +4,30 @@ import { useToast } from "../../../../context/ToastContext";
 import OrderDetailModal from "../../components/Modals/OrderDetailModal";
 import styles from "./Orders.module.scss";
 import { vnd } from "../../utils";
-
-// 1. IMPORT AUTH
 import { useAuth } from "../../../../context/AuthContext";
-
 import { useQueryClient } from "@tanstack/react-query";
 import { useAdminOrders, useFilters } from "../../../../context/FilterProvider";
-import { db } from "../../../../data/mockData";
+import { db } from "../../../../services/dbService";
+// [MỚI] Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom"; // Import thêm useLocation nếu cần
 
-const ORDER_STATUSES = [
-  { value: "PLACED", label: "Đã đặt hàng" },
-  { value: "CONFIRMED", label: "Đã xác nhận" },
-  { value: "SHIPPING", label: "Đang giao" },
-  { value: "COMPLETED", label: "Hoàn thành" },
-  { value: "CANCELLED", label: "Đã hủy" },
-];
-
-const STATUS_FLOW = ["PLACED", "CONFIRMED", "SHIPPING", "COMPLETED"];
+const STATUS_LABELS = {
+  PLACED: "Đã đặt hàng",
+  CONFIRMED: "Đã xác nhận",
+  PICKING: "Đang lấy hàng",
+  SHIPPING: "Đang giao",
+  COMPLETED: "Hoàn thành",
+  CANCELLED: "Đã hủy",
+};
 
 const Orders = () => {
+  const navigate = useNavigate(); // [MỚI] Hook điều hướng
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-
-  // 2. LẤY STORE ID
   const { user } = useAuth();
   const currentStoreId = user?.storeId;
-
   const { filters, setFilters } = useFilters();
 
-  // 3. TRUYỀN STORE ID VÀO HOOK
   const { data, isLoading, error } = useAdminOrders({
     ...filters,
     storeId: currentStoreId,
@@ -44,7 +39,6 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState(filters.name || "");
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -57,40 +51,30 @@ const Orders = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, filters.name, setFilters]);
 
-  const isStatusDisabled = (currentStatus, targetOptionValue) => {
-    if (currentStatus === targetOptionValue) return true;
-    if (currentStatus === "COMPLETED" || currentStatus === "CANCELLED")
-      return true;
-    if (targetOptionValue === "CANCELLED") return false;
-    const currentIndex = STATUS_FLOW.indexOf(currentStatus);
-    const targetIndex = STATUS_FLOW.indexOf(targetOptionValue);
-    if (currentIndex === -1 || targetIndex === -1) return true;
-    return targetIndex <= currentIndex;
-  };
+  // Hàm cập nhật trạng thái (Chỉ dùng cho Xác nhận hoặc Hoàn thành/Hủy)
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    if (!window.confirm(`Xác nhận chuyển trạng thái đơn #${orderId}?`)) return;
 
-  const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const success = db.orders.updateStatus(orderId, newStatus);
-      if (success) {
-        await queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
-        showToast({
-          title: "Cập nhật thành công",
-          message: `Đơn hàng #${orderId} -> ${newStatus}`,
-          type: "success",
-        });
-      } else {
-        showToast({
-          title: "Lỗi",
-          message: "Không tìm thấy đơn hàng",
-          type: "error",
-        });
-      }
+      await db.orders.updateStatus(orderId, newStatus);
+      await queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
+      showToast({
+        title: "Thành công",
+        message: `Đơn hàng #${orderId} -> ${STATUS_LABELS[newStatus]}`,
+        type: "success",
+      });
     } catch (err) {
-      console.error(err);
       showToast({ title: "Lỗi", message: "Có lỗi xảy ra", type: "error" });
     }
   };
 
+  // [MỚI] Hàm chuyển hướng sang DroneMap
+  const handleGoToMap = (orderId) => {
+    // Giữ nguyên đường dẫn gốc (ví dụ /admin), chỉ thêm params
+    // ?tab=DroneMap: Để AdminPage biết chuyển tab
+    // &orderId=...: Để DroneMap biết highlight đơn hàng nào
+    navigate(`?tab=DroneMap&orderId=${orderId}`);
+  };
   const handleStatusFilterChange = (e) => {
     const value = e.target.value;
     setStatusFilter(value);
@@ -125,7 +109,7 @@ const Orders = () => {
     setIsModalOpen(true);
   };
 
-  const getStatusClass = (status) => {
+  const getStatusBadgeClass = (status) => {
     switch (status) {
       case "PLACED":
         return styles.placed;
@@ -133,6 +117,8 @@ const Orders = () => {
         return styles.confirmed;
       case "SHIPPING":
         return styles.shipping;
+      case "PICKING":
+        return styles.shipping; // Gộp chung màu với shipping
       case "COMPLETED":
         return styles.completed;
       case "CANCELLED":
@@ -142,16 +128,82 @@ const Orders = () => {
     }
   };
 
+  // --- RENDER ACTION BUTTONS (SỬA LẠI LOGIC) ---
+  const renderActionButtons = (order) => {
+    const { id, orderStatus } = order;
+
+    // 1. Đơn mới -> Cần Xác nhận (Bếp nhận đơn)
+    if (orderStatus === "PLACED") {
+      return (
+        <div className={styles.actionGroup}>
+          <button
+            className={`${styles.btnAction} ${styles.btnConfirm}`}
+            onClick={() => handleUpdateStatus(id, "CONFIRMED")}
+            title="Xác nhận đơn"
+          >
+            <i className="fa-solid fa-check"></i> Xác nhận
+          </button>
+          <button
+            className={`${styles.btnAction} ${styles.btnCancel}`}
+            onClick={() => handleUpdateStatus(id, "CANCELLED")}
+            title="Hủy đơn"
+          >
+            <i className="fa-solid fa-xmark"></i> Hủy
+          </button>
+        </div>
+      );
+    }
+
+    // 2. Đã xác nhận -> Chuyển sang DroneMap để giao
+    if (orderStatus === "CONFIRMED") {
+      return (
+        <div className={styles.actionGroup}>
+          <button
+            className={`${styles.btnAction} ${styles.btnShip}`}
+            // [QUAN TRỌNG] Thay vì update status, ta navigate qua Map
+            onClick={() => handleGoToMap(id)}
+            title="Điều phối Drone"
+          >
+            <i className="fa-solid fa-map-location-dot"></i> Điều phối
+          </button>
+          {/* Nút hủy đề phòng */}
+          <button
+            className={`${styles.btnAction} ${styles.btnCancel}`}
+            onClick={() => handleUpdateStatus(id, "CANCELLED")}
+            title="Hủy đơn"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      );
+    }
+
+    // 3. Đang giao (PICKING / SHIPPING) -> Nút Hoàn thành (nếu cần can thiệp thủ công)
+    if (["PICKING", "SHIPPING"].includes(orderStatus)) {
+      return (
+        <div className={styles.actionGroup}>
+          <button className={styles.btnDroneStatus} disabled>
+            <i className="fa-solid fa-robot"></i> Đang bay...
+          </button>
+          {/* Có thể thêm nút Force Complete nếu cần, nhưng thường Drone tự update */}
+        </div>
+      );
+    }
+
+    return <span className={styles.noAction}>-</span>;
+  };
+
   return (
     <>
       <div className={styles.section}>
+        {/* ... (Phần Filter giữ nguyên như cũ) ... */}
         <div className={styles.adminControl}>
           <div className={styles.adminControlLeft}>
             <select value={statusFilter} onChange={handleStatusFilterChange}>
               <option value="ALL">Tất cả trạng thái</option>
-              {ORDER_STATUSES.map((st) => (
-                <option key={st.value} value={st.value}>
-                  {st.label}
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
                 </option>
               ))}
             </select>
@@ -167,7 +219,7 @@ const Orders = () => {
               <input
                 type="text"
                 className={styles.formSearchInput}
-                placeholder="Tìm kiếm mã đơn..."
+                placeholder="Tìm mã đơn..."
                 value={searchTerm}
                 onInput={(e) => setSearchTerm(e.target.value)}
               />
@@ -203,6 +255,7 @@ const Orders = () => {
           </div>
         </div>
 
+        {/* ... (Phần Table) ... */}
         <div className={styles.table}>
           <table width="100%">
             <thead>
@@ -212,14 +265,15 @@ const Orders = () => {
                 <th>Tổng tiền</th>
                 <th>Ghi chú</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th style={{ minWidth: "150px" }}>Thao tác</th>
+                <th>Chi tiết</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     style={{ textAlign: "center", padding: "20px" }}
                   >
                     Đang tải...
@@ -227,14 +281,7 @@ const Orders = () => {
                 </tr>
               ) : error ? (
                 <tr>
-                  <td
-                    colSpan="6"
-                    style={{
-                      textAlign: "center",
-                      padding: "20px",
-                      color: "red",
-                    }}
-                  >
+                  <td colSpan="7" style={{ textAlign: "center", color: "red" }}>
                     Lỗi: {error.message}
                   </td>
                 </tr>
@@ -253,49 +300,26 @@ const Orders = () => {
                       {order.note || "---"}
                     </td>
 
+                    {/* Status Badge */}
                     <td data-label="Trạng thái">
-                      <div
-                        className={`${
-                          styles.statusSelectWrapper
-                        } ${getStatusClass(order.orderStatus)}`}
+                      <span
+                        className={`${styles.statusBadge} ${getStatusBadgeClass(
+                          order.orderStatus
+                        )}`}
                       >
-                        <select
-                          value={order.orderStatus}
-                          onChange={(e) =>
-                            handleStatusChange(order.id, e.target.value)
-                          }
-                          className={styles.statusSelect}
-                          disabled={
-                            order.orderStatus === "COMPLETED" ||
-                            order.orderStatus === "CANCELLED"
-                          }
-                        >
-                          {ORDER_STATUSES.map((st) => (
-                            <option
-                              key={st.value}
-                              value={st.value}
-                              disabled={isStatusDisabled(
-                                order.orderStatus,
-                                st.value
-                              )}
-                            >
-                              {st.label}
-                            </option>
-                          ))}
-                        </select>
-                        {!(
-                          order.orderStatus === "COMPLETED" ||
-                          order.orderStatus === "CANCELLED"
-                        ) && <i className="fa-solid fa-caret-down"></i>}
-                      </div>
+                        {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+                      </span>
                     </td>
 
-                    <td className={styles.control} data-label="Thao tác">
+                    {/* Action Buttons */}
+                    <td data-label="Thao tác">{renderActionButtons(order)}</td>
+
+                    <td data-label="Chi tiết" className={styles.control}>
                       <button
                         className={styles.btnDetail}
                         onClick={() => openDetailModal(order)}
                       >
-                        <i className="fa-regular fa-eye"></i> Chi tiết
+                        <i className="fa-regular fa-eye"></i>
                       </button>
                     </td>
                   </tr>
@@ -303,10 +327,10 @@ const Orders = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     style={{ textAlign: "center", padding: "20px" }}
                   >
-                    Không có đơn hàng nào tại chi nhánh này.
+                    Không có đơn hàng nào.
                   </td>
                 </tr>
               )}
@@ -314,7 +338,9 @@ const Orders = () => {
           </table>
         </div>
 
+        {/* ... (Phần Pagination giữ nguyên) ... */}
         <div className={styles.pageNav}>
+          {/* Copy lại logic pagination cũ */}
           <ul className={styles.pageNavList}>
             <li
               className={`${styles.pageNavItem} ${

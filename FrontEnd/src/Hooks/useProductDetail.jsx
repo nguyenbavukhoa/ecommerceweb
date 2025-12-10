@@ -1,5 +1,6 @@
+// src/hooks/useProductDetail.jsx
 import { useState, useEffect } from "react";
-import { db } from "../data/mockData"; // Import db
+import { db } from "../services/dbService"; // [MỚI] Import từ Service
 
 export default function useProductDetail(productId) {
   const [product, setProduct] = useState(null);
@@ -16,10 +17,8 @@ export default function useProductDetail(productId) {
       setLoading(true);
       setError(null);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        // Dùng db.products.getOne
-        const found = db.products.getOne(productId);
+        // [MỚI] Gọi API chi tiết sản phẩm (Async/Await)
+        const found = await db.products.getOne(productId);
 
         if (found) {
           setProduct(found);
@@ -27,6 +26,7 @@ export default function useProductDetail(productId) {
           throw new Error("Không tìm thấy sản phẩm");
         }
       } catch (err) {
+        console.error("Lỗi lấy chi tiết sản phẩm:", err);
         setError(err.message);
       } finally {
         setLoading(false);

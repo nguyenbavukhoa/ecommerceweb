@@ -1,16 +1,20 @@
+// src/hooks/useProducts.jsx
 import { useQuery } from "@tanstack/react-query";
-import { db } from "../data/mockData";
+import { db } from "../services/dbService"; // [MỚI] Import từ Service
 
 export function useProducts(filters) {
   return useQuery({
     // Thêm filters.storeId vào queryKey để khi đổi store (nếu có) nó tự fetch lại
     queryKey: ["products", filters],
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // Không cần setTimeout giả lập nữa vì gọi API có độ trễ thật
 
-      let result = db.products.getAll();
+      // [MỚI] Gọi API lấy tất cả sản phẩm về
+      let result = await db.products.getAll();
 
-      // --- 1. QUAN TRỌNG: Lọc theo Store ID trước tiên ---
+      // --- LOGIC LỌC TẠI CLIENT (Giữ nguyên logic cũ của bạn) ---
+
+      // 1. Lọc theo Store ID
       if (filters.storeId) {
         result = result.filter((p) => p.storeId === filters.storeId);
       }

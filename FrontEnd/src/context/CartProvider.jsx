@@ -2,23 +2,29 @@
 import { useState, createContext, useContext } from "react";
 import { useCartAPI } from "../hooks/useCartAPI";
 import { useAuth } from "./AuthContext";
-// 1. Import useFilters
 import { useFilters } from "./FilterProvider";
 
 const CartContext = createContext();
-export const useCart = () => useContext(CartContext);
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) throw new Error("useCart must be used within a CartProvider");
+  return context;
+};
 
 export const CartProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Lấy thông tin User để tạo key localStorage riêng (tránh trùng cart với guest)
   const { auth } = useAuth();
 
-  // 2. Lấy storeId hiện tại
+  // Lấy storeId để lọc giỏ hàng (chỉ hiện món của quán đang đứng)
   const { filters } = useFilters();
-  const currentStoreId = filters.storeId;
+  const currentStoreId = filters.storeId || "RES-01";
 
-  // 3. Truyền currentStoreId vào hook
+  // Gọi Hook quản lý logic
   const {
-    cartItems, // Đây là list đã được lọc theo store
+    cartItems,
     loading,
     error,
     toggleItemSelected,
@@ -28,23 +34,31 @@ export const CartProvider = ({ children }) => {
     clearSelectedItems,
   } = useCartAPI(auth?.id, currentStoreId);
 
+  // --- UI HANDLERS ---
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
+  // Helper format tiền tệ
   const vnd = (price) =>
     Number(price).toLocaleString("vi-VN", {
       style: "currency",
       currency: "VND",
     });
 
+  // Tính tổng tiền (chỉ tính những món được tick chọn)
   const getCartTotal = () => {
     return (
       cartItems
         ?.filter((item) => item.selected)
-        ?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0
+        ?.reduce(
+          (sum, item) =>
+            sum + (item.price || item.priceBase || 0) * item.quantity,
+          0
+        ) || 0
     );
   };
 
+  // Tính tổng số lượng item (cho badge trên icon giỏ hàng)
   const getAmountCart = () => {
     return cartItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
   };
@@ -57,7 +71,7 @@ export const CartProvider = ({ children }) => {
     if (currentQuantity > 1) {
       updateItemQuantity(id, currentQuantity - 1);
     } else {
-      removeItemFromCart(id);
+      removeItemFromCart(id); // Giảm về 0 thì xóa luôn
     }
   };
 

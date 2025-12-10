@@ -1,3 +1,4 @@
+// src/pages/ServerPage/sections/Stores/Stores.jsx
 import React, { useState } from "react";
 import { useToast } from "../../../../context/ToastContext";
 import {
@@ -8,7 +9,8 @@ import {
 import { vnd } from "../../utils";
 import styles from "./Stores.module.scss";
 import RestaurantModal from "../../components/Modals/RestaurantModal";
-import { db } from "../../../../data/mockData"; // Import DB để check đơn hàng
+// [FIX] Import dbService
+import { db } from "../../../../services/dbService";
 
 const COMMISSION_RATE = 0.2;
 
@@ -33,9 +35,9 @@ const getStatusBadge = (status) => {
 
 const Stores = () => {
   const { showToast } = useToast();
-  // useServerStores giờ đã trả về revenue thực tế
   const { data: stores = [], isLoading } = useServerStores();
   const updateStoreMutation = useUpdateStore();
+  const deleteStoreMutation = useDeleteStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -54,15 +56,14 @@ const Stores = () => {
     setIsEditModalOpen(true);
   };
 
-  // [LOGIC MỚI] Xử lý Khóa/Mở khóa
-  const handleToggleStatus = (store) => {
+  // [FIX] Chuyển thành Async để gọi API kiểm tra
+  const handleToggleStatus = async (store) => {
     const isCurrentlyActive = store.status === "active";
     const newStatus = isCurrentlyActive ? "inactive" : "active";
 
-    // Nếu đang muốn KHÓA quán (active -> inactive)
     if (isCurrentlyActive) {
-      // 1. Kiểm tra xem có đơn hàng nào chưa hoàn thành không
-      const allOrders = db.orders.getAll();
+      // 1. Kiểm tra đơn hàng (Async)
+      const allOrders = await db.orders.getAll();
       const activeOrders = allOrders.filter(
         (o) =>
           o.restaurantId === store.id &&
@@ -73,14 +74,13 @@ const Stores = () => {
       if (activeOrders.length > 0) {
         showToast({
           title: "Không thể khóa quán",
-          message: `Quán đang có ${activeOrders.length} đơn hàng đang xử lý. Vui lòng hoàn thành hết đơn hàng trước khi khóa.`,
+          message: `Quán đang có ${activeOrders.length} đơn hàng đang xử lý.`,
           type: "error",
         });
-        return; // Dừng lại, không cho khóa
+        return;
       }
     }
 
-    // Nếu thỏa điều kiện thì hỏi xác nhận
     if (
       window.confirm(
         `Bạn muốn chuyển trạng thái sang ${
@@ -95,14 +95,10 @@ const Stores = () => {
     }
   };
 
-  const deleteStoreMutation = useDeleteStore(); // Hook xóa
-
-  // Logic Xóa (Double Confirm)
-  // --- [SỬA LẠI] LOGIC XÓA CÓ RÀNG BUỘC ---
-  const handleDeleteStore = (store) => {
-    // 1. KIỂM TRA RÀNG BUỘC ĐƠN HÀNG (Giống logic khóa)
-    // Không được xóa nếu đang có đơn hàng chưa hoàn tất
-    const allOrders = db.orders.getAll();
+  // [FIX] Chuyển thành Async
+  const handleDeleteStore = async (store) => {
+    // 1. Kiểm tra ràng buộc đơn hàng (Async)
+    const allOrders = await db.orders.getAll();
     const activeOrders = allOrders.filter(
       (o) =>
         o.restaurantId === store.id &&
@@ -113,14 +109,13 @@ const Stores = () => {
     if (activeOrders.length > 0) {
       showToast({
         title: "Không thể xóa quán",
-        message: `Quán đang có ${activeOrders.length} đơn hàng chưa hoàn tất. Vui lòng xử lý xong trước khi xóa!`,
-        type: "error", // Màu đỏ cảnh báo
+        message: `Quán đang có ${activeOrders.length} đơn hàng chưa hoàn tất.`,
+        type: "error",
       });
-      return; // Dừng ngay lập tức
+      return;
     }
 
-    // 2. KIỂM TRA RÀNG BUỘC TÀI CHÍNH (Optional nhưng nên có)
-    // Nếu quán còn doanh thu chưa rút -> Cảnh báo nhẹ (nhưng vẫn cho xóa nếu admin muốn)
+    // 2. Kiểm tra tài chính
     if (store.revenue > 0) {
       if (
         !window.confirm(
@@ -133,7 +128,7 @@ const Stores = () => {
       }
     }
 
-    // 3. XÁC NHẬN KÉP (Double Confirm)
+    // 3. Xóa
     if (
       window.confirm(
         `Bạn có chắc chắn muốn XÓA VĨNH VIỄN cửa hàng "${store.name}"?`
@@ -152,7 +147,9 @@ const Stores = () => {
   return (
     <>
       <div className={styles.section}>
+        {/* ... (Phần UI Table giữ nguyên như cũ) ... */}
         <div className={styles.adminControl}>
+          {/* Copy lại UI header cũ */}
           <div className={styles.adminControlLeft}>
             <h2 className={styles.pageTitle}>🏪 Quản lý Đối tác (Merchant)</h2>
           </div>
@@ -193,7 +190,6 @@ const Stores = () => {
                 </tr>
               ) : filteredStores.length > 0 ? (
                 filteredStores.map((s) => {
-                  // revenue đã được tính toán tự động từ mockData.js
                   const revenue = s.revenue || 0;
                   const grabShare = revenue * COMMISSION_RATE;
                   const storeShare = revenue - grabShare;
@@ -211,8 +207,6 @@ const Stores = () => {
                         </div>
                       </td>
                       <td>{s.owner || "---"}</td>
-
-                      {/* Hiển thị doanh thu thực tế */}
                       <td>
                         <div className={styles.revenue}>{vnd(revenue)}</div>
                         <div
@@ -241,9 +235,7 @@ const Stores = () => {
                           ({s.totalOrders || 0} đơn)
                         </div>
                       </td>
-
                       <td>{getStatusBadge(s.status)}</td>
-
                       <td>
                         <div className={styles.actions}>
                           <button
@@ -253,7 +245,6 @@ const Stores = () => {
                           >
                             <i className="fa-light fa-pen-to-square"></i>
                           </button>
-
                           <button
                             className={styles.btnLock}
                             onClick={() => handleToggleStatus(s)}

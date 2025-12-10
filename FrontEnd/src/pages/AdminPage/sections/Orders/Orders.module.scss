@@ -6,16 +6,19 @@
   display: block !important;
 }
 
-/* --- STATUS BADGES (Desktop) --- */
+/* --- STATUS BADGES (Static Label) --- */
 .statusBadge {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px; /* Bo góc nhẹ hơn cho hiện đại */
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  min-width: 100px;
 
   &.placed {
     background-color: #e3f2fd;
@@ -24,7 +27,7 @@
   }
   &.confirmed {
     background-color: #fff3e0;
-    color: #f57c00;
+    color: #ef6c00; /* Đậm hơn chút để dễ đọc */
     border: 1px solid #ffe0b2;
   }
   &.shipping {
@@ -57,84 +60,103 @@
 .adminControlRight {
   @include admin-control-buttons;
 }
-.btnDetail {
-  @include btn-detail-style;
+
+/* --- ACTION BUTTONS (Nút xử lý đơn) --- */
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-/* --- SELECT TRẠNG THÁI --- */
-.statusSelectWrapper {
-  position: relative;
-  display: inline-block;
-  border-radius: 50px;
-  padding: 0;
-  overflow: hidden;
-  min-width: 130px;
-  height: 32px;
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
+.btnAction {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  color: #fff;
+  white-space: nowrap;
 
-  i {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-    pointer-events: none;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
 
-  .statusSelect {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    border: none;
-    padding: 0 30px 0 15px;
-    font-size: 13px;
-    font-weight: 700;
-    color: inherit;
-    cursor: pointer;
-    outline: none;
+  &:active {
+    transform: translateY(0);
+  }
 
-    option {
-      color: #333;
-      background: #fff;
+  // 1. Nút Xác nhận (Xanh dương)
+  &.btnConfirm {
+    background-color: #2196f3;
+    &:hover {
+      background-color: #1976d2;
     }
   }
 
-  /* Màu sắc */
-  &.placed {
-    background-color: #e3f2fd;
-    color: #1976d2;
-    border-color: #bbdefb;
+  // 2. Nút Giao hàng (Vàng cam/Tím - giả lập màu brand ship)
+  &.btnShip {
+    background-color: #ff9800;
+    color: #fff;
+    &:hover {
+      background-color: #f57c00;
+    }
   }
-  &.confirmed {
-    background-color: #fff3e0;
-    color: #f57c00;
-    border-color: #ffe0b2;
+
+  // 3. Nút Hoàn thành (Xanh lá)
+  &.btnComplete {
+    background-color: #4caf50;
+    &:hover {
+      background-color: #388e3c;
+    }
   }
-  &.shipping {
-    background-color: #e0f2f1;
-    color: #00796b;
-    border-color: #b2dfdb;
-  }
-  &.completed {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border-color: #c8e6c9;
-  }
-  &.cancelled {
-    background-color: #ffebee;
-    color: #c62828;
-    border-color: #ffcdd2;
+
+  // 4. Nút Hủy (Đỏ nhạt hoặc Xám)
+  &.btnCancel {
+    background-color: #fff;
+    border: 1px solid #ffcdd2;
+    color: #d32f2f;
+    padding: 5px 10px; // Nhỏ hơn chút
+
+    &:hover {
+      background-color: #ffebee;
+      border-color: #ef9a9a;
+    }
   }
 }
 
+.noAction {
+  color: #999;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Nút Chi tiết (con mắt) */
+.btnDetail {
+  @include btn-detail-style;
+  min-width: 40px;
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .noteCell {
-  max-width: 200px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #666;
+  font-style: italic;
+  font-size: 13px;
 }
 
 /* --- Pagination --- */
@@ -165,12 +187,12 @@
     color: #fff;
     border: 2px solid var(--red);
   }
-}
-.pageNavItem.disabled a {
-  background-color: #f0f0f0;
-  color: #ccc;
-  border-color: #f0f0f0;
-  cursor: not-allowed;
+  &.disabled a {
+    background-color: #f0f0f0;
+    color: #ccc;
+    border-color: #f0f0f0;
+    cursor: not-allowed;
+  }
 }
 
 /* ====================================================== */
@@ -182,7 +204,7 @@
     background-color: #f4f6f8;
   }
 
-  /* 1. Control Bar: Stack Vertical */
+  /* ... (Giữ nguyên phần Admin Control Styles cũ của bạn) ... */
   .adminControl {
     flex-direction: column;
     gap: 15px;
@@ -191,7 +213,7 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
-    height: auto; /* Override fixed height if any */
+    height: auto;
   }
 
   .adminControlLeft,
@@ -200,112 +222,42 @@
     width: 100%;
     margin: 0;
   }
-
-  /* Select Box */
-  .adminControlLeft select {
+  .adminControlLeft select,
+  .formSearchInput,
+  .formSearch {
     width: 100%;
+    margin-bottom: 5px;
+  }
+  .formSearchInput {
+    padding-left: 45px;
     height: 45px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 12px;
-    font-size: 14px;
-    margin-bottom: 0;
+  }
+  .searchBtn {
+    height: 45px;
   }
 
-  /* Search Box */
-  .formSearch {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    transform: none !important;
-    width: 100%;
-    display: block;
-    margin-bottom: 5px;
-
-    .formSearchInput {
-      width: 100%;
-      height: 45px;
-      padding: 10px 15px 10px 45px; /* Padding cho icon */
+  .fillterDate {
+    display: flex;
+    gap: 10px;
+    div {
+      width: 48%;
+      display: flex;
+      flex-direction: column;
+    }
+    input {
+      height: 40px;
       border: 1px solid #ddd;
       border-radius: 8px;
-      outline: none;
-      box-sizing: border-box;
-      font-size: 14px;
-      background-color: #f9f9f9;
-
-      &:focus {
-        background-color: #fff;
-        border-color: var(--red);
-      }
-    }
-
-    .searchBtn {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 45px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #888;
-      font-size: 18px;
-      pointer-events: none;
+      padding: 0 10px;
     }
   }
-
-  /* Date Filters */
-  .adminControlRight {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    .fillterDate {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      gap: 10px;
-
-      div {
-        width: 48%;
-        display: flex;
-        flex-direction: column;
-
-        label {
-          font-size: 12px;
-          color: #666;
-          margin-bottom: 4px;
-          font-weight: 600;
-        }
-        input {
-          width: 100%;
-          height: 40px;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          padding: 0 10px;
-          box-sizing: border-box;
-        }
-      }
-    }
-
-    .btnResetOrder {
-      width: 100%;
-      height: 45px;
-      margin-top: 5px;
-      border-radius: 8px;
-      background-color: #eee;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      color: #555;
-
-      &:active {
-        background-color: #e0e0e0;
-      }
-    }
+  .btnResetOrder {
+    width: 100%;
+    height: 45px;
+    margin-top: 5px;
+    background: #eee;
+    border: none;
+    border-radius: 8px;
   }
 
   /* 2. TABLE -> CARD VIEW */
@@ -315,116 +267,110 @@
     padding: 0;
     border: none;
 
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-      display: block;
-    }
-
     thead {
       display: none;
-    } /* Ẩn header bảng */
+    }
 
-    /* Mỗi dòng là 1 Card */
     tbody tr {
+      display: block;
       background: #fff;
       margin-bottom: 15px;
       border-radius: 12px;
       padding: 15px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       border: 1px solid #eee;
-      position: relative;
     }
 
     tbody td {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      padding: 10px 0;
       border-bottom: 1px dashed #eee;
       text-align: right;
       font-size: 14px;
-      color: #333;
 
-      /* Label giả từ data-label */
       &::before {
         content: attr(data-label);
         font-weight: 600;
         color: #777;
-        text-align: left;
         font-size: 13px;
-        margin-right: 15px;
+        text-align: left;
       }
 
       &:last-child {
         border-bottom: none;
-        padding-bottom: 0;
-        padding-top: 15px;
-        justify-content: center; /* Nút chi tiết ra giữa */
       }
     }
 
-    /* Custom từng dòng dữ liệu */
-
-    /* Mã đơn */
+    /* Tùy chỉnh hiển thị Card */
     td:nth-of-type(1) {
       font-weight: 700;
       font-size: 15px;
-      color: #333;
-    }
-
-    /* Tổng tiền (Nổi bật) */
+    } /* Mã đơn */
     td:nth-of-type(3) {
       color: var(--red);
       font-weight: 700;
       font-size: 16px;
-    }
+    } /* Tiền */
 
-    /* Ghi chú (Cho xuống dòng nếu dài) */
+    /* Ghi chú: Xuống dòng */
     td:nth-of-type(4) {
       flex-direction: column;
       align-items: flex-start;
       gap: 5px;
-
-      &::before {
-        margin-bottom: 2px;
-      }
-
       .noteCell {
-        max-width: 100% !important;
         white-space: normal;
-        text-align: left;
-        font-style: italic;
-        color: #666;
         background: #f9f9f9;
         padding: 8px;
         border-radius: 6px;
         width: 100%;
-        box-sizing: border-box;
+        max-width: 100%;
       }
     }
 
-    /* Trạng thái (Dropdown to) */
+    /* Trạng thái (Badge to hơn trên mobile) */
     td:nth-of-type(5) {
-      .statusSelectWrapper {
+      .statusBadge {
         width: 100%;
-        height: 40px;
-        border-radius: 8px;
+        height: 35px;
+        font-size: 13px;
+      }
+    }
 
-        .statusSelect {
+    /* Xử lý đơn (Nút bấm) */
+    td:nth-of-type(6) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+
+      &::before {
+        display: none;
+      } /* Ẩn label "Xử lý" */
+
+      .actionGroup {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+
+        .btnAction {
+          flex: 1;
+          justify-content: center;
+          height: 40px;
           font-size: 14px;
         }
       }
     }
 
-    /* Nút Chi Tiết */
-    td:nth-of-type(6) {
+    /* Chi tiết */
+    td:nth-of-type(7) {
+      justify-content: center;
+      padding-top: 10px;
+      border-top: 1px solid #eee; /* Ngăn cách với nút xử lý */
+
       &::before {
-        content: none;
-      } /* Ẩn label */
+        display: none;
+      }
 
       .btnDetail {
         width: 100%;
@@ -434,12 +380,6 @@
         border: 1px solid #cce5ff;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin: 0;
 
         &:active {
           background-color: #e6f2ff;

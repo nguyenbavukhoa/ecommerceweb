@@ -1,14 +1,19 @@
 // src/pages/AdminPage/sections/Products/Step3Review.jsx
-import React from "react";
 import styles from "./ProductForm.module.scss";
 import { vnd } from "../../utils";
-import { MOCK_CATEGORIES } from "../../../../data/mockData";
 
-const Step3Review = ({ formData, options, imagePreview, onBack, onSave }) => {
-  // Tìm tên danh mục từ ID
+const Step3Review = ({
+  formData,
+  options,
+  imagePreview,
+  onBack,
+  onSave,
+  categories = [],
+}) => {
+  // Tìm tên danh mục từ List categories thật
   const categoryName =
-    MOCK_CATEGORIES.find((c) => c.id == formData.categoryId)?.name ||
-    "Chưa phân loại";
+    categories.find((c) => c.id == formData.categoryId)?.name ||
+    `ID: ${formData.categoryId}`;
 
   return (
     <div className={styles.reviewContainer}>

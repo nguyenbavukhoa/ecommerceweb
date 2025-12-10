@@ -1,32 +1,47 @@
 // src/pages/AdminPage/components/Modals/ProductDetailModal.jsx
-import React from "react";
+import { useState, useEffect } from "react";
 import CommonModal from "../../components/Modals/CommonModal";
 import ImageWithFallback from "../../../../components/ImageWithFallbackComponent/ImageWithFallback";
 import { vnd } from "../../utils";
 import styles from "./ProductDetailModal.module.scss";
-import useProductDetail from "../../../../hooks/useProductDetail";
+import useProductDetail from "../../../../Hooks/useProductDetail";
+import { db } from "../../../../services/dbService"; // [FIX]
 
 const ProductDetailModal = ({ isOpen, onClose, productId }) => {
   // Gọi hook lấy chi tiết sản phẩm (từ Mock Data)
-  const { product: productDataFromApi, loading: isLoadingDetail } =
-    useProductDetail(productId);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (isOpen && productId) {
+        setLoading(true);
+        try {
+          const data = await db.products.getOne(productId);
+          setProduct(data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loadData();
+  }, [isOpen, productId]);
 
   const renderContent = () => {
-    if (!productDataFromApi) return null;
+    if (!product) return null;
 
-    // Map dữ liệu từ DB sang cấu trúc hiển thị
     const p = {
-      img: productDataFromApi.imgMain,
-      title: productDataFromApi.name,
-      description: productDataFromApi.description,
-      // Hiển thị tên Category nếu có, nếu không thì hiện ID
-      category:
-        productDataFromApi.category || `ID: ${productDataFromApi.categoryId}`,
-      price: productDataFromApi.priceBase, // Lấy đúng trường priceBase
-      status: productDataFromApi.status === "ACTIVE" ? 1 : 0,
-      options: productDataFromApi.optionGroups || [],
+      img: product.imgMain,
+      title: product.name,
+      description: product.description,
+      // Có thể fetch category name nếu cần, ở đây hiện ID cho nhanh
+      category: product.category || `Category ID: ${product.categoryId}`,
+      price: product.priceBase,
+      status: product.status === "ACTIVE" ? 1 : 0,
+      options: product.optionGroups || [],
     };
-
     return (
       <div className={styles.detailLayout}>
         {/* Cột trái: Ảnh */}
@@ -115,8 +130,8 @@ const ProductDetailModal = ({ isOpen, onClose, productId }) => {
       title="CHI TIẾT SẢN PHẨM"
       customWidth="800px"
     >
-      {isLoadingDetail ? (
-        <p style={{ padding: "20px" }}>Đang tải chi tiết...</p>
+      {loading ? (
+        <p style={{ padding: "20px" }}>Đang tải...</p>
       ) : (
         renderContent()
       )}

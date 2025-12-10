@@ -5,14 +5,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../../../context/AuthContext";
 
 import { useFilters, useCategories } from "../../../../context/FilterProvider";
-import { useProducts } from "../../../../hooks/useProducts";
+import { useProducts } from "../../../../Hooks/useProducts";
 import { useToast } from "../../../../context/ToastContext";
 import ProductDetailModal from "../../components/Modals/ProductDetailModal";
 import ProductForm from "../../components/Form/ProductForm";
 import styles from "./Products.module.scss";
 import { vnd } from "../../utils";
 import ImageWithFallback from "../../../../components/ImageWithFallbackComponent/ImageWithFallback";
-import { db } from "../../../../data/mockData";
+import { db } from "../../../../services/dbService"; // [MỚI]
 
 const Products = () => {
   const { showToast } = useToast();
@@ -54,7 +54,10 @@ const Products = () => {
   const handleStatusToggle = async (product) => {
     try {
       const newStatus = product.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-      db.products.update(product.id, { status: newStatus });
+
+      // [MỚI] Gọi API update
+      await db.products.update(product.id, { status: newStatus });
+
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       showToast({
         title: "Thành công",

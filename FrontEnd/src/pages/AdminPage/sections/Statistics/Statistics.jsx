@@ -5,7 +5,7 @@ import { vnd } from "../../utils";
 
 // 1. IMPORT AUTH & DB
 import { useAuth } from "../../../../context/AuthContext";
-import { db } from "../../../../data/mockData";
+import { db } from "../../../../services/dbService"; // [MỚI]
 
 const Statistics = () => {
   const { user } = useAuth();
@@ -38,60 +38,66 @@ const Statistics = () => {
 
   // --- 2. LOGIC TỔNG HỢP DỮ LIỆU ---
   useEffect(() => {
-    const processData = () => {
-      let allOrders = db.orders.getAll();
+    const processData = async () => {
+      try {
+        let allOrders = await db.orders.getAll();
 
-      // Lọc theo Store của Admin
-      if (currentStoreId) {
-        allOrders = allOrders.filter((o) => o.restaurantId === currentStoreId);
-      }
-      setStoreOrders(allOrders);
+        // Lọc theo Store của Admin
+        if (currentStoreId) {
+          allOrders = allOrders.filter(
+            (o) => o.restaurantId === currentStoreId
+          );
+        }
+        setStoreOrders(allOrders);
 
-      const productMap = new Map();
+        const productMap = new Map();
 
-      allOrders.forEach((order) => {
-        // Bỏ qua đơn hủy
-        if (order.orderStatus === "CANCELLED") return;
+        allOrders.forEach((order) => {
+          // Bỏ qua đơn hủy
+          if (order.orderStatus === "CANCELLED") return;
 
-        order.orderItems.forEach((item) => {
-          // QUAN TRỌNG: Dùng productId để gom nhóm (Bất kể size/topping)
-          const key = item.productId;
+          order.orderItems.forEach((item) => {
+            // QUAN TRỌNG: Dùng productId để gom nhóm (Bất kể size/topping)
+            const key = item.productId;
 
-          // SỬA 2: Ép kiểu Number để tránh lỗi cộng chuỗi
-          const qty = Number(item.quantity);
-          const price = Number(item.price);
-          const total = qty * price;
+            // SỬA 2: Ép kiểu Number để tránh lỗi cộng chuỗi
+            const qty = Number(item.quantity);
+            const price = Number(item.price);
+            const total = qty * price;
 
-          if (productMap.has(key)) {
-            const existing = productMap.get(key);
-            existing.quantity += qty;
-            existing.doanhthu += total;
-            // Cập nhật thời gian mới nhất để lọc ngày
-            if (new Date(order.orderTime) > new Date(existing.time)) {
-              existing.time = order.orderTime;
+            if (productMap.has(key)) {
+              const existing = productMap.get(key);
+              existing.quantity += qty;
+              existing.doanhthu += total;
+              // Cập nhật thời gian mới nhất để lọc ngày
+              if (new Date(order.orderTime) > new Date(existing.time)) {
+                existing.time = order.orderTime;
+              }
+            } else {
+              productMap.set(key, {
+                id: key, // ID gốc
+                title: item.productName,
+                category: assignCategoryByName(item.productName),
+                img: item.imgUrl,
+                quantity: qty,
+                doanhthu: total,
+                time: order.orderTime,
+              });
             }
-          } else {
-            productMap.set(key, {
-              id: key, // ID gốc
-              title: item.productName,
-              category: assignCategoryByName(item.productName),
-              img: item.imgUrl,
-              quantity: qty,
-              doanhthu: total,
-              time: order.orderTime,
-            });
-          }
+          });
         });
-      });
 
-      const resultList = Array.from(productMap.values());
-      setAggregatedData(resultList);
+        const resultList = Array.from(productMap.values());
+        setAggregatedData(resultList);
 
-      setOverview({
-        products: resultList.length,
-        quantity: resultList.reduce((sum, item) => sum + item.quantity, 0),
-        sale: resultList.reduce((sum, item) => sum + item.doanhthu, 0),
-      });
+        setOverview({
+          products: resultList.length,
+          quantity: resultList.reduce((sum, item) => sum + item.quantity, 0),
+          sale: resultList.reduce((sum, item) => sum + item.doanhthu, 0),
+        });
+      } catch (e) {
+        console.error("Lỗi tổng hợp dữ liệu thống kê:", e);
+      }
     };
 
     processData();

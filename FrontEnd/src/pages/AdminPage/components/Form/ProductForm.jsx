@@ -7,15 +7,17 @@ import styles from "./ProductForm.module.scss";
 import Step1Info from "./Step1Info";
 import Step2Options from "./Step2Options";
 import Step3Review from "./Step3Review";
-import { db, MOCK_CATEGORIES } from "../../../../data/mockData";
+import { db } from "../../../../services/dbService";
+import { useCategories } from "../../../../context/FilterProvider";
 
 const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
   const { showToast } = useToast();
-  // 2. LẤY STORE ID
   const { user } = useAuth();
 
-  const [currentStep, setCurrentStep] = useState(1);
+  // [MỚI] Lấy danh mục từ API thật thay vì MOCK_CATEGORIES cứng
+  const { data: categories = [] } = useCategories();
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
     categoryId: 1,
@@ -26,29 +28,37 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
     "/assets/img/blank-image.png"
   );
   const [options, setOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (productToEditId) {
-      const product = db.products.getOne(productToEditId);
-      if (product) {
-        setFormData({
-          title: product.name,
-          desc: product.description,
-          price: product.priceBase,
-          categoryId: product.categoryId || 1,
-        });
-        setImagePreview(product.imgMain || "/assets/img/blank-image.png");
-        const loadedOptions = (product.optionGroups || []).map((g) => ({
-          ...g,
-          values: g.values.map((v) => ({ ...v, name: v.value || v.name })),
-        }));
-        setOptions(loadedOptions);
+    const fetchProduct = async () => {
+      if (productToEditId) {
+        try {
+          const product = await db.products.getOne(productToEditId);
+          if (product) {
+            setFormData({
+              title: product.name,
+              desc: product.description,
+              price: product.priceBase,
+              categoryId: product.categoryId || 1,
+            });
+            setImagePreview(product.imgMain || "/assets/img/blank-image.png");
+            const loadedOptions = (product.optionGroups || []).map((g) => ({
+              ...g,
+              values: g.values.map((v) => ({ ...v, name: v.value || v.name })),
+            }));
+            setOptions(loadedOptions);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        setFormData({ title: "", categoryId: 1, price: "", desc: "" });
+        setImagePreview("/assets/img/blank-image.png");
+        setOptions([]);
       }
-    } else {
-      setFormData({ title: "", categoryId: 1, price: "", desc: "" });
-      setImagePreview("/assets/img/blank-image.png");
-      setOptions([]);
-    }
+    };
+    fetchProduct();
     setCurrentStep(1);
   }, [productToEditId]);
 
@@ -63,9 +73,9 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
     setCurrentStep(3);
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     try {
-      // 3. CHUẨN BỊ DATA
+      setIsSubmitting(true);
       const productData = {
         name: formData.title,
         description: formData.desc,
@@ -73,9 +83,7 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
         imgMain: imagePreview,
         categoryId: parseInt(formData.categoryId),
         status: "ACTIVE",
-        // Lưu storeId: Nếu sửa thì giữ nguyên, nếu mới thì lấy từ user
-        storeId: productToEditId ? undefined : user?.storeId,
-
+        storeId: productToEditId ? undefined : user?.storeId, // Giữ storeId cũ nếu edit
         optionGroups: options.map((g) => ({
           ...g,
           values: g.values.map((v) => ({
@@ -87,27 +95,18 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
       };
 
       if (productToEditId) {
-        // --- UPDATE (Giữ nguyên storeId cũ trong hàm update của mockData) ---
-        db.products.update(productToEditId, productData);
+        await db.products.update(productToEditId, productData);
         showToast({
           title: "Thành công",
           message: "Đã cập nhật món ăn!",
           type: "success",
         });
       } else {
-        // --- CREATE (Có storeId mới) ---
-        if (!user?.storeId) {
-          showToast({
-            title: "Lỗi",
-            message: "Không xác định được cửa hàng!",
-            type: "error",
-          });
-          return;
-        }
-        db.products.add(productData);
+        if (!user?.storeId) throw new Error("Không xác định được cửa hàng!");
+        await db.products.add(productData);
         showToast({
           title: "Thành công",
-          message: "Đã thêm món mới vào thực đơn!",
+          message: "Đã thêm món mới!",
           type: "success",
         });
       }
@@ -116,6 +115,8 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
     } catch (error) {
       console.error(error);
       showToast({ title: "Lỗi", message: "Có lỗi xảy ra!", type: "error" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -169,7 +170,7 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
                 initialData={formData}
                 initialImage={imagePreview}
                 onSubmit={handleStep1Submit}
-                categories={MOCK_CATEGORIES}
+                categories={categories}
               />
             )}
             {currentStep === 2 && (
@@ -186,6 +187,7 @@ const ProductForm = ({ productToEditId, onSaveSuccess, onCancel }) => {
                 imagePreview={imagePreview}
                 onBack={() => setCurrentStep(2)}
                 onSave={handleFinalSubmit}
+                categories={categories}
               />
             )}
           </div>

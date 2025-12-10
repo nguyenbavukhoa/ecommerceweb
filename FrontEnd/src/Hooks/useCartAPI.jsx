@@ -1,107 +1,174 @@
 // src/hooks/useCartAPI.jsx
 import { useState, useEffect, useMemo } from "react";
-import { MOCK_CART_ITEMS } from "../data/mockData";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { db } from "../services/dbService";
 
-// Nhận thêm currentStoreId
 export function useCartAPI(userId, currentStoreId) {
-  const storageKey = userId ? `cart_${userId}` : "cart_guest";
+  const queryClient = useQueryClient();
 
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  // --- STATE CHO GUEST ---
+  const [localCart, setLocalCart] = useState([]);
+  const isGuest = !userId;
+  const storageKey = "cart_guest";
 
-  // Load cart
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (isGuest && typeof window !== "undefined") {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
-        setCartItems(JSON.parse(saved));
-      } else {
-        setCartItems(userId ? [] : MOCK_CART_ITEMS || []);
+        try {
+          setLocalCart(JSON.parse(saved));
+        } catch (e) {
+          setLocalCart([]);
+        }
       }
     }
-  }, [storageKey, userId]);
+  }, [isGuest]);
 
-  // Save cart
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(storageKey, JSON.stringify(cartItems));
-    }
-  }, [cartItems, storageKey]);
+  const setCartItemsLocal = (items) => {
+    setLocalCart(items);
+    localStorage.setItem(storageKey, JSON.stringify(items));
+  };
 
-  // --- [QUAN TRỌNG] Lọc sản phẩm theo Store ID ---
-  // Chỉ hiển thị những món thuộc cửa hàng đang chọn
+  // --- LOGIC CHO USER (SERVER) ---
+  const { data: serverCartData, isLoading: isLoadingServer } = useQuery({
+    queryKey: ["cart", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      return await db.cart.getUserCart(userId);
+    },
+    enabled: !!userId,
+    refetchInterval: 2000,
+  });
+
+  // Merge Cart Items
+  const cartItems = useMemo(() => {
+    if (isGuest) return localCart;
+    return serverCartData?.items || [];
+  }, [isGuest, localCart, serverCartData]);
+
   const visibleCartItems = useMemo(() => {
     if (!currentStoreId) return cartItems;
-    // Giả sử item trong giỏ có trường storeId (cần thêm lúc Add)
-    // Hoặc nếu mock cũ chưa có, ta tạm chấp nhận hiển thị hết (fallback)
     return cartItems.filter(
       (item) => !item.storeId || item.storeId === currentStoreId
     );
   }, [cartItems, currentStoreId]);
 
-  const addItemToCart = async (newItem) => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 200));
+  // --- HELPER: Hàm tính toán giỏ hàng mới (Dùng chung) ---
+  const calculateNewCart = (currentItems, newItem, storeId) => {
+    let newCart = [...currentItems];
+    const existingIndex = newCart.findIndex(
+      (item) => item.id === newItem.id && item.storeId === storeId
+    );
 
-    setCartItems((prev) => {
-      const cartItemData = {
+    if (existingIndex > -1) {
+      // Cộng dồn
+      newCart[existingIndex] = {
+        ...newCart[existingIndex],
+        quantity: newCart[existingIndex].quantity + (newItem.quantity || 1),
+      };
+    } else {
+      // Thêm mới
+      newCart.push({
         ...newItem,
         selected: true,
-        id: Date.now(),
-        // Lưu ý: newItem phải có storeId truyền từ ProductDetail
-      };
-      return [...prev, cartItemData];
-    });
+        storeId: storeId || "RES-01",
+        addedAt: Date.now(),
+      });
+    }
+    return newCart;
+  };
 
-    setLoading(false);
+  // --- MUTATION: ADD TO CART (Sửa lại để an toàn hơn) ---
+  const addToCartMutation = useMutation({
+    mutationFn: async (newItem) => {
+      // 1. Nếu là GUEST: Xử lý LocalStorage
+      if (isGuest) {
+        const newCart = calculateNewCart(localCart, newItem, currentStoreId);
+        setCartItemsLocal(newCart);
+        return;
+      }
+
+      // 2. Nếu là USER: Fetch dữ liệu mới nhất từ Server để tránh race condition
+      const latestCart = await db.cart.getUserCart(userId);
+      const currentItems = latestCart ? latestCart.items : [];
+
+      // Tính toán dựa trên dữ liệu server vừa lấy về
+      const newItems = calculateNewCart(currentItems, newItem, currentStoreId);
+
+      if (latestCart) {
+        await db.cart.updateCartItems(latestCart.id, newItems);
+      } else {
+        await db.cart.createCart(userId, newItems);
+      }
+    },
+    onSuccess: () => {
+      if (!isGuest) queryClient.invalidateQueries(["cart", userId]);
+    },
+  });
+
+  // --- MUTATION: UPDATE/DELETE (Giữ nguyên logic cũ nhưng gọn hơn) ---
+  const updateCartMutation = useMutation({
+    mutationFn: async (newItems) => {
+      if (isGuest) {
+        setCartItemsLocal(newItems);
+        return;
+      }
+      // Với update/delete thì chấp nhận dùng state hiện tại vì user đang thao tác trực tiếp
+      const latestCart = await db.cart.getUserCart(userId);
+      if (latestCart) {
+        await db.cart.updateCartItems(latestCart.id, newItems);
+      }
+    },
+    onSuccess: () => {
+      if (!isGuest) queryClient.invalidateQueries(["cart", userId]);
+    },
+  });
+
+  // --- EXPORTED ACTIONS ---
+
+  const addItemToCart = async (newItem) => {
+    // Truyền trực tiếp newItem vào mutation, không tính toán array ở đây nữa
+    await addToCartMutation.mutateAsync(newItem);
     return { success: true };
   };
 
   const toggleItemSelected = async (itemId, isSelected) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, selected: isSelected } : item
-      )
+    const newCart = cartItems.map((item) =>
+      item.id === itemId ? { ...item, selected: isSelected } : item
     );
-    return { success: true };
+    await updateCartMutation.mutateAsync(newCart);
   };
 
   const updateItemQuantity = async (itemId, quantity) => {
     if (quantity < 1) return;
-    setCartItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
+    const newCart = cartItems.map((item) =>
+      item.id === itemId ? { ...item, quantity } : item
     );
-    return { success: true };
+    await updateCartMutation.mutateAsync(newCart);
   };
 
   const removeItemFromCart = async (itemId) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-    return { success: true };
+    const newCart = cartItems.filter((item) => item.id !== itemId);
+    await updateCartMutation.mutateAsync(newCart);
   };
 
-  const clearSelectedItems = () => {
-    // Chỉ xóa những item đang hiển thị (thuộc store này) và được chọn
-    setCartItems((prev) =>
-      prev.filter((item) => {
-        const isBelongToStore =
-          !item.storeId || item.storeId === currentStoreId;
-        return !(isBelongToStore && item.selected);
-      })
-    );
+  const clearSelectedItems = async () => {
+    const newCart = cartItems.filter((item) => {
+      const isBelongToStore = !item.storeId || item.storeId === currentStoreId;
+      const isSelected = item.selected;
+      return !(isBelongToStore && isSelected);
+    });
+    await updateCartMutation.mutateAsync(newCart);
   };
 
   return {
-    // Trả về danh sách đã lọc theo store
     cartItems: visibleCartItems,
-    // Hàm gốc để thao tác toàn bộ (nếu cần)
     allCartItems: cartItems,
-    loading,
-    error,
+    loading: isGuest ? false : isLoadingServer || addToCartMutation.isPending,
+    addItemToCart,
     toggleItemSelected,
     updateItemQuantity,
     removeItemFromCart,
-    addItemToCart,
     clearSelectedItems,
   };
 }

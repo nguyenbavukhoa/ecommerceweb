@@ -1,0 +1,97 @@
+/* src/pages/AdminPage/components/Modals/CommonModal.module.scss */
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 10px; /* Thêm padding để modal không dính sát mép màn hình */
+}
+
+.modalContainer {
+  background-color: #fff;
+  /* Thay vì fix cứng chiều cao, hãy dùng max-height */
+  max-height: calc(100vh - 40px);
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column; /* Để header/content/footer xếp dọc */
+  position: relative;
+  transform: scale(1);
+  transition: 0.3s ease;
+
+  width: 800px; /* Width mặc định cho Desktop */
+  /* QUAN TRỌNG: Giới hạn max-width để không bao giờ vượt quá màn hình */
+  max-width: 100%;
+}
+
+.modalClose {
+  /* ... Giữ nguyên style nút đóng ... */
+  background-color: rgba(0, 0, 0, 0.1);
+  height: 32px;
+  width: 32px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #fff;
+  }
+}
+
+.modalContainerTitle {
+  display: block;
+  padding: 15px 20px;
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 16px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+}
+
+/* Wrapper nội dung có thể cuộn */
+.modalContent {
+  overflow-y: auto;
+  flex: 1; /* Chiếm hết không gian còn lại */
+  /* Scrollbar đẹp */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+  }
+}
+
+/* --- RESPONSIVE --- */
+@media only screen and (max-width: 768px) {
+  .modalContainer {
+    width: 100% !important; /* Ghi đè width từ props */
+    height: auto;
+    max-height: 90vh; /* Trên mobile cho cao gần hết màn hình */
+    border-radius: 12px;
+  }
+
+  .modalContainerTitle {
+    font-size: 15px;
+    padding-right: 50px; /* Tránh đè nút đóng */
+  }
+}

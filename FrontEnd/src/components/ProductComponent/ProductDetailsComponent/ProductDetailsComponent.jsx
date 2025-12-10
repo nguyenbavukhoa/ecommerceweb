@@ -3,38 +3,39 @@ import { vnd } from "../../../utils/vnd";
 import { useCart } from "../../../context/CartProvider";
 import ImageWithFallback from "../../ImageWithFallbackComponent/ImageWithFallback";
 import VariantOptions from "../../VariantOptionComponent/VariantOptions";
-import useProductDetail from "../../../hooks/useProductDetail";
+import useProductDetail from "../../../Hooks/useProductDetail";
 
-const ProductDetailsComponent = ({
-  productId,
-  onClose,
-  onAddToCart,
-  onOrderNow,
-}) => {
+const ProductDetailsComponent = ({ productId, onClose }) => {
   const { product, loading, error } = useProductDetail(productId);
   const { addItemToCart, openCart } = useCart();
+
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [optionsPrice, setOptionsPrice] = useState(0);
-
   const [selectedValueIds, setSelectedValueIds] = useState([]);
-  // 1. Thêm state lưu danh sách object option để hiển thị tên trong giỏ
   const [selectedOptionsDTO, setSelectedOptionsDTO] = useState([]);
 
-  // 2. Cập nhật callback nhận tham số thứ 4 (optionObjects)
+  // [QUAN TRỌNG] Reset form khi productId thay đổi
+  useEffect(() => {
+    setQuantity(1);
+    setNote("");
+    setOptionsPrice(0);
+    setSelectedValueIds([]);
+    setSelectedOptionsDTO([]);
+  }, [productId]);
+
   const handleSelectionChange = useCallback(
     (selection, priceOfOptions, ids, optionObjects) => {
       setOptionsPrice(priceOfOptions);
       setSelectedValueIds(ids);
-      setSelectedOptionsDTO(optionObjects); // Lưu DTO
+      setSelectedOptionsDTO(optionObjects);
     },
     []
   );
 
   useEffect(() => {
     if (product) {
-      // 3. Sửa product.basePrice thành product.priceBase (theo mockData)
       const base = product.priceBase || 0;
       const finalPrice = (base + optionsPrice) * quantity;
       setTotalPrice(finalPrice);
@@ -53,27 +54,27 @@ const ProductDetailsComponent = ({
     if (!product) return;
 
     const cartItemData = {
-      productId: product.id,
+      // Dùng id và name trực tiếp từ product hiện tại
+      id: product.id, // [FIX] Đảm bảo dùng 'id' để khớp logic findIndex trong hook
       productName: product.name,
       imgUrl: product.imgMain,
       price: product.priceBase + optionsPrice,
-
-      // [QUAN TRỌNG] Thêm storeId vào item trong giỏ
       storeId: product.storeId,
-
       optionValuesDTO: selectedOptionsDTO,
       quantity: quantity,
       note: note,
     };
 
+    // Gọi hàm add
     await addItemToCart(cartItemData);
+
     alert("Đã thêm vào giỏ hàng!");
     openCart();
     onClose();
   };
 
-  if (loading) return <div>Đang tải sản phẩm...</div>;
-  if (error) return <div>Lỗi: {error}</div>;
+  if (loading) return <div style={{ padding: 20 }}>Đang tải sản phẩm...</div>;
+  if (error) return <div style={{ padding: 20 }}>Lỗi: {error}</div>;
   if (!product) return null;
 
   return (
@@ -81,7 +82,7 @@ const ProductDetailsComponent = ({
       <div className="modal-header">
         <ImageWithFallback
           className="product-image"
-          src={product.imgMain} // Sửa imgUrl thành imgMain theo mockData
+          src={product.imgMain}
           alt={product.name}
         />
       </div>
@@ -89,7 +90,6 @@ const ProductDetailsComponent = ({
         <h2 className="product-title">{product.name}</h2>
         <div className="product-control">
           <div className="priceBox">
-            {/* 5. Sửa hiển thị giá */}
             <span className="current-price">{vnd(product.priceBase)}</span>
           </div>
           <div className="buttons_added">
@@ -105,10 +105,7 @@ const ProductDetailsComponent = ({
               min="1"
               type="number"
               value={quantity}
-              onChange={(e) => {
-                const val = parseInt(e.target.value, 10);
-                if (!isNaN(val) && val >= 1 && val <= 100) setQuantity(val);
-              }}
+              readOnly
             />
             <input
               className="plus is-form"
@@ -120,12 +117,17 @@ const ProductDetailsComponent = ({
         </div>
         <p className="product-description">{product.description}</p>
       </div>
-      <div className="modal-variants">
-        <VariantOptions
-          optionGroups={product.optionGroups}
-          onSelectionChange={handleSelectionChange}
-        />
-      </div>
+
+      {/* Chỉ render VariantOptions khi có optionGroups */}
+      {product.optionGroups && product.optionGroups.length > 0 && (
+        <div className="modal-variants">
+          <VariantOptions
+            optionGroups={product.optionGroups}
+            onSelectionChange={handleSelectionChange}
+          />
+        </div>
+      )}
+
       <div className="notebox">
         <p className="notebox-title">Ghi chú</p>
         <textarea

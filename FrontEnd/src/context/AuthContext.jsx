@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-import { db } from "../data/mockData"; // Import DB
+// [QUAN TRỌNG] Đổi import sang dbService
+import { db } from "../services/dbService";
 
 const AuthContext = createContext();
 
@@ -15,66 +16,79 @@ export const AuthProvider = ({ children }) => {
 
   // --- 1. LOGIN ADMIN ---
   const loginAdmin = async (email, password) => {
-    await new Promise((r) => setTimeout(r, 500));
+    // Không cần setTimeout giả lập nữa
+    try {
+      // Admin vẫn cần fetch all để check userType (hoặc viết API riêng, nhưng MVP dùng getAll ok)
+      const users = await db.users.getAll();
 
-    const users = db.users.getAll();
-    const foundAdmin = users.find(
-      (u) => u.email === email && u.password === password && u.userType === 1
-    );
+      const foundAdmin = users.find(
+        (u) => u.email === email && u.password === password && u.userType === 1
+      );
 
-    if (foundAdmin) {
-      const adminSession = {
-        ...foundAdmin,
-        accessToken: "fake-admin-token-" + Date.now(),
-      };
-      setUser(adminSession);
-      localStorage.setItem("currentUser", JSON.stringify(adminSession));
-      return true;
+      if (foundAdmin) {
+        const adminSession = {
+          ...foundAdmin,
+          accessToken: "fake-admin-token-" + Date.now(),
+        };
+        setUser(adminSession);
+        localStorage.setItem("currentUser", JSON.stringify(adminSession));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Lỗi đăng nhập Admin:", error);
+      return false;
     }
-    return false;
   };
 
   // --- 2. LOGIN USER (KHÁCH HÀNG) ---
   const loginUser = async (email, password, rememberMe = false) => {
-    await new Promise((r) => setTimeout(r, 500));
-    const users = db.users.getAll();
+    try {
+      // [MỚI] Dùng hàm login của service (gọi API filter theo email)
+      const foundUser = await db.users.login(email);
 
-    const foundUser = users.find((u) => u.email === email && u.userType === 0);
+      // Check password và userType (chỉ cho phép userType = 0 đăng nhập ở trang này)
+      if (foundUser && foundUser.password === password) {
+        if (foundUser.userType !== 0) {
+          throw new Error("Tài khoản này không phải là Khách hàng.");
+        }
 
-    if (foundUser && foundUser.password === password) {
-      // [SỬA] Lưu đầy đủ thông tin vào session (bao gồm addresses, gender)
-      const authData = {
-        id: foundUser.id,
-        email: foundUser.email,
-        accountName: foundUser.fullName, // Map tên hiển thị
-        fullName: foundUser.fullName, // Lưu tên gốc
-        role: "USER",
-        phone: foundUser.phoneNumber,
-        address: foundUser.address, // Địa chỉ phẳng (cũ)
-        addresses: foundUser.addresses || [], // [QUAN TRỌNG] Sổ địa chỉ
-        gender: foundUser.gender, // [MỚI] Giới tính
-        accessToken: "fake-jwt-token-" + Date.now(),
-      };
+        // [SỬA] Lưu đầy đủ thông tin vào session
+        const authData = {
+          id: foundUser.id,
+          email: foundUser.email,
+          accountName: foundUser.fullName, // Map tên hiển thị
+          fullName: foundUser.fullName, // Lưu tên gốc
+          role: "USER",
+          phone: foundUser.phoneNumber,
+          address: foundUser.address || "", // Địa chỉ phẳng
+          addresses: foundUser.addresses || [], // [QUAN TRỌNG] Sổ địa chỉ
+          gender: foundUser.gender, // [MỚI] Giới tính
+          accessToken: "fake-jwt-token-" + Date.now(),
+        };
 
-      setAuth(authData);
-      const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem("auth", JSON.stringify(authData));
-      return authData;
-    } else {
-      throw new Error("Email hoặc mật khẩu không chính xác!");
+        setAuth(authData);
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("auth", JSON.stringify(authData));
+        return authData;
+      } else {
+        throw new Error("Email hoặc mật khẩu không chính xác!");
+      }
+    } catch (error) {
+      // Ném lỗi ra để Component bắt được và hiển thị Toast
+      throw error;
     }
   };
 
   // --- 3. SIGNUP USER ---
   const signupUser = async (email, password, accountName) => {
-    await new Promise((r) => setTimeout(r, 500));
-
     try {
-      db.users.create({
+      // [MỚI] Thêm await
+      await db.users.create({
         email,
         password,
         fullName: accountName,
-        // db.users.create đã tự động thêm addresses: []
+        // db.users.create (trong service) đã tự xử lý logic check trùng email
       });
       return { success: true, message: "Đăng ký thành công! Hãy đăng nhập." };
     } catch (error) {
@@ -86,7 +100,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (newData) => {
     if (!auth) return;
 
-    // 1. Cập nhật State & Session Storage (Client side)
+    // 1. Cập nhật State & Session Storage (Client side - để UI mượt)
     const updatedAuth = {
       ...auth,
       ...newData,
@@ -104,22 +118,23 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.setItem("auth", JSON.stringify(updatedAuth));
     }
 
-    // 2. Cập nhật vào Mock DB (Server side giả lập)
+    // 2. Cập nhật vào JSON Server (Server side)
     try {
-      // Chuẩn bị payload để gửi vào db.users.update
+      // Chuẩn bị payload để gửi API
       const dbPayload = {
         id: auth.id,
-        ...newData, // Spread toàn bộ dữ liệu mới (bao gồm password, gender, addresses...)
+        ...newData, // Spread dữ liệu mới
       };
 
       // Map lại tên trường nếu UI gửi lên khác tên trong DB
       if (newData.name) dbPayload.fullName = newData.name;
       if (newData.phone) dbPayload.phoneNumber = newData.phone;
 
-      // Gọi hàm update của DB
-      db.users.update(dbPayload);
+      // [MỚI] Gọi API update
+      await db.users.update(dbPayload);
     } catch (err) {
       console.error("Lỗi cập nhật DB:", err);
+      // Có thể revert state auth nếu muốn chặt chẽ, nhưng MVP thì log lỗi là được
       throw err;
     }
   };

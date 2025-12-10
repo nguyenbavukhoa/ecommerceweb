@@ -1,29 +1,32 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import CommonModal from "./CommonModal";
 import styles from "./StatisticsDetailModal.module.scss";
 import { vnd } from "../../utils";
-
-// Lưu ý: Không import MOCK_ORDERS ở đây nữa
-import { db } from "../../../../data/mockData";
+import { db } from "../../../../services/dbService"; // [FIX]
 const StatisticsDetailModal = ({
   isOpen,
   onClose,
   productId,
   storeOrders = [],
 }) => {
-  // Logic: Dùng storeOrders được truyền vào (đã lọc theo store ở cha)
+  const [users, setUsers] = useState([]);
+
+  // Fetch users 1 lần khi mở modal để map tên khách hàng
+  useEffect(() => {
+    if (isOpen) {
+      db.users.getAll().then(setUsers);
+    }
+  }, [isOpen]);
+
   const { productDetails, productName } = useMemo(() => {
     if (!isOpen || !productId) return { productDetails: [], productName: "" };
 
     let foundName = "";
     const details = [];
-    const allUsers = db.users.getAll();
 
     storeOrders.forEach((order) => {
       if (order.orderStatus === "CANCELLED") return;
 
-      // --- SỬA TẠI ĐÂY: Lọc theo productId ---
-      // Tìm tất cả các dòng trong đơn hàng có productId trùng với sản phẩm đang xem
       const matchedItems = order.orderItems.filter(
         (i) => i.productId === productId
       );
@@ -31,7 +34,6 @@ const StatisticsDetailModal = ({
       if (matchedItems.length > 0) {
         if (!foundName) foundName = matchedItems[0].productName;
 
-        // Cộng dồn nếu trong 1 đơn khách mua 2 dòng của cùng 1 món (VD: 1 cay, 1 không cay)
         const totalQtyInOrder = matchedItems.reduce(
           (sum, i) => sum + i.quantity,
           0
@@ -41,7 +43,7 @@ const StatisticsDetailModal = ({
           0
         );
 
-        const customer = allUsers.find((u) => u.id === order.userId);
+        const customer = users.find((u) => u.id === order.userId);
         const customerName = customer ? customer.fullName : "Khách vãng lai";
 
         details.push({
@@ -55,15 +57,8 @@ const StatisticsDetailModal = ({
       }
     });
 
-    // Sắp xếp ngày mới nhất (logic parse ngày đơn giản)
-    details.sort((a, b) => {
-      // Giả sử format "HH:mm DD/MM/YYYY" -> So sánh string cũng tương đối ổn nếu format chuẩn YYYY,
-      // nhưng tốt nhất nên parse. Ở đây demo đơn giản giữ nguyên logic cũ.
-      return 0;
-    });
-
     return { productDetails: details, productName: foundName };
-  }, [isOpen, productId, storeOrders]);
+  }, [isOpen, productId, storeOrders, users]); // Thêm users vào dependency
 
   if (!isOpen) return null;
 
