@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useFilters, useCategories } from "../../../context/FilterProvider";
 import "../styles/AdvancedSearch.css";
+
 const scrollToProducts = () => {
   document
     .getElementById("home-service")
     ?.scrollIntoView({ behavior: "smooth" });
 };
 
-// 1. Thêm prop isMobileSearchOpen
 export default function AdvancedSearch({
   isOpen,
   onClose,
@@ -17,35 +17,44 @@ export default function AdvancedSearch({
   const { data: categories = [], isLoading: isLoadingCategories } =
     useCategories();
 
+  // Local state cho input giá
   const [min, setMin] = useState(filters.minPrice);
   const [max, setMax] = useState(filters.maxPrice);
 
+  // Đồng bộ local state khi filters global thay đổi (ví dụ khi reset)
   useEffect(() => {
     setMin(filters.minPrice);
     setMax(filters.maxPrice);
   }, [filters.minPrice, filters.maxPrice]);
 
   const handleCategoryChange = (e) => {
-    setFilters({ category: e.target.value });
+    setFilters({ category: e.target.value, page: 1 });
     setTimeout(scrollToProducts, 0);
   };
 
   const handlePriceSearch = () => {
     if (min && max && parseInt(min) > parseInt(max)) {
-      alert("Khoảng giá không hợp lệ!");
+      alert("Giá tối thiểu không được lớn hơn giá tối đa!");
       return;
     }
-    setFilters({ minPrice: min, maxPrice: max });
+    // Cập nhật vào context để trigger API
+    setFilters({ minPrice: min, maxPrice: max, page: 1 });
     setTimeout(scrollToProducts, 0);
   };
 
+  // [SỬA] Cập nhật hàm sort để gửi cả sortBy và sortOrder
   const handleSort = (order) => {
-    setFilters({ sortBy: "priceBase", sortOrder: order });
+    // Mặc định sort theo giá (priceBase) khi bấm nút mũi tên trong UI này
+    // Bạn có thể mở rộng để sort theo 'name' hoặc 'id' nếu cần
+    setFilters({
+      sortBy: "priceBase",
+      sortOrder: order, // 'asc' hoặc 'desc'
+      page: 1,
+    });
     setTimeout(scrollToProducts, 0);
   };
 
   const handleReset = () => {
-    setFilters({ category: "Tất cả" });
     setMin("");
     setMax("");
     setFilters({
@@ -54,20 +63,17 @@ export default function AdvancedSearch({
       maxPrice: "",
       sortBy: "",
       sortOrder: "",
+      page: 1,
     });
     setTimeout(scrollToProducts, 0);
   };
 
-  // 2. Logic tính toán class
   const openClass = isOpen ? "open" : "";
-  // Nếu search mobile mở -> thêm class 'shifted'
   const shiftClass = isMobileSearchOpen ? "shifted" : "";
 
   return (
-    // 3. Thêm shiftClass vào div container
     <div className={`advanced-search ${openClass} ${shiftClass}`}>
       <div className="container">
-        {/* ... Nội dung bên trong GIỮ NGUYÊN KHÔNG ĐỔI ... */}
         <div className="advanced-search-category">
           <span>Phân loại </span>
           <select
@@ -108,19 +114,25 @@ export default function AdvancedSearch({
         </div>
 
         <div className="advanced-search-control">
+          {/* Nút Tăng dần */}
           <button
             className={filters.sortOrder === "asc" ? "active" : ""}
             onClick={() => handleSort("asc")}
+            title="Giá tăng dần"
           >
             <i className="fa-regular fa-arrow-up-short-wide"></i>
           </button>
+
+          {/* Nút Giảm dần */}
           <button
             className={filters.sortOrder === "desc" ? "active" : ""}
             onClick={() => handleSort("desc")}
+            title="Giá giảm dần"
           >
             <i className="fa-regular fa-arrow-down-wide-short"></i>
           </button>
-          <button id="reset-search" onClick={handleReset}>
+
+          <button id="reset-search" onClick={handleReset} title="Đặt lại">
             <i className="fa-light fa-arrow-rotate-right"></i>
           </button>
           <button onClick={onClose}>

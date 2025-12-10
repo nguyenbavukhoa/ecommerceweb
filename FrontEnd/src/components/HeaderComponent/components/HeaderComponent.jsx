@@ -7,13 +7,14 @@ import {
   useCategories,
   useStores,
 } from "../../../context/FilterProvider";
-// [QUAN TRỌNG] Import đúng tên Context (nếu bạn đã đổi tên file provider)
 import { useCart } from "../../../context/CartProvider";
 import { useAuth } from "../../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; // Đã bỏ useRef
 import { useDebounce } from "../hooks/useDebounce";
 import AdvancedSearch from "./AdvancedSearch";
+// [DELETED] notificationService import
 
+// Helper scroll
 const scrollToProducts = () => {
   document
     .getElementById("home-service")
@@ -21,41 +22,35 @@ const scrollToProducts = () => {
 };
 
 export default function HeaderComponent() {
-  // 1. Lấy dữ liệu từ CartContext
-  // getAmountCart là hàm tính tổng số lượng item
+  // 1. Lấy dữ liệu từ Context
   const { openCart, getAmountCart } = useCart();
-
-  // 2. Lấy dữ liệu từ AuthContext
-  // Bỏ isLoggedIn, chỉ cần check biến 'auth'
   const { auth, logout } = useAuth();
-
   const navigate = useNavigate();
-
   const { filters, setFilters } = useFilters();
-
   const { data: stores = [], isLoading: isLoadingStores } = useStores();
 
+  // 2. State quản lý UI
   const [searchTerm, setSearchTerm] = useState(filters.name);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // Thêm state cho dropdown user
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
+  // [DELETED] State & Effect cho Notification
+
+  // 3. Logic chọn Store mặc định
   useEffect(() => {
     if (!isLoadingStores && stores.length > 0) {
       const currentStoreExists = stores.find(
         (s) => s.id.toString() === filters.storeId?.toString()
       );
-
-      // Nếu chưa chọn hoặc chọn sai ID -> Chọn cái đầu tiên
       if (!filters.storeId || !currentStoreExists) {
-        console.log("🔄 Auto-selecting first store:", stores[0].id);
         setFilters({ storeId: stores[0].id });
       }
     }
   }, [stores, isLoadingStores, filters.storeId, setFilters]);
 
-  // --- LOGIC SEARCH & FILTER ---
+  // 4. Logic Search & Filter
   useEffect(() => {
     if (!showMobileSearch) {
       setIsFilterOpen(false);
@@ -92,10 +87,10 @@ export default function HeaderComponent() {
     }
   };
 
-  // 3. Tính toán số lượng giỏ hàng
-  // Gọi hàm getAmountCart() để lấy số
+  // 5. Tính toán số lượng giỏ hàng
   const totalAmount = getAmountCart ? getAmountCart() : 0;
 
+  // 6. Xử lý hiển thị Header Bottom
   const location = useLocation();
   const hideHeaderBottomOnPaths = ["/order-history", "/checkout"];
   const isHeaderBottomVisible = !hideHeaderBottomOnPaths.includes(
@@ -106,7 +101,7 @@ export default function HeaderComponent() {
     setShowMobileSearch(false);
   }, [location.pathname]);
 
-  // 4. Xử lý tên hiển thị (Ưu tiên accountName từ API, fallback sang fullName)
+  // 7. Tên hiển thị
   const displayName = auth?.accountName || auth?.fullName || "Khách hàng";
 
   return (
@@ -117,9 +112,9 @@ export default function HeaderComponent() {
             {/* GROUP 1: LOGO & STORE SELECTOR */}
             <div className={styles.headerLeftGroup}>
               <div className={styles.headerLogo}>
-                <a href="/">
+                <Link to="/">
                   <img src={logo} alt="" className={styles.headerLogoImg} />
-                </a>
+                </Link>
               </div>
 
               <div className={styles.storeSelectorWrapper}>
@@ -183,11 +178,13 @@ export default function HeaderComponent() {
                   ></i>
                 </li>
 
+                {/* [DELETED] NOTIFICATION ITEM */}
+
                 {/* USER DROPDOWN */}
                 <li
                   className={styles.item}
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  style={{ position: "relative" }} // Để dropdown căn theo item này
+                  style={{ position: "relative" }}
                 >
                   <i
                     className={`fa-light fa-user ${
@@ -226,7 +223,6 @@ export default function HeaderComponent() {
                       {!auth ? (
                         <>
                           <li>
-                            {/* Dùng URL /auth như bạn đã sửa ở bước trước */}
                             <Link to="/auth?action=login">
                               <i className="fa-light fa-right-to-bracket"></i>{" "}
                               Đăng nhập
@@ -275,7 +271,6 @@ export default function HeaderComponent() {
                 <li className={styles.item} onClick={openCart}>
                   <div className={styles.cartIconMenu}>
                     <i className="fa-light fa-basket-shopping"></i>
-                    {/* Hiển thị số lượng item */}
                     <span className={styles.count}>{totalAmount}</span>
                   </div>
                   <span>Giỏ hàng</span>

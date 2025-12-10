@@ -11,7 +11,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "./DroneMap.module.scss";
 
-// Services & Context
+// Services
 import { useAuth } from "../../../../context/AuthContext";
 import { useToast } from "../../../../context/ToastContext";
 import { useQuery } from "@tanstack/react-query";
@@ -19,10 +19,9 @@ import droneService from "../../../../services/droneService";
 import deliveryService from "../../../../services/deliveryService";
 import orderService from "../../../../services/orderService";
 import storeService from "../../../../services/storeService";
-import { SEED_HUBS } from "../../../../data/mockData";
 import { vnd } from "../../utils";
 
-// --- ICONS ---
+// ICONS
 const droneIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
   iconSize: [40, 40],
@@ -38,13 +37,8 @@ const customerIcon = new L.Icon({
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
-const hubIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/921/921347.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
 
-// Component cập nhật View bản đồ
+// Component: Tự động di chuyển map đến trung tâm
 const MapUpdater = ({ center }) => {
   const map = useMap();
   useEffect(() => {
@@ -55,21 +49,26 @@ const MapUpdater = ({ center }) => {
   return null;
 };
 
-const DroneMap = () => {
+const DroneMap = ({
+  isEmbedded = false,
+  storeId: propStoreId,
+  onOrderSelect,
+}) => {
   const { auth: currentUser } = useAuth();
   const { showToast } = useToast();
-  const storeId =
-    localStorage.getItem("currentStoreId") || currentUser?.storeId || 1;
 
-  // --- STATE ---
-  const [activeTab, setActiveTab] = useState("pending"); // "pending" (Chuẩn bị) | "flying" (Đang bay)
+  const storeId =
+    propStoreId ||
+    localStorage.getItem("currentStoreId") ||
+    currentUser?.storeId ||
+    1;
+
+  const [activeTab, setActiveTab] = useState("pending");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [trackingData, setTrackingData] = useState(null); // Dữ liệu tracking chi tiết
+  const [trackingData, setTrackingData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // --- 1. DATA FETCHING ---
-
-  // Lấy thông tin Store
+  // 1. LẤY THÔNG TIN STORE (Start Point)
   const { data: store } = useQuery({
     queryKey: ["storeInfo", storeId],
     queryFn: async () => {
@@ -81,71 +80,49 @@ const DroneMap = () => {
     staleTime: Infinity,
   });
 
-  // Lấy danh sách Drone (Polling 1s để thấy bay realtime)
+  // 2. LẤY DANH SÁCH DRONE
   const { data: drones = [], refetch: refetchDrones } = useQuery({
     queryKey: ["drones"],
     queryFn: async () => await droneService.getAllDrones(),
-    refetchInterval: 1000,
+    refetchInterval: 2000, // Refresh nhanh để thấy drone di chuyển
   });
 
-  // Lấy danh sách Đơn hàng (Polling 2s)
+  // 3. LẤY DANH SÁCH ĐƠN HÀNG
   const { data: orders = [], refetch: refetchOrders } = useQuery({
-    queryKey: ["droneMapOrders", storeId], // Đổi key để không trùng cache
-    queryFn: async () => {
-      // Gọi hàm mới chuyên dụng
-      return await orderService.getAllOrdersForMap(storeId);
-    },
-    refetchInterval: 2000, // Vẫn polling để cập nhật trạng thái đơn mới
+    queryKey: ["droneMapOrders", storeId],
+    queryFn: async () => await orderService.getAllStoreOrders(storeId),
+    refetchInterval: 3000,
   });
 
-  // --- 2. TRACKING LOGIC (Khi chọn đơn đang bay) ---
+  // [UPDATED] TRACKING LOGIC - DÙNG API MỚI
   useEffect(() => {
     let intervalId;
 
-    // Chỉ tracking khi đang ở tab "Đang bay" và đã chọn đơn
+    // Chỉ tracking khi ở tab "Đang bay" và đã chọn đơn hàng
     if (activeTab === "flying" && selectedOrder) {
-      // Lấy deliveryId từ LocalStorage (đã lưu lúc tạo)
-      const deliveryMap = JSON.parse(
-        localStorage.getItem("deliveryMap") || "{}"
-      );
-      const deliveryId = deliveryMap[selectedOrder.id];
-
-      if (deliveryId) {
-        // Polling API Tracking riêng cho đơn này
-        intervalId = setInterval(async () => {
-          try {
-            const trackRes = await deliveryService.getDeliveryTracking(
-              deliveryId
-            );
-            if (trackRes) setTrackingData(trackRes);
-          } catch (e) {
-            console.error("Tracking error", e);
+      const pollTracking = async () => {
+        try {
+          // Gọi API lấy thông tin vận chuyển theo OrderID
+          const data = await deliveryService.getDeliveryByOrderId(
+            selectedOrder.id
+          );
+          if (data) {
+            setTrackingData(data);
           }
-        }, 1000);
-      } else {
-        // Nếu không có deliveryId (do F5 mất hoặc tạo ở máy khác),
-        // ta sẽ fallback: Tìm drone nào đang có currentOrderId == selectedOrder.id
-        const linkedDrone = drones.find(
-          (d) => d.currentOrderId === selectedOrder.id
-        );
-        if (linkedDrone) {
-          setTrackingData({
-            currentLat: linkedDrone.currentLat,
-            currentLng: linkedDrone.currentLng,
-            status: linkedDrone.status,
-            // Mock các field khác nếu API list drone ko có
-            progressPct: 50,
-          });
+        } catch (e) {
+          console.error("Tracking error:", e);
         }
-      }
+      };
+
+      pollTracking(); // Gọi ngay lập tức
+      intervalId = setInterval(pollTracking, 2000); // Lặp lại mỗi 2s
     } else {
       setTrackingData(null);
     }
-
     return () => clearInterval(intervalId);
-  }, [selectedOrder, activeTab, drones]);
+  }, [selectedOrder, activeTab]);
 
-  // --- 3. HANDLER: GỌI DRONE (CREATE DELIVERY) ---
+  // [UPDATED] HANDLER GỌI DRONE - BỎ LOCALSTORAGE
   const handleCallDrone = async (e, order) => {
     e.stopPropagation();
     try {
@@ -159,38 +136,24 @@ const DroneMap = () => {
         });
         return;
       }
-
       const selectedDrone = candidates[0];
 
       // B2: Tạo Delivery
-      const res = await deliveryService.createDelivery(
-        order.id,
-        selectedDrone.id
-      );
+      await deliveryService.createDelivery(order.id, selectedDrone.id);
 
-      // B3: [QUAN TRỌNG] Lưu Delivery ID vào LocalStorage để dùng cho Tracking
-      // API trả về data: { id: 11, ... }
-      const newDeliveryId = res.data?.id || res.id;
-
-      if (newDeliveryId) {
-        const currentMap = JSON.parse(
-          localStorage.getItem("deliveryMap") || "{}"
-        );
-        currentMap[order.id] = newDeliveryId;
-        localStorage.setItem("deliveryMap", JSON.stringify(currentMap));
-      }
-
+      // B3: Thông báo & Refresh
       showToast({
         title: "Thành công",
         message: `Drone ${selectedDrone.serial} bắt đầu giao!`,
         type: "success",
       });
 
-      // B4: Refresh và chuyển tab
-      refetchOrders();
-      refetchDrones();
-      setActiveTab("flying"); // Chuyển ngay sang tab Đang bay
-      setSelectedOrder(order); // Tự động chọn đơn vừa tạo để track luôn
+      await refetchOrders();
+      await refetchDrones();
+
+      // B4: Chuyển tab & Chọn đơn để tracking ngay
+      setActiveTab("flying");
+      handleOrderClick(order);
     } catch (err) {
       showToast({
         title: "Lỗi",
@@ -200,29 +163,36 @@ const DroneMap = () => {
     }
   };
 
-  // --- 4. FILTERING (Phân loại đơn theo 2 Tab) ---
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    // Nếu props onOrderSelect được truyền (từ Orders.jsx), gọi nó để mở Modal Admin
+    // if (onOrderSelect) onOrderSelect(order);
+    // -> NOTE: Tạm tắt dòng trên để click vào card chỉ vẽ map nhỏ,
+    // muốn xem chi tiết thì bấm nút "Xem chi tiết" riêng.
+  };
+
+  const handleViewDetail = (e, order) => {
+    e.stopPropagation();
+    if (onOrderSelect) onOrderSelect(order);
+  };
+
+  // FILTER ORDERS THEO TAB
   const filteredOrders = useMemo(() => {
     let list = orders;
-
-    // Lọc theo Tab
-    if (activeTab === "pending") {
-      // CHUẨN BỊ BAY: Placed, Confirmed, Ready
+    if (activeTab === "pending")
       list = list.filter((o) =>
         ["PLACED", "CONFIRMED", "READY_FOR_DELIVERY"].includes(o.orderStatus)
       );
-    } else if (activeTab === "flying") {
-      // ĐANG BAY: In Progress, Shipping, Out For Delivery
+    else if (activeTab === "flying")
       list = list.filter((o) =>
         ["IN_PROGRESS", "SHIPPING", "OUT_FOR_DELIVERY"].includes(o.orderStatus)
       );
-    } else {
-      // Lịch sử (nếu cần)
+    else
       list = list.filter((o) =>
         ["COMPLETED", "DELIVERED", "CANCELLED", "FAILED"].includes(
           o.orderStatus
         )
       );
-    }
 
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
@@ -231,37 +201,71 @@ const DroneMap = () => {
     return list.sort((a, b) => b.id - a.id);
   }, [orders, activeTab, searchTerm]);
 
-  // --- RENDER ---
-  if (!store) return <div>Loading Map...</div>;
+  if (!store) return <div>Đang tải bản đồ...</div>;
 
-  const defaultCenter = [store.lat || 10.776019, store.lng || 106.702068];
+  // --- TỌA ĐỘ VẼ MAP ---
+  const storeLocation = [store.lat || 10.776019, store.lng || 106.702068];
 
-  // Center Map: Nếu đang track thì theo drone, không thì theo store
-  // const mapCenter = trackingData
-  //   ? [trackingData.currentLat, trackingData.currentLng]
-  //   : selectedOrder?.customerLocation || defaultCenter;
+  // Center Map: Ưu tiên Drone > Khách > Kho
+  let mapCenter = storeLocation;
+  if (trackingData) {
+    mapCenter = [trackingData.currentLat, trackingData.currentLng];
+  } else if (selectedOrder && selectedOrder.customerLocation) {
+    // Fallback nếu chưa có tracking data nhưng có info khách (ít khi xảy ra với logic mới)
+    // selectedOrder.customerLocation có thể là object hoặc array tùy API trả về của order
+    const lat =
+      selectedOrder.customerLocation.lat || selectedOrder.customerLocation[0];
+    const lng =
+      selectedOrder.customerLocation.lng || selectedOrder.customerLocation[1];
+    if (lat) mapCenter = [lat, lng];
+  }
 
-  // Bỏ trackingData ra khỏi logic tính tâm bản đồ
-  const mapCenter = selectedOrder?.customerLocation || defaultCenter;
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      style={isEmbedded ? { padding: 0, height: "100%", gap: 0 } : {}}
+    >
       {/* SIDEBAR */}
-      <div className={styles.sidebar}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Điều phối Drone</h2>
-          {/* Search box giữ nguyên */}
-          <div className={styles.searchBox}>
-            <input
-              type="text"
-              placeholder="Tìm mã đơn..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <div
+        className={styles.sidebar}
+        style={
+          isEmbedded
+            ? {
+                height: "100%",
+                borderRadius: 0,
+                border: "none",
+                borderRight: "1px solid #e5e7eb",
+              }
+            : {}
+        }
+      >
+        {!isEmbedded && (
+          <div className={styles.header}>
+            <h2 className={styles.title}>Điều phối Drone</h2>
           </div>
-        </div>
+        )}
 
-        {/* 2 TAB CHÍNH */}
-        <div className={styles.tabs}>
+        {isEmbedded && (
+          <div
+            className={styles.header}
+            style={{ paddingTop: 10, paddingBottom: 10 }}
+          >
+            <div className={styles.searchBox}>
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                placeholder="Tìm đơn..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
+        <div
+          className={styles.tabs}
+          style={isEmbedded ? { margin: "0 10px" } : {}}
+        >
           <button
             className={`${styles.tab} ${
               activeTab === "pending" ? styles.active : ""
@@ -272,7 +276,7 @@ const DroneMap = () => {
               setTrackingData(null);
             }}
           >
-            Chuẩn bị bay
+            Chuẩn bị
           </button>
           <button
             className={`${styles.tab} ${
@@ -281,6 +285,7 @@ const DroneMap = () => {
             onClick={() => {
               setActiveTab("flying");
               setSelectedOrder(null);
+              setTrackingData(null);
             }}
           >
             Đang bay
@@ -289,12 +294,11 @@ const DroneMap = () => {
 
         <div className={styles.list}>
           {filteredOrders.length === 0 ? (
-            <div className={styles.empty}>Không có đơn hàng.</div>
+            <div className={styles.empty}>Không có đơn hàng</div>
           ) : (
             filteredOrders.map((order) => {
               const isSelected = selectedOrder?.id === order.id;
-
-              // Tìm tên Drone nếu đang bay
+              // Tìm drone đang phụ trách đơn này (để hiển thị tag)
               const linkedDrone = drones.find(
                 (d) => d.currentOrderId === order.id || d.id === order.droneId
               );
@@ -305,7 +309,7 @@ const DroneMap = () => {
                   className={`${styles.card} ${
                     isSelected ? styles.selected : ""
                   }`}
-                  onClick={() => setSelectedOrder(order)}
+                  onClick={() => handleOrderClick(order)}
                 >
                   <div className={styles.cardTop}>
                     <span className={styles.oid}>#{order.id}</span>
@@ -314,33 +318,45 @@ const DroneMap = () => {
                     </span>
                   </div>
                   <div className={styles.cardInfo}>
-                    📍 {order.customerAddress || order.deliveryInfo?.address}
+                    {/* Hiển thị địa chỉ ngắn gọn */}
+                    <i className="fa-solid fa-location-dot"></i>
+                    <span
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {order.deliveryInfo?.address || "---"}
+                    </span>
                   </div>
 
-                  {/* Tag hiển thị Drone đang giao */}
                   {activeTab === "flying" && linkedDrone && (
                     <div className={styles.droneTag}>
                       🚁 {linkedDrone.serial}
                     </div>
                   )}
 
-                  {/* Nút Gọi Drone (Chỉ hiện ở Tab Pending) */}
-                  {activeTab === "pending" && (
+                  {/* Nút Xem Chi Tiết */}
+                  {onOrderSelect && (
                     <button
-                      className={styles.btnCall}
-                      onClick={(e) => handleCallDrone(e, order)}
+                      className={styles.btnDetailSmall}
+                      onClick={(e) => handleViewDetail(e, order)}
                     >
-                      🚀 Cho bay ngay
+                      Xem chi tiết
                     </button>
                   )}
 
-                  {/* Panel Tracking Mini (Chỉ hiện khi chọn ở Tab Flying) */}
-                  {isSelected && activeTab === "flying" && trackingData && (
-                    <div className={styles.trackingInfo}>
-                      <p>Tiến độ: {trackingData.progressPct?.toFixed(0)}%</p>
-                      <p>Tốc độ: {linkedDrone?.avgSpeedKmh || 35} km/h</p>
-                    </div>
-                  )}
+                  {/* Nút Gọi Drone (Chỉ hiện khi Ready) */}
+                  {activeTab === "pending" &&
+                    order.orderStatus === "READY_FOR_DELIVERY" && (
+                      <button
+                        className={styles.btnCall}
+                        onClick={(e) => handleCallDrone(e, order)}
+                      >
+                        🚀 Gọi Drone
+                      </button>
+                    )}
                 </div>
               );
             })
@@ -348,39 +364,67 @@ const DroneMap = () => {
         </div>
       </div>
 
-      {/* MAP WRAPPER */}
-      <div className={styles.mapWrapper}>
+      {/* MAP AREA */}
+      <div
+        className={styles.mapWrapper}
+        style={isEmbedded ? { border: "none", borderRadius: 0 } : {}}
+      >
         <MapContainer
-          center={defaultCenter}
+          center={storeLocation}
           zoom={14}
           style={{ height: "100%", width: "100%" }}
         >
           <MapUpdater center={mapCenter} />
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-          {/* 1. STORE & HUB */}
-          <Marker position={defaultCenter} icon={storeIcon}>
+          {/* 1. MARKER KHO/CỬA HÀNG */}
+          <Marker position={storeLocation} icon={storeIcon}>
             <Popup>
               <b>{store.name}</b>
+              <br />
+              Kho xuất phát
             </Popup>
           </Marker>
-          {/* {SEED_HUBS.map((h) => (
-              <Marker key={h.id} position={h.location} icon={hubIcon} />
-            ))} */}
 
-          {/* 2. VẼ DRONE */}
-          {/* Nếu đang chọn 1 đơn đang bay -> Vẽ chi tiết Tracking (Line, Customer) */}
-          {activeTab === "flying" && selectedOrder && trackingData ? (
+          {/* 2. VẼ TẤT CẢ DRONES (Realtime Position) */}
+          {drones.map((d) => {
+            // Nếu drone này đang được track trong order được chọn -> Không vẽ ở đây để tránh trùng lặp marker
+            // Hoặc cứ vẽ đè lên cũng được, nhưng tốt nhất là vẽ mờ đi hoặc icon khác
+            const lat = d.currentLat || storeLocation[0];
+            const lng = d.currentLng || storeLocation[1];
+            return (
+              <Marker
+                key={d.id}
+                position={[lat, lng]}
+                icon={droneIcon}
+                opacity={0.7}
+              >
+                <Popup>
+                  <b>{d.serial}</b>
+                  <br />
+                  Trạng thái: {d.status}
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* 3. VẼ TRACKING CHI TIẾT CHO ĐƠN ĐANG CHỌN */}
+          {activeTab === "flying" && selectedOrder && trackingData && (
             <>
-              {/* Drone đang track */}
+              {/* Drone Marker (Active) - Đè lên drone marker thường */}
               <Marker
                 position={[trackingData.currentLat, trackingData.currentLng]}
                 icon={droneIcon}
+                zIndexOffset={1000} // Luôn hiện trên cùng
               >
-                <Popup>Đang giao đơn #{selectedOrder.id}</Popup>
+                <Popup>
+                  <b>Đang giao đơn #{selectedOrder.id}</b>
+                  <br />
+                  Tiến độ: {trackingData.progressPct?.toFixed(1)}%
+                </Popup>
               </Marker>
 
-              {/* Khách hàng */}
+              {/* Customer Marker */}
               <Marker
                 position={[trackingData.endLat, trackingData.endLng]}
                 icon={customerIcon}
@@ -388,39 +432,28 @@ const DroneMap = () => {
                 <Popup>Khách hàng</Popup>
               </Marker>
 
-              {/* Đường bay */}
+              {/* Đường bay: Store -> Drone */}
               <Polyline
                 positions={[
-                  [
-                    store.lat || defaultCenter[0],
-                    store.lng || defaultCenter[1],
-                  ],
+                  storeLocation,
+                  [trackingData.currentLat, trackingData.currentLng],
+                ]}
+                color="#b5292f"
+                weight={4}
+              />
+
+              {/* Đường dự kiến: Drone -> Khách */}
+              <Polyline
+                positions={[
                   [trackingData.currentLat, trackingData.currentLng],
                   [trackingData.endLat, trackingData.endLng],
                 ]}
-                color="#e74c3c"
-                weight={4}
-                dashArray="10, 5"
+                color="#b5292f"
+                weight={2}
+                dashArray="5, 10"
+                opacity={0.6}
               />
             </>
-          ) : (
-            // Nếu không chọn đơn cụ thể, vẽ tất cả Drone ở vị trí hiện tại (từ API list)
-            drones.map((d) => {
-              const lat = d.currentLat || SEED_HUBS[0].location[0];
-              const lng = d.currentLng || SEED_HUBS[0].location[1];
-              return (
-                <Marker
-                  key={d.id}
-                  position={[lat, lng]}
-                  icon={droneIcon}
-                  opacity={0.7}
-                >
-                  <Popup>
-                    {d.serial} ({d.status})
-                  </Popup>
-                </Marker>
-              );
-            })
           )}
         </MapContainer>
       </div>

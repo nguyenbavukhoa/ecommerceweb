@@ -212,65 +212,97 @@ const orderService = {
     }
   },
 
-  // --- [MỚI] HÀM RIÊNG CHO DRONE MAP (Lấy hết đơn của quán) ---
-  getAllOrdersForMap: async (storeId) => {
-    let allOrders = [];
-    let currentPage = 1; // Bắt đầu từ trang 1 (Đúng)
-    let totalPages = 1;
+  // [QUAN TRỌNG] HÀM LẤY TẤT CẢ ĐƠN (Cho Admin Dashboard & Map)
+  // Đã sửa logic vòng lặp và parser
+  // getAllStoreOrders: async (storeId) => {
+  //   let allOrders = [];
+  //   let currentPage = 1;
+  //   let totalPages = 1;
+  //   const MAX_SAFETY_LOOP = 50; // Chặn lặp vô tận (tối đa 50 trang)
 
-    console.log(
-      `🚁 [OrderService] Đang lấy toàn bộ đơn cho DroneMap (Store: ${storeId})...`
-    );
+  //   console.log(`📡 Fetching ALL orders for Store: ${storeId}`);
+
+  //   try {
+  //     do {
+  //       // Gọi API với size lớn để giảm số lần request
+  //       const response = await axiosClient.get(
+  //         `/orders/restaurant/${storeId}`,
+  //         {
+  //           params: { page: currentPage, size: 50 },
+  //         }
+  //       );
+
+  //       const rootData = response.data || response;
+  //       let fetchedContent = [];
+
+  //       // --- XỬ LÝ PARSE DỮ LIỆU ---
+
+  //       // CASE 1: API trả về mảng trực tiếp (Như JSON bạn gửi)
+  //       if (Array.isArray(rootData)) {
+  //         console.log("ℹ️ Detect Flat Array format");
+  //         // Nếu là mảng phẳng, nghĩa là trả hết 1 lần -> lấy luôn và thoát vòng lặp
+  //         allOrders = rootData;
+  //         break;
+  //       }
+
+  //       // CASE 2: API trả về object phân trang chuẩn Spring Boot { content: [...], totalPages: 10 }
+  //       if (rootData.content) {
+  //         fetchedContent = rootData.content;
+  //         totalPages = rootData.totalPages || 1;
+  //       }
+  //       // CASE 3: Lồng trong data { data: { content: [...] } }
+  //       else if (rootData.data && rootData.data.content) {
+  //         fetchedContent = rootData.data.content;
+  //         totalPages = rootData.data.totalPages || 1;
+  //       }
+
+  //       // Gộp dữ liệu
+  //       if (fetchedContent.length > 0) {
+  //         allOrders = [...allOrders, ...fetchedContent];
+  //       } else {
+  //         break; // Không có dữ liệu thì dừng
+  //       }
+
+  //       currentPage++;
+  //     } while (currentPage <= totalPages && currentPage <= MAX_SAFETY_LOOP);
+
+  //     console.log(`✅ Loaded ${allOrders.length} orders total.`);
+  //     return allOrders;
+  //   } catch (error) {
+  //     console.error("❌ Error fetching all orders:", error);
+  //     return [];
+  //   }
+  // },
+  getAllStoreOrders: async (storeId) => {
+    let allOrders = [];
+
+    // [FIX] Đổi endpoint sang đúng API bạn cung cấp: /restaurants/{storeId}/orders
+    console.log(`📡 Fetching ALL orders for Store: ${storeId}`);
 
     try {
-      do {
-        // Gọi API lấy đơn hàng của nhà hàng
-        const response = await axiosClient.get(
-          `/orders/restaurant/${storeId}`,
-          {
-            params: {
-              page: currentPage,
-              size: 20,
-            },
-          }
-        );
+      // API này trả về mảng trực tiếp, không phân trang (theo JSON mẫu bạn gửi)
+      const response = await axiosClient.get(`/restaurants/${storeId}/orders`);
 
-        // Xử lý cấu trúc trả về
-        let rootData = response.data || response;
+      const rootData = response.data || response;
 
-        let fetchedContent = [];
-        let fetchedTotalPages = 0;
+      // CASE 1: API trả về mảng trực tiếp (Đúng format JSON bạn gửi)
+      if (Array.isArray(rootData)) {
+        console.log("ℹ️ Detect Flat Array format");
+        allOrders = rootData;
+      }
+      // CASE 2: Fallback nếu sau này API đổi ý bọc trong data (Optional)
+      else if (rootData.data && Array.isArray(rootData.data)) {
+        allOrders = rootData.data;
+      }
+      // CASE 3: Fallback nếu API có phân trang kiểu Spring Boot
+      else if (rootData.content && Array.isArray(rootData.content)) {
+        allOrders = rootData.content;
+      }
 
-        // Kiểm tra cấu trúc phân trang chuẩn: { content: [], totalPages: ... }
-        if (rootData && rootData.content) {
-          fetchedContent = rootData.content;
-          fetchedTotalPages = rootData.totalPages || 0;
-        }
-        // Cấu trúc lồng: { data: { content: [] } }
-        else if (rootData.data && rootData.data.content) {
-          fetchedContent = rootData.data.content;
-          fetchedTotalPages = rootData.data.totalPages || 0;
-        }
-
-        if (fetchedContent.length > 0) {
-          allOrders = [...allOrders, ...fetchedContent];
-          // Cập nhật tổng số trang thực tế từ server
-          totalPages = fetchedTotalPages;
-        } else {
-          break;
-        }
-
-        currentPage++;
-
-        // [SỬA QUAN TRỌNG] Phải là <= để lấy được trang cuối cùng
-      } while (currentPage <= totalPages);
-
-      console.log(
-        `✅ [OrderService] DroneMap đã tải xong ${allOrders.length} đơn hàng.`
-      );
+      console.log(`✅ Loaded ${allOrders.length} orders total.`);
       return allOrders;
     } catch (error) {
-      console.error("❌ [OrderService] DroneMap Fetch Error:", error);
+      console.error("❌ Error fetching all orders:", error);
       return [];
     }
   },

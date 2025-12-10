@@ -7,6 +7,7 @@ import AdminLogin from "../pages/AdminLogin.jsx/AdminLogin.jsx";
 import ServerPage from "../pages/ServerPage/ServerPage.jsx";
 import CheckoutPage from "../pages/CheckoutPage/CheckoutPage"; // Import trang Checkout
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
+import NotificationPage from "../pages/NotificationPage/NotificationPage.jsx";
 export const routes = [
   {
     path: "/",
@@ -31,6 +32,11 @@ export const routes = [
   {
     path: "/auth", // For signup and signin
     page: AuthPage,
+    isShowHeader: true,
+  },
+  {
+    path: "/notifications", // For notifications
+    page: NotificationPage,
     isShowHeader: true,
   },
   {

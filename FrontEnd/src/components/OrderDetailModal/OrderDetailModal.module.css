@@ -1,225 +1,753 @@
-.modalView {
+/* --- 1. MODAL WRAPPER (LAYOUT CHÍNH) --- */
+.adminModalContainer {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  animation: fadeIn 0.3s ease;
+  width: 1000px;
+  max-width: 95vw;
+  height: 85vh; /* Chiều cao cố định để map hiển thị đúng */
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden; /* Cắt góc tròn */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.modalHeader {
+/* Header cố định */
+.adminModalHeader {
+  background: #fff;
+  padding: 15px 25px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  background-color: white;
-  flex-shrink: 0;
-  /* Đảm bảo header luôn hiển thị khi cuộn */
-  position: sticky;
-  top: 0;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0; /* Không bị co lại */
   z-index: 10;
 }
-.backBtn {
-  background: none;
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+}
+
+.btnClose {
+  background: transparent;
   border: none;
-  font-size: 18px;
-  margin-right: 10px;
-  cursor: pointer;
-  color: #555;
-}
-.modalHeader h3 {
-  margin: 0 auto;
   font-size: 20px;
-  font-weight: 700;
-}
-
-.modalContent {
-  overflow-y: auto;
-  padding: 20px;
-  background-color: #f5f5f5;
-  flex-grow: 1;
-  min-height: 0;
-}
-
-/* --- CÁC STYLE CHUNG CHO CARD --- */
-.card {
-  background-color: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-.cardHeader {
-  padding: 15px 20px;
-  font-size: 16px;
-  font-weight: 700;
-  border-bottom: 1px solid #e0e0e0;
-}
-.cardBody {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.infoRow span {
-  color: #555;
-}
-
-/* === STYLE CHO THANH TIẾN TRÌNH === */
-.timelineWrapper {
-  width: 100%;
-}
-.timelineContainer {
-  display: flex;
-  width: 100%;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-.timelineSegment {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  transition: background-color 0.5s ease;
-}
-
-/* Màu cho các trạng thái của vạch */
-.completed {
-  background-color: #28a745;
-} /* Xanh lá: Đã hoàn thành */
-.future {
-  background-color: #e0e0e0;
-} /* Xám: Chưa tới */
-/* Màu cho trạng thái hiện tại */
-.pending,
-.picking {
-  background-color: #ffc107;
-} /* Vàng */
-.shipping {
-  background-color: #007bff;
-} /* Xanh dương */
-.delivered {
-  background-color: #28a745;
-} /* Xanh lá */
-.cancelled {
-  background-color: #dc3545;
-} /* Đỏ */
-.returned {
-  background-color: #fc5603;
-} /* Xám đậm */
-
-/* Style cho các nhãn (label) bên dưới */
-.timelineLabels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
   color: #666;
-}
-.timelineLabel {
-  flex: 1;
-  text-align: center;
-  padding: 0 2px;
-}
-.cancelledLabel {
-  flex: 1;
-  text-align: center;
-  font-weight: 600;
-  color: #dc3545;
-}
-
-/* Address */
-.addressBody {
-  flex-direction: row;
-  gap: 15px;
-  align-items: flex-start;
-}
-.addressBody > i {
-  font-size: 20px;
-  color: #b5292f;
-  margin-top: 5px;
-}
-.addressNamePhone {
-  margin: 0 0 5px 0;
-}
-.addressText {
-  margin: 0;
-  color: #555;
-}
-
-/* Product List & Summary */
-.productList {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.productRow {
+  cursor: pointer;
+  padding: 5px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+    color: #333;
+  }
 }
-.productImage {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid #eee;
-  flex-shrink: 0;
+
+.headerRight {
+  .btnPrint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #f8f9fa;
+      border-color: #ccc;
+    }
+  }
 }
-.productInfo {
-  flex-grow: 1;
+
+/* Body Modal (Chứa InfoView hoặc TrackingView) */
+.adminModalBody {
+  flex: 1; /* Chiếm hết không gian còn lại */
+  position: relative;
+  overflow: hidden; /* Quan trọng để scroll bên trong con */
+  display: flex;
+  background: #f4f6f8;
 }
-.productName {
-  font-weight: 600;
-  font-size: 15px;
+
+/* --- 2. VIEW 1: INFO VIEW (CHI TIẾT ĐƠN) --- */
+.infoViewContainer {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* Scroll dọc */
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.infoScrollContent {
+  width: 100%;
+  max-width: 800px;
+  padding-bottom: 20px;
+}
+
+/* Header Banner (Mã đơn + Trạng thái) */
+.orderHeaderBanner {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.ohLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.ohLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ohCode {
+  font-size: 22px;
+  font-weight: 800;
   color: #333;
-  margin: 0;
+  margin: 4px 0;
 }
-.productQuantity {
-  color: #e57905;
-  font-weight: 600;
-  margin-right: 5px;
-}
-.productOptions {
+
+.ohTime {
   font-size: 13px;
   color: #666;
-  margin: 4px 0 0 0;
 }
-.productPrice {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  white-space: nowrap;
+
+/* Nút Gọi Drone */
+.btnTrackLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
-.orderSummary {
-  padding: 15px 20px;
-  border-top: 1px solid #f0f0f0;
+
+/* Badge Trạng thái */
+.statusBadgeBig {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Màu trạng thái */
+.PLACED {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+.CONFIRMED {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffe0b2;
+}
+.IN_PROGRESS {
+  background: #fff8e1;
+  color: #f57c00;
+  border: 1px solid #ffecb3;
+}
+.READY_FOR_DELIVERY {
+  background: #e0f7fa;
+  color: #006064;
+  border: 1px solid #b2ebf2;
+}
+.OUT_FOR_DELIVERY {
+  background: #e8eaf6;
+  color: #1a237e;
+  border: 1px solid #c5cae9;
+}
+.DELIVERED {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+.CANCELLED,
+.REJECTED,
+.FAILED {
+  background: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #ffcdd2;
+}
+
+/* Logistics Container */
+.logisticsContainer {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
-.priceRow {
+
+.shippingSection {
+  padding: 20px;
+  border-bottom: 1px dashed #e0e0e0;
+  background: #fdfdfd;
+}
+
+.shipHeader {
   display: flex;
   justify-content: space-between;
-  color: #555;
+  align-items: center;
+  margin-bottom: 15px;
 }
-.finalTotal {
-  font-size: 18px;
+
+.carrierInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #333;
+
+  i {
+    color: #b5292f;
+    font-size: 18px;
+  }
+  strong {
+    color: #b5292f;
+  }
+}
+
+.shipBody {
+  padding-left: 28px;
+}
+
+.trackingRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.tkLabel {
+  font-size: 13px;
+  color: #666;
+}
+.tkCode {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 15px;
+  color: #333;
+}
+
+.statusDetailRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.sdIcon {
+  color: #27ae60;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.sdText {
+  p {
+    margin: 0;
+    line-height: 1.4;
+  }
+  .sdStatus {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+  }
+  .sdTime {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+}
+
+.receiverSection {
+  padding: 20px;
+}
+
+.secTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.receiverInfo {
+  padding-left: 20px;
+  border-left: 3px solid #eee;
+  margin-left: 6px;
+
+  p {
+    margin: 0 0 5px 0;
+  }
+  .rcName {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+  }
+  .rcPhone {
+    font-weight: 400;
+    color: #666;
+  }
+  .rcAddress {
+    font-size: 14px;
+    color: #555;
+  }
+}
+
+/* Payment Card */
+.paymentCard {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.payRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.payLabel {
+  font-size: 14px;
+  color: #666;
+}
+.payValue {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.noteRow {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+}
+.noteLabel {
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+.noteValue {
+  font-style: italic;
+  color: #888;
+}
+
+/* Product List Card */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.cardHeader {
+  background: #f9fafb;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #444;
+  border-bottom: 1px solid #eee;
+}
+
+.itemList {
+  padding: 0 20px;
+}
+
+.itemRow {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemThumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #eee;
+}
+
+.itemDetails {
+  flex: 1;
+}
+
+.itemName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.itemOpts {
+  font-size: 12px;
+  color: #888;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.itemMetaRight {
+  text-align: right;
+  min-width: 80px;
+}
+
+.itemQty {
+  display: block;
+  font-size: 12px;
+  color: #888;
+}
+.itemPrice {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+}
+
+.summarySection {
+  background: #fdfdfd;
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+}
+
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+
+  &.total {
+    border-top: 1px solid #ddd;
+    padding-top: 12px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #b5292f;
+  }
+}
+
+/* --- 3. VIEW 2: TRACKING VIEW (BẢN ĐỒ & TIMELINE) --- */
+.trackingViewContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+
+/* Cột Trái: Bản đồ */
+.trackingMapCol {
+  flex: 2; /* Chiếm 2/3 */
+  height: 100%;
+  position: relative;
+  border-right: 1px solid #e0e0e0;
+}
+
+/* Thông báo nổi trên map */
+.mapOverlayInfo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 25px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.overlayTitle {
+  font-weight: 700;
+  color: #b5292f;
+  font-size: 14px;
+}
+
+/* Cột Phải: Thông tin & Timeline */
+.trackingInfoCol {
+  flex: 1; /* Chiếm 1/3 */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  background: #fff;
+}
+
+.trackingHeader {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  background: #fdfdfd;
+}
+
+.backLink {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+
+  &:hover {
+    color: #b5292f;
+  }
+}
+
+.trackingHeader h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  flex: 1;
+  text-align: right;
+  color: #333;
+}
+
+.trackingMetaBox {
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.trackMetaRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.tmLabel {
+  color: #666;
+}
+.tmValue {
   font-weight: 700;
   color: #333;
 }
-.finalTotal span:last-child {
-  color: #b5292f;
+
+/* TIMELINE (Quan trọng) */
+.timelineWrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
 }
-.loadingState,
-.errorState {
-  padding: 50px 20px;
-  text-align: center;
-  color: #888;
-  font-size: 16px;
+
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 10px;
 }
-.errorState {
-  color: #dc3545;
+
+.timelineItem {
+  display: flex;
+  gap: 15px;
+  padding-bottom: 35px;
+  position: relative;
+  opacity: 0.5; /* Mờ các bước chưa tới */
+  transition: all 0.3s;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  /* Active: Đã qua hoặc đang ở */
+  &.active {
+    opacity: 1;
+
+    .tlIcon {
+      border-color: #b5292f;
+      color: #b5292f;
+      background: #fff;
+    }
+
+    .tlLine {
+      background: #b5292f;
+    }
+  }
+
+  /* Current: Bước hiện tại */
+  &.current {
+    .tlIcon {
+      background: #b5292f;
+      color: #fff;
+      border-color: #b5292f;
+      box-shadow: 0 0 0 4px rgba(181, 41, 47, 0.15);
+      transform: scale(1.1);
+    }
+
+    h4 {
+      color: #b5292f;
+    }
+  }
+}
+
+.tlLine {
+  position: absolute;
+  left: 15px; /* Căn giữa icon 32px */
+  top: 35px;
+  bottom: -5px;
+  width: 2px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.tlIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  font-size: 14px;
+  color: #999;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.tlContent {
+  flex: 1;
+  padding-top: 3px;
+
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+  }
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+  }
+}
+
+.timeLabel {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  background: #b5292f;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+/* Trạng thái lỗi/hủy */
+.timelineItem.danger {
+  opacity: 1;
+  .tlIcon {
+    border-color: #d32f2f;
+    color: #d32f2f;
+    background: #ffebee;
+  }
+  h4 {
+    color: #d32f2f;
+  }
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 992px) {
+  .adminModalContainer {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .trackingViewContainer {
+    flex-direction: column;
+  }
+
+  .trackingMapCol {
+    flex: none;
+    height: 300px; /* Map cố định chiều cao */
+    border-right: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .trackingInfoCol {
+    flex: 1;
+    min-width: 100%;
+  }
+
+  .infoScrollContent {
+    padding-bottom: 60px;
+  }
 }

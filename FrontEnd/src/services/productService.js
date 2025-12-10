@@ -21,42 +21,65 @@ const productService = {
   // 1. LẤY DANH SÁCH (Giữ nguyên)
   getAll: async (params = {}) => {
     try {
-      const { storeId, category, name, page, size } = params;
+      const {
+        storeId,
+        category,
+        name,
+        page,
+        size,
+        minPrice,
+        maxPrice,
+        sortBy,
+        sortOrder,
+      } = params;
+
       const pageSize = size || 12;
       const currentPage = page || 1;
 
-      let apiData = { content: [], totalPages: 0, totalElements: 0 };
+      // Chuẩn bị tham số cho API
+      const apiParams = {
+        page: currentPage,
+        size: pageSize,
+      };
 
-      // Gọi API
-      let endpoint = "/products";
-      const apiParams = { page: currentPage, size: pageSize };
-
-      if (storeId) {
-        // Nếu backend hỗ trợ lấy theo store
-        endpoint = `/products/restaurant/${storeId}`;
-      } else {
-        if (name) apiParams.name = name;
+      // 1. Xử lý Store ID
+      let targetStoreId = storeId;
+      // Kiểm tra nếu không có storeId hoặc là chuỗi "null" thì lấy từ LocalStorage
+      if (!targetStoreId || targetStoreId === "null") {
+        targetStoreId = localStorage.getItem("currentStoreId");
       }
+
+      // [FIX] Ép kiểu sang Number để đảm bảo gửi đi là 2 chứ không phải "2"
+      if (targetStoreId && targetStoreId !== "null") {
+        apiParams.restaurantId = Number(targetStoreId);
+      }
+
+      // 2. Map Category
+      if (category && category !== "all") {
+        apiParams.categoryId = category;
+      }
+
+      // 3. Map Search & Filters
+      if (name) apiParams.name = name;
+      if (minPrice) apiParams.minPrice = minPrice;
+      if (maxPrice) apiParams.maxPrice = maxPrice;
+
+      // 4. Map Sorting
+      if (sortBy) apiParams.sortBy = sortBy;
+      if (sortOrder) apiParams.sortOrder = sortOrder;
+
+      // Endpoint chung
+      const endpoint = "/products";
+
+      console.log("📡 [ProductService] Fetching:", endpoint, apiParams);
 
       const response = await axiosClient.get(endpoint, { params: apiParams });
 
-      // Xử lý response linh hoạt (trực tiếp data hoặc bọc trong data)
+      // Xử lý response
       const data = response.data || response;
-      const content = data.content || [];
+      const content = data.content || (Array.isArray(data) ? data : []);
 
       let products = content.map(mapProductData).filter((i) => i !== null);
-
-      // Filter bổ trợ phía Client
-      if (category && category !== "all") {
-        products = products.filter((p) => p.categoryId == category);
-      }
-      // Nếu API chung /products trả về hết, cần lọc storeId
-      if (!storeId && name) {
-        // Logic tìm kiếm chung
-      } else if (storeId && endpoint === "/products") {
-        // Nếu gọi endpoint chung mà muốn lọc store
-        products = products.filter((p) => p.storeId == storeId);
-      }
 
       return {
         content: products,
@@ -64,7 +87,7 @@ const productService = {
         totalElements: data.totalElements || 0,
       };
     } catch (error) {
-      console.warn("API GetAll Error:", error);
+      console.warn("❌ API GetAll Error:", error);
       return { content: [], totalPages: 0, totalElements: 0 };
     }
   },

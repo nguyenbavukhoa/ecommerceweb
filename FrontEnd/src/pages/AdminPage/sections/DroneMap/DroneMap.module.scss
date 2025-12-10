@@ -11,7 +11,7 @@
 
 /* SIDEBAR */
 .sidebar {
-  width: 380px;
+  width: 320px; /* Thu nhỏ lại chút cho map rộng hơn */
   background: white;
   border-radius: 12px;
   display: flex;
@@ -28,7 +28,7 @@
 }
 
 .title {
-  margin: 0 0 10px 0;
+  margin: 0;
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
@@ -37,6 +37,7 @@
 
 .searchBox {
   position: relative;
+  margin-top: 5px;
 
   i {
     position: absolute;
@@ -44,13 +45,14 @@
     top: 50%;
     transform: translateY(-50%);
     color: #9ca3af;
+    font-size: 13px;
   }
 
   input {
     width: 100%;
-    padding: 10px 10px 10px 35px;
+    padding: 8px 10px 8px 30px;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 6px;
     outline: none;
     font-size: 13px;
     background: #f9fafb;
@@ -58,7 +60,6 @@
     &:focus {
       background: #fff;
       border-color: #b5292f;
-      box-shadow: 0 0 0 2px rgba(181, 41, 47, 0.1);
     }
   }
 }
@@ -66,11 +67,11 @@
 /* TABS */
 .tabs {
   display: flex;
-  padding: 5px;
+  padding: 4px;
   background: #f3f4f6;
   margin: 10px 15px 0 15px;
   border-radius: 8px;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tab {
@@ -93,7 +94,7 @@
   &.active {
     background: white;
     color: #b5292f;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -110,7 +111,7 @@
 .empty {
   text-align: center;
   color: #9ca3af;
-  margin-top: 50px;
+  margin-top: 40px;
   font-style: italic;
   font-size: 13px;
 }
@@ -119,74 +120,70 @@
 .card {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px 15px;
+  border-radius: 8px;
+  padding: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
 
   &:hover {
     border-color: #b5292f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   }
 
   &.selected {
     border-color: #b5292f;
-    background: #fff5f5;
-    border-left: 4px solid #b5292f;
+    background: #fffbfc;
+    border-left: 3px solid #b5292f;
   }
 }
 
 .cardTop {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 
   .oid {
     font-weight: 700;
     color: #1f2937;
-    font-size: 14px;
+    font-size: 13px;
   }
-
   .price {
     font-weight: 700;
-    color: #059669;
-    font-size: 14px;
+    color: #b5292f;
+    font-size: 13px;
   }
 }
 
 .cardInfo {
   font-size: 12px;
-  color: #4b5563;
-  margin-bottom: 4px;
+  color: #666;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
 
   i {
-    width: 14px;
-    text-align: center;
     color: #9ca3af;
+    font-size: 11px;
   }
 }
 
 .droneTag {
-  margin-top: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #eff6ff;
-  color: #2563eb;
-  padding: 4px 8px;
+  gap: 4px;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 3px 6px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
+  margin-bottom: 8px;
 }
 
+/* BUTTONS */
 .btnCall {
   width: 100%;
-  margin-top: 10px;
   padding: 8px;
   background: #b5292f;
   color: white;
@@ -199,129 +196,60 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
+  transition: background 0.2s;
 
   &:hover {
     background: #991b1b;
   }
 }
 
-.statusBadge {
-  margin-top: 10px;
-  text-align: center;
-  padding: 5px;
+.btnDetailSmall {
+  width: 100%;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #555;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 5px; /* Cách nút Call ra một chút */
 
-  &.picking {
-    background: #ffedd5;
-    color: #c2410c;
-  }
-  &.shipping {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-  &.completed {
-    background: #dcfce7;
-    color: #15803d;
-  }
-  &.cancelled {
-    background: #fee2e2;
-    color: #991b1b;
+  &:hover {
+    background: #f9fafb;
+    border-color: #ccc;
+    color: #333;
   }
 }
 
-/* MAP */
+/* MAP WRAPPER */
 .mapWrapper {
   flex: 1;
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.dateFilter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  background: #f9fafb;
-  padding: 8px;
-  border-radius: 8px;
   border: 1px solid #e5e7eb;
-
-  input[type="date"] {
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 12px;
-    color: #555;
-    outline: none;
-    cursor: pointer;
-    flex: 1;
-  }
-
-  span {
-    color: #9ca3af;
-  }
 }
 
-/* Responsive Mobile */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .container {
-    /* Chuyển sang cột dọc */
     flex-direction: column;
-    /* Giữ cố định chiều cao bằng màn hình để list scroll được bên trong */
-    height: calc(100vh - 60px);
     padding: 0;
     gap: 0;
-    overflow: hidden; /* Ẩn thanh cuộn của body */
+    height: 100vh;
   }
 
-  /* 1. BẢN ĐỒ (Đưa lên trên) */
   .mapWrapper {
-    order: 1; /* Ưu tiên hiển thị trước */
-    flex: none; /* Không co giãn tự động */
-    width: 100%;
-    height: 40%; /* Chiếm 40% màn hình trên */
-    border-radius: 0; /* Bỏ bo góc để full màn */
+    height: 50%;
+    border-radius: 0;
     border: none;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: none;
-    z-index: 1;
+    border-bottom: 1px solid #eee;
   }
 
-  /* 2. SIDEBAR (Đưa xuống dưới) */
   .sidebar {
-    order: 2; /* Hiển thị sau */
     width: 100%;
-    flex: 1; /* Chiếm toàn bộ khoảng trống còn lại (khoảng 60%) */
-    height: auto; /* Để flex tự tính */
-    border-radius: 20px 20px 0 0; /* Bo tròn 2 góc trên cho đẹp giống bottom sheet */
+    flex: 1;
+    border-radius: 0;
     border: none;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 2;
-    margin-top: -15px; /* Kéo lên đè nhẹ vào map 1 chút cho đẹp */
-  }
-
-  /* Tùy chỉnh bên trong Sidebar cho gọn trên mobile */
-  .header {
-    padding: 10px 15px;
-  }
-
-  .title {
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-
-  .tabs {
-    margin: 5px 15px 0 15px;
-  }
-
-  .list {
-    padding: 10px 15px;
-    padding-bottom: 80px; /* Chừa chỗ để không bị che bởi browser bar */
   }
 }

@@ -1,120 +1,173 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useToast } from "../../../../context/ToastContext";
-import OrderDetailModal from "../../components/Modals/OrderDetailModal";
 import styles from "./Orders.module.scss";
 import { vnd } from "../../utils";
 
 import { useAuth } from "../../../../context/AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAdminOrders, useFilters } from "../../../../context/FilterProvider";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import orderService from "../../../../services/orderService";
+import deliveryService from "../../../../services/deliveryService";
+import droneService from "../../../../services/droneService";
 
-// [CẬP NHẬT] Danh sách Status chuẩn theo Enum Backend
+// COMPONENTS
+import OrderDetailModal from "../../components/Modals/OrderDetailModal"; // [NOTE] Đổi tên import cho khớp file
+import DroneMap from "./../DroneMap/DroneMap";
+
 const ORDER_STATUSES = [
   { value: "PLACED", label: "Mới đặt" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
   { value: "IN_PROGRESS", label: "Đang chế biến" },
   { value: "READY_FOR_DELIVERY", label: "Chờ giao hàng" },
   { value: "OUT_FOR_DELIVERY", label: "Đang giao hàng" },
-  { value: "DELIVERED", label: "Đã giao (Hoàn thành)" }, // Thay COMPLETED
+  { value: "DELIVERED", label: "Hoàn thành" },
   { value: "CANCELLED", label: "Đã hủy" },
   { value: "REJECTED", label: "Đã từ chối" },
   { value: "FAILED", label: "Thất bại" },
 ];
 
-// Luồng trạng thái xuôi dòng (Happy Path)
-const STATUS_FLOW = [
-  "PLACED",
-  "CONFIRMED",
-  "IN_PROGRESS",
-  "READY_FOR_DELIVERY",
-  "OUT_FOR_DELIVERY",
-  "DELIVERED",
-];
-
-// Các trạng thái kết thúc (Terminal States) - không thể chuyển đi đâu được nữa
-const TERMINAL_STATUSES = ["DELIVERED", "CANCELLED", "REJECTED", "FAILED"];
-
 const Orders = ({ storeId }) => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const currentStoreId = storeId || user?.storeId;
+  const currentStoreId = storeId || user?.storeId || 1;
 
-  const { filters, setFilters } = useFilters();
-
-  const { data, isLoading, error } = useAdminOrders({
-    ...filters,
-    storeId: currentStoreId,
-  });
-
-  const { orders = [], totalPages = 0 } = data || {};
-
+  const [viewMode, setViewMode] = useState("LIST");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [searchTerm, setSearchTerm] = useState(filters.name || "");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [processingId, setProcessingId] = useState(null);
 
-  // --- CLIENT SIDE FILTERING ---
-  const displayedOrders = orders.filter((order) => {
-    if (statusFilter !== "ALL" && order.orderStatus !== statusFilter)
-      return false;
-    if (searchTerm && !order.id.toString().includes(searchTerm)) return false;
-    return true;
+  // 1. FETCH ALL DATA
+  const { data: allOrders = [], isLoading } = useQuery({
+    queryKey: ["adminAllOrders", currentStoreId],
+    queryFn: async () => {
+      if (!currentStoreId) return [];
+      return await orderService.getAllStoreOrders(currentStoreId);
+    },
+    refetchInterval: 5000,
+    enabled: !!currentStoreId,
   });
 
+  // 2. STATS
+  const stats = useMemo(
+    () => ({
+      all: allOrders.length,
+      new: allOrders.filter((o) => o.orderStatus === "PLACED").length,
+      cooking: allOrders.filter((o) =>
+        ["IN_PROGRESS", "CONFIRMED"].includes(o.orderStatus)
+      ).length,
+      ready: allOrders.filter((o) => o.orderStatus === "READY_FOR_DELIVERY")
+        .length,
+      shipping: allOrders.filter((o) => o.orderStatus === "OUT_FOR_DELIVERY")
+        .length,
+    }),
+    [allOrders]
+  );
+
+  // 3. FILTER
+  const filteredOrders = useMemo(() => {
+    let result = [...allOrders];
+    if (statusFilter !== "ALL")
+      result = result.filter((o) => o.orderStatus === statusFilter);
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase();
+      result = result.filter(
+        (o) =>
+          o.id.toString().includes(lower) ||
+          (o.note && o.note.toLowerCase().includes(lower))
+      );
+    }
+    return result.sort((a, b) => b.id - a.id); // Mới nhất lên đầu
+  }, [allOrders, statusFilter, searchTerm]);
+
+  // 4. PAGINATION
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const displayedOrders = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(start, start + itemsPerPage);
+  }, [filteredOrders, currentPage]);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchTerm !== filters.name) {
-        setFilters({ name: searchTerm });
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm, filters.name, setFilters]);
+    setCurrentPage(1);
+  }, [statusFilter, searchTerm]);
 
-  // Logic chặn chuyển trạng thái
-  const isStatusDisabled = (currentStatus, targetOptionValue) => {
-    // Nếu đang ở trạng thái cuối cùng -> Khóa hết
-    if (TERMINAL_STATUSES.includes(currentStatus)) return true;
-
-    // Luôn cho phép chuyển sang các trạng thái hủy/từ chối nếu chưa xong
-    if (["CANCELLED", "REJECTED", "FAILED"].includes(targetOptionValue))
-      return false;
-
-    // Kiểm tra luồng xuôi
-    const currentIndex = STATUS_FLOW.indexOf(currentStatus);
-    const targetIndex = STATUS_FLOW.indexOf(targetOptionValue);
-
-    if (currentIndex === -1 || targetIndex === -1) return true;
-
-    // Chỉ cho phép đi xuôi (target > current) hoặc giữ nguyên
-    return targetIndex <= currentIndex;
-  };
-
-  const handleStatusChange = async (orderId, newStatus) => {
+  // --- HANDLERS ---
+  const handleQuickStatus = async (orderId, nextStatus) => {
+    setProcessingId(orderId);
     try {
-      await orderService.updateStatus(orderId, newStatus);
-      await queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
+      await orderService.updateStatus(orderId, nextStatus);
+      await queryClient.invalidateQueries({ queryKey: ["adminAllOrders"] });
       showToast({
         title: "Thành công",
-        message: `Đơn hàng #${orderId} -> ${newStatus}`,
+        message: "Đã cập nhật trạng thái!",
         type: "success",
       });
     } catch (err) {
-      console.error(err);
-      showToast({ title: "Lỗi", message: "Cập nhật thất bại", type: "error" });
+      showToast({ title: "Lỗi", message: "Thao tác thất bại", type: "error" });
+    } finally {
+      setProcessingId(null);
     }
   };
 
-  const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
-  const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setFilters({ page: newPage });
-  };
-  const handleCancelSearch = () => {
-    setStatusFilter("ALL");
-    setSearchTerm("");
-    setFilters({ page: 1, name: undefined });
+  const handleQuickDispatch = async (order) => {
+    setProcessingId(order.id);
+    try {
+      // B1: Tìm Drone rảnh
+      const candidates = await droneService.getCandidateDrones(
+        15,
+        currentStoreId
+      );
+
+      if (!candidates || candidates.length === 0) {
+        showToast({
+          title: "Hết Drone",
+          message: "Hiện không có Drone nào rảnh!",
+          type: "warning",
+        });
+        setProcessingId(null);
+        return;
+      }
+
+      const selectedDrone = candidates[0];
+
+      // B2: Tạo Delivery
+      const res = await deliveryService.createDelivery(
+        order.id,
+        selectedDrone.id
+      );
+
+      // B3: Refresh toàn bộ dữ liệu (List sẽ tự cập nhật status sang OUT_FOR_DELIVERY)
+      await queryClient.invalidateQueries({ queryKey: ["adminAllOrders"] });
+      await queryClient.invalidateQueries({ queryKey: ["drones"] });
+
+      showToast({
+        title: "Đã gọi Drone",
+        message: `Drone ${selectedDrone.serial} đang đến lấy hàng!`,
+        type: "success",
+      });
+
+      // B4: Mở Modal (Truyền order đã update giả lập để User thấy ngay sự thay đổi)
+      const updatedOrder = {
+        ...order,
+        orderStatus: "OUT_FOR_DELIVERY",
+        droneId: selectedDrone.id,
+        deliveryId: res.data?.id || res.id,
+      };
+      openDetailModal(updatedOrder);
+    } catch (err) {
+      console.error(err);
+      showToast({
+        title: "Thất bại",
+        message: "Không thể điều phối Drone lúc này.",
+        type: "error",
+      });
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   const openDetailModal = (order) => {
@@ -122,224 +175,306 @@ const Orders = ({ storeId }) => {
     setIsModalOpen(true);
   };
 
-  // [CẬP NHẬT] Map màu sắc cho Status Enum mới
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "PLACED":
-        return styles.placed;
-      case "CONFIRMED":
-        return styles.confirmed;
-      case "IN_PROGRESS":
-        return styles.shipping; // Xanh dương nhạt
-      case "READY_FOR_DELIVERY":
-        return styles.shipping; // Xanh dương
-      case "OUT_FOR_DELIVERY":
-        return styles.shipping; // Xanh dương đậm
-      case "DELIVERED":
-        return styles.completed; // Xanh lá (Thành công)
-      case "CANCELLED":
-        return styles.cancelled; // Đỏ
-      case "REJECTED":
-        return styles.cancelled; // Đỏ
-      case "FAILED":
-        return styles.cancelled; // Đỏ
-      default:
-        return "";
-    }
+  const handlePageChange = (p) => {
+    if (p >= 1 && p <= totalPages) setCurrentPage(p);
+  };
+
+  const renderTime = (timeStr) => {
+    if (!timeStr) return <span>---</span>;
+    // Xử lý format thời gian đơn giản
+    const dateObj = new Date(timeStr);
+    const time = dateObj.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const date = dateObj.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+
+    return (
+      <div className={styles.dateTimeCell}>
+        <span className={styles.time}>{time}</span>
+        <span className={styles.date}>{date}</span>
+      </div>
+    );
   };
 
   return (
     <>
       <div className={styles.section}>
         <div className={styles.adminControl}>
-          <div className={styles.adminControlLeft}>
-            <select value={statusFilter} onChange={handleStatusFilterChange}>
-              <option value="ALL">Tất cả trạng thái</option>
-              {ORDER_STATUSES.map((st) => (
-                <option key={st.value} value={st.value}>
-                  {st.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.adminControlCenter}>
-            <form
-              className={styles.formSearch}
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <span className={styles.searchBtn}>
-                <i className="fa-light fa-magnifying-glass"></i>
-              </span>
-              <input
-                type="text"
-                className={styles.formSearchInput}
-                placeholder="Tìm kiếm mã đơn..."
-                value={searchTerm}
-                onInput={(e) => setSearchTerm(e.target.value)}
-              />
-            </form>
-          </div>
-          <div className={styles.adminControlRight}>
+          <div className={styles.viewSwitcher}>
             <button
-              className={styles.btnResetOrder}
-              onClick={handleCancelSearch}
+              className={`${styles.switchBtn} ${
+                viewMode === "LIST" ? styles.active : ""
+              }`}
+              onClick={() => setViewMode("LIST")}
             >
-              <i className="fa-light fa-arrow-rotate-right"></i>
+              <i className="fa-solid fa-list-check"></i> Quản lý & Bếp
+            </button>
+            <button
+              className={`${styles.switchBtn} ${
+                viewMode === "MAP" ? styles.active : ""
+              }`}
+              onClick={() => setViewMode("MAP")}
+            >
+              <i className="fa-solid fa-map-location-dot"></i> Bản đồ Drone
             </button>
           </div>
+
+          {viewMode === "LIST" && (
+            <div className={styles.searchWrapper}>
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                placeholder="Tìm mã đơn, ghi chú..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          )}
         </div>
 
-        <div className={styles.table}>
-          <table width="100%">
-            <thead>
-              <tr>
-                <th>Mã đơn</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Ghi chú</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    Đang tải...
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{
-                      textAlign: "center",
-                      padding: "20px",
-                      color: "red",
-                    }}
-                  >
-                    Lỗi kết nối API
-                  </td>
-                </tr>
-              ) : displayedOrders.length > 0 ? (
-                displayedOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td data-label="Mã đơn">#{order.id}</td>
-                    <td data-label="Ngày đặt">{order.orderTime}</td>
-                    <td
-                      data-label="Tổng tiền"
-                      style={{ color: "var(--red)", fontWeight: "bold" }}
-                    >
-                      {vnd(order.totalPrice)}
-                    </td>
-                    <td className={styles.noteCell} data-label="Ghi chú">
-                      {order.note || "---"}
-                    </td>
-
-                    <td data-label="Trạng thái">
-                      <div
-                        className={`${
-                          styles.statusSelectWrapper
-                        } ${getStatusClass(order.orderStatus)}`}
-                      >
-                        <select
-                          value={order.orderStatus}
-                          onChange={(e) =>
-                            handleStatusChange(order.id, e.target.value)
-                          }
-                          className={styles.statusSelect}
-                          // Disable nếu đã ở trạng thái cuối cùng
-                          disabled={TERMINAL_STATUSES.includes(
-                            order.orderStatus
-                          )}
-                        >
-                          {ORDER_STATUSES.map((st) => (
-                            <option
-                              key={st.value}
-                              value={st.value}
-                              disabled={isStatusDisabled(
-                                order.orderStatus,
-                                st.value
-                              )}
-                            >
-                              {st.label}
-                            </option>
-                          ))}
-                        </select>
-                        {/* Ẩn icon dropdown nếu đã disable */}
-                        {!TERMINAL_STATUSES.includes(order.orderStatus) && (
-                          <i className="fa-solid fa-caret-down"></i>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className={styles.control} data-label="Thao tác">
-                      <button
-                        className={styles.btnDetail}
-                        onClick={() => openDetailModal(order)}
-                      >
-                        <i className="fa-regular fa-eye"></i> Chi tiết
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    Không có đơn hàng nào.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {totalPages > 1 && (
-          <div className={styles.pageNav}>
-            <ul className={styles.pageNavList}>
-              {/* Logic phân trang giữ nguyên */}
-              <li
-                className={`${styles.pageNavItem} ${
-                  filters.page === 1 ? styles.disabled : ""
-                }`}
-              >
-                <a href="#!" onClick={() => handlePageChange(filters.page - 1)}>
-                  &laquo;
-                </a>
-              </li>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <li
-                  key={i + 1}
-                  className={`${styles.pageNavItem} ${
-                    filters.page === i + 1 ? styles.active : ""
+        <div className={styles.contentBody}>
+          {viewMode === "LIST" ? (
+            <>
+              {/* STATS BAR */}
+              <div className={styles.statsBar}>
+                <div
+                  className={`${styles.statCard} ${
+                    statusFilter === "ALL" ? styles.active : ""
                   }`}
+                  onClick={() => setStatusFilter("ALL")}
                 >
-                  <a href="#!" onClick={() => handlePageChange(i + 1)}>
-                    {i + 1}
-                  </a>
-                </li>
-              ))}
-              <li
-                className={`${styles.pageNavItem} ${
-                  filters.page === totalPages ? styles.disabled : ""
-                }`}
-              >
-                <a href="#!" onClick={() => handlePageChange(filters.page + 1)}>
-                  &raquo;
-                </a>
-              </li>
-            </ul>
-          </div>
-        )}
+                  <div className={styles.statInfo}>
+                    <span className={styles.label}>Tổng đơn</span>
+                    <h4 className={styles.count}>{stats.all}</h4>
+                  </div>
+                  <div className={styles.statIcon}>
+                    <i className="fa-solid fa-clipboard-list"></i>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.statCard} ${styles.new} ${
+                    statusFilter === "PLACED" ? styles.active : ""
+                  }`}
+                  onClick={() => setStatusFilter("PLACED")}
+                >
+                  <div className={styles.statInfo}>
+                    <span className={styles.label}>Mới đặt</span>
+                    <h4 className={styles.count}>{stats.new}</h4>
+                  </div>
+                  <div className={styles.statIcon}>
+                    <i className="fa-solid fa-bell"></i>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.statCard} ${styles.cooking} ${
+                    ["IN_PROGRESS", "CONFIRMED"].includes(statusFilter)
+                      ? styles.active
+                      : ""
+                  }`}
+                  onClick={() => setStatusFilter("IN_PROGRESS")}
+                >
+                  <div className={styles.statInfo}>
+                    <span className={styles.label}>Đang nấu</span>
+                    <h4 className={styles.count}>{stats.cooking}</h4>
+                  </div>
+                  <div className={styles.statIcon}>
+                    <i className="fa-solid fa-fire-burner"></i>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.statCard} ${styles.ready} ${
+                    statusFilter === "READY_FOR_DELIVERY" ? styles.active : ""
+                  }`}
+                  onClick={() => setStatusFilter("READY_FOR_DELIVERY")}
+                >
+                  <div className={styles.statInfo}>
+                    <span className={styles.label}>Chờ Drone</span>
+                    <h4 className={styles.count}>{stats.ready}</h4>
+                  </div>
+                  <div className={styles.statIcon}>
+                    <i className="fa-solid fa-box-open"></i>
+                  </div>
+                </div>
+              </div>
+
+              {/* TABLE */}
+              <div className={styles.tableWrapper}>
+                <table className={styles.customTable}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: "10%" }}>Mã đơn</th>
+                      <th style={{ width: "15%" }}>Thời gian</th>
+                      <th style={{ width: "15%" }}>Tổng tiền</th>
+                      <th style={{ width: "20%" }}>Ghi chú</th>
+                      <th style={{ width: "15%" }}>Trạng thái</th>
+                      <th style={{ textAlign: "right" }}>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan="6" className={styles.loadingCell}>
+                          Đang tải dữ liệu...
+                        </td>
+                      </tr>
+                    ) : displayedOrders.length > 0 ? (
+                      displayedOrders.map((order) => {
+                        const isProcessing = processingId === order.id;
+                        return (
+                          <tr
+                            key={order.id}
+                            className={isProcessing ? styles.processingRow : ""}
+                          >
+                            <td className={styles.idCell}>
+                              <strong>#{order.id}</strong>
+                              {order.paymentMethod === "VNPAY" && (
+                                <span className={styles.tagVnPay}>VNPAY</span>
+                              )}
+                            </td>
+                            <td>{renderTime(order.orderTime)}</td>
+                            <td className={styles.priceCell}>
+                              {vnd(order.totalPrice)}
+                            </td>
+                            <td>
+                              {order.note ? (
+                                <div
+                                  className={styles.noteBox}
+                                  title={order.note}
+                                >
+                                  <i className="fa-light fa-pen"></i>{" "}
+                                  {order.note}
+                                </div>
+                              ) : (
+                                <span className={styles.noNote}>--</span>
+                              )}
+                            </td>
+                            <td>
+                              <span
+                                className={`${styles.statusBadge} ${
+                                  styles[order.orderStatus?.toLowerCase()]
+                                }`}
+                              >
+                                {ORDER_STATUSES.find(
+                                  (s) => s.value === order.orderStatus
+                                )?.label || order.orderStatus}
+                              </span>
+                            </td>
+                            <td>
+                              <div className={styles.actionGroup}>
+                                {/* STATUS FLOW */}
+                                {order.orderStatus === "PLACED" && (
+                                  <button
+                                    className={`${styles.btnAction} ${styles.btnConfirm}`}
+                                    onClick={() =>
+                                      handleQuickStatus(order.id, "CONFIRMED")
+                                    }
+                                    disabled={isProcessing}
+                                  >
+                                    <i className="fa-solid fa-check"></i> Nhận
+                                  </button>
+                                )}
+                                {order.orderStatus === "CONFIRMED" && (
+                                  <button
+                                    className={`${styles.btnAction} ${styles.btnCook}`}
+                                    onClick={() =>
+                                      handleQuickStatus(order.id, "IN_PROGRESS")
+                                    }
+                                    disabled={isProcessing}
+                                  >
+                                    <i className="fa-solid fa-fire"></i> Nấu
+                                  </button>
+                                )}
+                                {order.orderStatus === "IN_PROGRESS" && (
+                                  <button
+                                    className={`${styles.btnAction} ${styles.btnDone}`}
+                                    onClick={() =>
+                                      handleQuickStatus(
+                                        order.id,
+                                        "READY_FOR_DELIVERY"
+                                      )
+                                    }
+                                    disabled={isProcessing}
+                                  >
+                                    <i className="fa-solid fa-box"></i> Xong
+                                  </button>
+                                )}
+                                {/* DISPATCH BUTTON */}
+                                {order.orderStatus === "READY_FOR_DELIVERY" && (
+                                  <button
+                                    className={`${styles.btnAction} ${styles.btnDispatch}`}
+                                    onClick={() => handleQuickDispatch(order)}
+                                    disabled={isProcessing}
+                                  >
+                                    {isProcessing ? (
+                                      <i className="fa-solid fa-circle-notch fa-spin"></i>
+                                    ) : (
+                                      <i className="fa-solid fa-rocket"></i>
+                                    )}{" "}
+                                    Gọi Drone
+                                  </button>
+                                )}
+                                <button
+                                  className={styles.btnView}
+                                  onClick={() => openDetailModal(order)}
+                                  title="Xem chi tiết"
+                                >
+                                  <i className="fa-regular fa-eye"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className={styles.emptyCell}>
+                          Không có đơn hàng nào.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* PAGINATION */}
+                {totalPages > 1 && (
+                  <div className={styles.paginationControl}>
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                    >
+                      &laquo; Trước
+                    </button>
+                    <span>
+                      Trang <strong>{currentPage}</strong> / {totalPages}
+                    </span>
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                    >
+                      Sau &raquo;
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className={styles.mapContainer}>
+              <DroneMap
+                isEmbedded={true}
+                storeId={currentStoreId}
+                onOrderSelect={openDetailModal}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <OrderDetailModal
+        key={selectedOrder?.id || "modal"}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         order={selectedOrder}

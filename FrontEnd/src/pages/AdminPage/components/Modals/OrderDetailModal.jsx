@@ -1,249 +1,538 @@
-import React, { useMemo } from "react";
-import CommonModal from "./CommonModal";
+import React, { useMemo, useState, useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 import styles from "./OrderDetailModal.module.scss";
-import { vnd } from "../../utils";
+import CommonModal from "./CommonModal";
 import ImageWithFallback from "../../../../components/ImageWithFallbackComponent/ImageWithFallback";
 
-// [CẬP NHẬT] Map Status mới sang tiếng Việt
-const getStatusLabel = (status) => {
-  const map = {
-    PLACED: "Mới đặt",
-    CONFIRMED: "Đã xác nhận",
-    IN_PROGRESS: "Đang chế biến",
-    READY_FOR_DELIVERY: "Chờ giao hàng",
-    OUT_FOR_DELIVERY: "Đang giao hàng",
-    DELIVERED: "Đã giao (Hoàn thành)", // Thay COMPLETED
-    CANCELLED: "Đã hủy",
-    REJECTED: "Đã từ chối",
-    FAILED: "Thất bại",
-  };
+// Services & Hooks
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import deliveryService from "../../../../services/deliveryService";
+import droneService from "../../../../services/droneService";
+import storeService from "../../../../services/storeService"; // [NEW] Lấy tọa độ kho
+import { useToast } from "../../../../context/ToastContext";
 
-  let cls = status?.toLowerCase() || "";
-  // Map CSS Class (gom nhóm màu sắc)
-  if (["in_progress", "ready_for_delivery", "out_for_delivery"].includes(cls)) {
-    cls = "shipping"; // Màu xanh dương
+// --- ICONS ---
+const storeIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+});
+const droneIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+  iconSize: [45, 45],
+  iconAnchor: [22, 22],
+});
+const customerIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+  iconSize: [35, 35],
+  iconAnchor: [17, 35],
+});
+
+// Helper
+const vnd = (amount) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+    amount
+  );
+
+// --- COMPONENT: AUTO CENTER MAP ---
+const MapRecenter = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+};
+
+// --- TIMELINE ---
+const StatusTimeline = ({ order }) => {
+  const steps = [
+    { key: "PLACED", label: "Đã đặt hàng", icon: "fa-file-invoice" },
+    { key: "CONFIRMED", label: "Đã xác nhận", icon: "fa-check-circle" },
+    { key: "IN_PROGRESS", label: "Đang chế biến", icon: "fa-fire-burner" },
+    { key: "READY_FOR_DELIVERY", label: "Sẵn sàng giao", icon: "fa-box" },
+    { key: "OUT_FOR_DELIVERY", label: "Đang giao hàng", icon: "fa-drone" },
+    { key: "DELIVERED", label: "Giao thành công", icon: "fa-face-smile" },
+  ];
+
+  if (["CANCELLED", "REJECTED", "FAILED"].includes(order.orderStatus)) {
+    return (
+      <div
+        className={styles.timelineList}
+        style={{ color: "red", padding: "20px" }}
+      >
+        <i className="fa-solid fa-circle-xmark"></i> Đơn hàng đã bị hủy.
+      </div>
+    );
   }
-  if (cls === "delivered") cls = "completed"; // Màu xanh lá
-  if (["rejected", "failed"].includes(cls)) cls = "cancelled"; // Màu đỏ
+
+  let currentKey = order.orderStatus;
+  if (currentKey === "SHIPPING") currentKey = "OUT_FOR_DELIVERY";
+  if (currentKey === "COMPLETED") currentKey = "DELIVERED";
+
+  const currentIndex = steps.findIndex((s) => s.key === currentKey);
+  const displayIndex = currentIndex === -1 ? 0 : currentIndex;
 
   return (
-    <span className={`${styles.statusBadge} ${styles[cls]}`}>
-      {map[status] || status}
-    </span>
+    <div className={styles.timelineList}>
+      {steps.map((step, idx) => {
+        const isActive = idx <= displayIndex;
+        const isCurrent = idx === displayIndex;
+        return (
+          <div
+            key={step.key}
+            className={`${styles.timelineItem} ${
+              isActive ? styles.active : ""
+            } ${isCurrent ? styles.current : ""}`}
+          >
+            {idx < steps.length - 1 && <div className={styles.tlLine}></div>}
+            <div className={styles.tlIcon}>
+              <i className={`fa-solid ${step.icon}`}></i>
+            </div>
+            <div className={styles.tlContent}>
+              <h4>{step.label}</h4>
+              {isCurrent && <span className={styles.timeLabel}>Hiện tại</span>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 
-const OrderDetailModal = ({ isOpen, onClose, order }) => {
-  // ... (Logic lấy customerInfo giữ nguyên như file cũ tôi đã gửi)
-  const customerInfo = useMemo(() => {
-    if (!order) return null;
+// --- VIEW 1: INFO VIEW ---
+const OrderInfoView = ({ order, customerInfo, onSwitchToTracking }) => {
+  const { showToast } = useToast();
+  const queryClient = useQueryClient();
+  const [isDispatching, setIsDispatching] = useState(false);
 
-    if (order.userInfo) {
-      return {
-        fullName: order.userInfo.fullName || order.userInfo.accountName,
-        phoneNumber: order.userInfo.phoneNumber,
-        address: order.userInfo.address,
-        type: order.userInfo.gender === "MALE" ? "HOME" : "WORK",
-      };
+  const totalItems =
+    order.orderItems?.reduce((sum, p) => sum + p.quantity, 0) || 0;
+
+  const isTrackingAvailable = [
+    "OUT_FOR_DELIVERY",
+    "SHIPPING",
+    "DELIVERED",
+    "COMPLETED",
+  ].includes(order.orderStatus);
+
+  // LOGIC GỌI DRONE TRỰC TIẾP
+  const handleDispatch = async () => {
+    setIsDispatching(true);
+    try {
+      // 1. Tìm Drone rảnh
+      const candidates = await droneService.getCandidateDrones(
+        15,
+        order.storeId || order.restaurantId || 1
+      );
+      if (!candidates || candidates.length === 0) {
+        throw new Error("Không có Drone nào rảnh lúc này.");
+      }
+      const drone = candidates[0];
+
+      // 2. Tạo Delivery (API sẽ tự handle trạng thái Order)
+      await deliveryService.createDelivery(order.id, drone.id);
+
+      // 3. Refresh Data
+      await queryClient.invalidateQueries({ queryKey: ["adminAllOrders"] });
+
+      showToast({
+        title: "Thành công",
+        message: `Đã gọi Drone ${drone.serial}!`,
+        type: "success",
+      });
+
+      // 4. Chuyển sang tab Tracking
+      onSwitchToTracking();
+    } catch (e) {
+      showToast({ title: "Lỗi", message: e.message, type: "error" });
+    } finally {
+      setIsDispatching(false);
     }
-    if (order.deliveryInfo) {
-      return {
-        fullName: order.deliveryInfo.name,
-        phoneNumber: order.deliveryInfo.phone,
-        address: order.deliveryInfo.address,
-        type: order.deliveryInfo.type,
+  };
+
+  return (
+    <div className={styles.infoViewContainer}>
+      <div className={styles.infoScrollContent}>
+        {/* HEADER */}
+        <div className={styles.orderHeaderBanner}>
+          <div className={styles.ohLeft}>
+            <span className={styles.ohLabel}>MÃ ĐƠN HÀNG</span>
+            <span className={styles.ohCode}>#{order.id}</span>
+            <span className={styles.ohTime}>
+              {order.orderTime
+                ? new Date(order.orderTime).toLocaleString("vi-VN")
+                : "---"}
+            </span>
+          </div>
+          <div className={styles.ohRight}>
+            {order.orderStatus === "READY_FOR_DELIVERY" ? (
+              <button
+                className={styles.btnDispatch} // Class từ css của bạn
+                style={{ padding: "10px 20px", fontSize: "14px" }}
+                onClick={handleDispatch}
+                disabled={isDispatching}
+              >
+                {isDispatching ? (
+                  <i className="fa-solid fa-spinner fa-spin"></i>
+                ) : (
+                  <i className="fa-solid fa-rocket"></i>
+                )}
+                {isDispatching ? " Đang xử lý..." : " GỌI DRONE NGAY"}
+              </button>
+            ) : (
+              <div
+                className={`${styles.statusBadge} ${
+                  styles[order.orderStatus?.toLowerCase()]
+                }`}
+                style={{ fontSize: "14px", padding: "8px 16px" }}
+              >
+                {order.orderStatus}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LOGISTICS */}
+        <div className={styles.logisticsContainer}>
+          <div className={styles.shippingSection}>
+            <div className={styles.shipHeader}>
+              <div className={styles.carrierInfo}>
+                <i className="fa-solid fa-drone"></i>
+                <span>
+                  Đơn vị: <strong>KHK Drone Express</strong>
+                </span>
+              </div>
+              {isTrackingAvailable && (
+                <button
+                  className={styles.btnView}
+                  onClick={onSwitchToTracking}
+                  style={{ width: "auto", padding: "5px 10px", gap: "5px" }}
+                >
+                  Xem bản đồ <i className="fa-solid fa-map-location-dot"></i>
+                </button>
+              )}
+            </div>
+
+            <div className={styles.shipBody}>
+              <div className={styles.trackingRow}>
+                <span className={styles.tkLabel}>Mã vận chuyển:</span>
+                <span className={styles.tkCode} style={{ color: "#d32f2f" }}>
+                  {order.deliveryId || "---"}
+                </span>
+              </div>
+              <div className={styles.trackingRow}>
+                <span className={styles.tkLabel}>Drone ID:</span>
+                <span className={styles.tkCode}>{order.droneId || "---"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.receiverSection}>
+            <div className={styles.secTitle}>
+              <i className="fa-solid fa-location-dot"></i> Địa chỉ nhận hàng
+            </div>
+            <div className={styles.receiverInfo}>
+              <p className={styles.rcName}>
+                {customerInfo.fullName}{" "}
+                <span>| {customerInfo.phoneNumber}</span>
+              </p>
+              <p className={styles.rcAddress}>{customerInfo.address}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* DETAILS */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            Chi tiết sản phẩm ({totalItems})
+          </div>
+          <div className={styles.itemList}>
+            {order.orderItems?.map((p, idx) => (
+              <div key={idx} className={styles.itemRow}>
+                <ImageWithFallback
+                  src={p.imgUrl || p.productImgUrl}
+                  className={styles.itemThumb}
+                  alt={p.productName}
+                />
+                <div className={styles.itemDetails}>
+                  <div className={styles.itemName}>{p.productName}</div>
+                  <div className={styles.itemOpts}>x{p.quantity}</div>
+                </div>
+                <div className={styles.itemPrice}>
+                  {vnd(p.price * p.quantity)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.summarySection}>
+            <div className={styles.sumRow}>
+              <span>Tổng tiền hàng</span>
+              <span>{vnd(order.totalPrice)}</span>
+            </div>
+            <div className={styles.sumRow}>
+              <span>Phí vận chuyển</span>
+              <span style={{ color: "#27ae60", fontWeight: "bold" }}>
+                Miễn phí
+              </span>
+            </div>
+            <div className={`${styles.sumRow} ${styles.total}`}>
+              <span>Tổng thanh toán</span>
+              <span>{vnd(order.totalPrice)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- VIEW 2: TRACKING VIEW (ADMIN) ---
+const OrderTrackingView = ({ order, onBack }) => {
+  const [trackingData, setTrackingData] = useState(null);
+  const [storeLocation, setStoreLocation] = useState(null);
+
+  const defaultCenter = [10.776019, 106.702068];
+
+  // 1. LẤY TỌA ĐỘ STORE TỪ API (Start Point)
+  const currentStoreId = order.storeId || order.restaurantId || 1;
+  const { data: storeInfo } = useQuery({
+    queryKey: ["storeInfo", currentStoreId],
+    queryFn: async () => {
+      if (!currentStoreId) return null;
+      const stores = await storeService.getAll();
+      return stores.find((s) => s.id.toString() === currentStoreId.toString());
+    },
+  });
+
+  useEffect(() => {
+    if (storeInfo && storeInfo.lat)
+      setStoreLocation([storeInfo.lat, storeInfo.lng]);
+  }, [storeInfo]);
+
+  // 2. POLLING API DELIVERY (Để lấy Drone & Khách)
+  useEffect(() => {
+    let intervalId;
+    const isTracking = [
+      "OUT_FOR_DELIVERY",
+      "SHIPPING",
+      "DELIVERED",
+      "COMPLETED",
+    ].includes(order?.orderStatus);
+
+    if (isTracking) {
+      const poll = async () => {
+        // [QUAN TRỌNG] Gọi API Delivery theo OrderId
+        const data = await deliveryService.getDeliveryByOrderId(order.id);
+        if (data) {
+          setTrackingData(data);
+        }
       };
+      poll();
+      intervalId = setInterval(poll, 2000);
     }
+    return () => clearInterval(intervalId);
+  }, [order]);
+
+  // --- TỌA ĐỘ ---
+  const startPoint = storeLocation || defaultCenter;
+
+  // End Point: Lấy từ API Delivery (chính xác nhất)
+  const endPoint = trackingData
+    ? [trackingData.endLat, trackingData.endLng]
+    : [10.776, 106.71]; // Fallback
+
+  // Drone Point
+  const dronePoint = trackingData
+    ? [trackingData.currentLat, trackingData.currentLng]
+    : startPoint;
+
+  // Center Map
+  const mapCenter =
+    trackingData?.status === "IN_PROGRESS" ? dronePoint : startPoint;
+
+  return (
+    <div className={styles.trackingViewContainer}>
+      <div className={styles.trackingMapCol}>
+        <MapContainer
+          center={startPoint}
+          zoom={14}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapRecenter center={mapCenter} />
+
+          {/* STORE */}
+          {storeLocation && (
+            <Marker position={storeLocation} icon={storeIcon}>
+              <Popup>
+                <b>{storeInfo?.name || "Cửa hàng"}</b>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* CUSTOMER */}
+          <Marker position={endPoint} icon={customerIcon}>
+            <Popup>
+              <b>Khách hàng</b>
+            </Popup>
+          </Marker>
+
+          {/* DRONE */}
+          {trackingData && trackingData.status === "IN_PROGRESS" && (
+            <Marker position={dronePoint} icon={droneIcon} zIndexOffset={1000}>
+              <Popup>
+                <b>Drone đang bay...</b>
+                <br />
+                Hoàn thành:{" "}
+                <span style={{ color: "#b5292f", fontWeight: "bold" }}>
+                  {trackingData.progressPct?.toFixed(1)}%
+                </span>
+              </Popup>
+            </Marker>
+          )}
+
+          <Polyline
+            positions={[startPoint, endPoint]}
+            color="#b5292f"
+            dashArray="10, 10"
+            opacity={0.5}
+          />
+
+          {trackingData && trackingData.status === "IN_PROGRESS" && (
+            <Polyline
+              positions={[startPoint, dronePoint]}
+              color="#b5292f"
+              weight={4}
+            />
+          )}
+        </MapContainer>
+
+        {/* OVERLAY STATUS */}
+        <div className={styles.mapOverlayInfo}>
+          {trackingData?.status === "IN_PROGRESS" ? (
+            <span style={{ color: "#e65100", fontWeight: "bold" }}>
+              <i className="fa-solid fa-plane"></i> Đang giao hàng &bull;{" "}
+              {trackingData.progressPct?.toFixed(1)}%
+            </span>
+          ) : trackingData?.status === "COMPLETED" ||
+            order.orderStatus === "DELIVERED" ? (
+            <span style={{ color: "green", fontWeight: "bold" }}>
+              <i className="fa-solid fa-check-circle"></i> Đã giao thành công
+            </span>
+          ) : (
+            <span>Đang tải dữ liệu...</span>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.trackingInfoCol}>
+        <div className={styles.trackingHeader}>
+          <button onClick={onBack} className={styles.backLink}>
+            <i className="fa-solid fa-arrow-left"></i> Quay lại
+          </button>
+          <h4>Giám sát hành trình</h4>
+        </div>
+
+        <div className={styles.trackingMetaBox}>
+          <div className={styles.trackMetaRow}>
+            <span className={styles.tmLabel}>Delivery ID:</span>
+            <span className={styles.tmValue} style={{ color: "#d32f2f" }}>
+              {trackingData ? `#${trackingData.id}` : "..."}
+            </span>
+          </div>
+          <div className={styles.trackMetaRow}>
+            <span className={styles.tmLabel}>Drone ID:</span>
+            <span className={styles.tmValue}>
+              {order.droneId || trackingData?.droneId || "..."}
+            </span>
+          </div>
+          {trackingData && (
+            <div className={styles.trackMetaRow}>
+              <span className={styles.tmLabel}>Trạng thái:</span>
+              <span
+                className={styles.tmValue}
+                style={{
+                  color:
+                    trackingData.status === "IN_PROGRESS" ? "#e67e22" : "green",
+                }}
+              >
+                {trackingData.status}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.timelineWrapper}>
+          <StatusTimeline order={order} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MAIN MODAL ---
+const OrderDetailModal = ({ isOpen, onClose, order }) => {
+  const [viewMode, setViewMode] = useState("INFO");
+
+  useEffect(() => {
+    if (isOpen) setViewMode("INFO");
+  }, [isOpen, order]);
+
+  const customerInfo = useMemo(() => {
+    if (!order) return {};
+    const info = order.userInfo || order.deliveryInfo || {};
     return {
-      fullName: "Khách vãng lai",
-      phoneNumber: "---",
-      address: "---",
+      fullName: info.fullName || info.name || "Khách vãng lai",
+      phoneNumber: info.phoneNumber || info.phone || "---",
+      address: info.address || "---",
     };
   }, [order]);
 
   if (!isOpen || !order) return null;
 
   return (
-    <CommonModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`CHI TIẾT ĐƠN HÀNG #${order.id}`}
-      customWidth="900px"
-    >
-      {/* ... (Phần UI bên dưới GIỮ NGUYÊN HOÀN TOÀN như file cũ của bạn) ... */}
-      <div className={styles.modalDetailOrder}>
-        <div className={styles.modalDetailLeft}>
-          {/* ... Danh sách món ăn ... */}
-          {/* (Copy y hệt phần render danh sách món từ code cũ) */}
-          <h4
-            style={{
-              marginBottom: "15px",
-              color: "#555",
-              borderBottom: "1px solid #eee",
-              paddingBottom: "10px",
-            }}
-          >
-            Danh sách món ăn ({order.orderItems?.length || 0})
-          </h4>
-          {order.orderItems &&
-            order.orderItems.map((item) => (
-              <div className={styles.orderProduct} key={item.id}>
-                {/* ... Giữ nguyên ... */}
-                <div className={styles.orderProductLeft}>
-                  <ImageWithFallback
-                    src={item.imgUrl}
-                    alt={item.productName}
-                    className={styles.productImage}
-                    onError={(e) =>
-                      (e.target.src = "/assets/img/blank-image.png")
-                    }
-                  />
-                  <div className={styles.orderProductInfo}>
-                    <h4>{item.productName}</h4>
-                    {item.note && (
-                      <p className={styles.orderProductNote}>
-                        <i className="fa-light fa-pen"></i> {item.note}
-                      </p>
-                    )}
-                    <p className={styles.orderProductQuantity}>
-                      SL: <strong>{item.quantity}</strong>
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.orderProductRight}>
-                  <div className={styles.orderProductPrice}>
-                    <span className={styles.orderProductCurrentPrice}>
-                      {vnd(item.price)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
-
-        <div className={styles.modalDetailRight}>
-          {/* ... Thông tin người nhận & Đơn hàng ... */}
-          {/* (Phần này chỉ cần đảm bảo gọi getStatusLabel(order.orderStatus) ở mục Trạng thái) */}
-          <div className={styles.detailOrderGroup}>
-            <h4 style={{ marginBottom: "10px", color: "#b5292f" }}>
-              Thông tin người nhận
-            </h4>
-            {/* ... (Giữ nguyên hiển thị customerInfo) ... */}
-            {customerInfo ? (
-              <ul className={styles.customerInfoList}>
-                <li className={styles.detailOrderItem}>
-                  <span className={styles.detailOrderItemLeft}>
-                    <i className="fa-regular fa-user"></i> Người nhận
-                  </span>
-                  <span className={styles.detailOrderItemRight}>
-                    <strong>{customerInfo.fullName}</strong>
-                  </span>
-                </li>
-                <li className={styles.detailOrderItem}>
-                  <span className={styles.detailOrderItemLeft}>
-                    <i className="fa-regular fa-phone"></i> SĐT
-                  </span>
-                  <span className={styles.detailOrderItemRight}>
-                    {customerInfo.phoneNumber}
-                  </span>
-                </li>
-                <li className={`${styles.detailOrderItem} ${styles.tb}`}>
-                  <span className={styles.detailOrderItemLeft}>
-                    <i className="fa-regular fa-location-dot"></i> Địa chỉ
-                  </span>
-                  <p className={styles.detailOrderItemB}>
-                    {customerInfo.address}
-                  </p>
-                </li>
-              </ul>
-            ) : (
-              <p>Không có thông tin.</p>
-            )}
+    <CommonModal isOpen={isOpen} onClose={onClose} customWidth="1100px">
+      <div className={styles.adminModalContainer}>
+        <div className={styles.adminModalHeader}>
+          <div className={styles.headerLeft}>
+            <button onClick={onClose} className={styles.btnClose}>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <h3>Chi tiết đơn hàng #{order.id}</h3>
           </div>
-
-          <div
-            className={styles.detailOrderGroup}
-            style={{
-              marginTop: "20px",
-              paddingTop: "15px",
-              borderTop: "1px dashed #eee",
-            }}
-          >
-            <h4 style={{ marginBottom: "10px", color: "#555" }}>
-              Thông tin đơn hàng
-            </h4>
-            <ul>
-              <li className={styles.detailOrderItem}>
-                <span className={styles.detailOrderItemLeft}>
-                  <i className="fa-light fa-shop"></i> Nhà hàng ID
-                </span>
-                <span className={styles.detailOrderItemRight}>
-                  {order.restaurantId || order.storeId || "---"}
-                </span>
-              </li>
-              <li className={styles.detailOrderItem}>
-                <span className={styles.detailOrderItemLeft}>
-                  <i className="fa-light fa-calendar-days"></i> Thời gian
-                </span>
-                <span className={styles.detailOrderItemRight}>
-                  {order.orderTime}
-                </span>
-              </li>
-              <li className={styles.detailOrderItem}>
-                <span className={styles.detailOrderItemLeft}>
-                  <i className="fa-light fa-credit-card"></i> Thanh toán
-                </span>
-                <span className={styles.detailOrderItemRight}>
-                  <strong
-                    style={{
-                      color:
-                        order.paymentMethod === "VNPAY" ? "#005eb8" : "#27ae60",
-                    }}
-                  >
-                    {order.paymentMethod === "VNPAY" ? "VNPAY" : "Tiền mặt"}
-                  </strong>
-                </span>
-              </li>
-
-              {/* TRẠNG THÁI ĐƠN HÀNG */}
-              <li className={styles.detailOrderItem}>
-                <span className={styles.detailOrderItemLeft}>
-                  <i className="fa-light fa-info-circle"></i> Trạng thái
-                </span>
-                <span className={styles.detailOrderItemRight}>
-                  {getStatusLabel(order.orderStatus)}
-                </span>
-              </li>
-
-              <li className={`${styles.detailOrderItem} ${styles.tb}`}>
-                <span className={styles.detailOrderItemLeft}>
-                  <i className="fa-light fa-note-sticky"></i> Ghi chú
-                </span>
-                <p className={styles.detailOrderItemB}>
-                  {order.note || "(Không có)"}
-                </p>
-              </li>
-            </ul>
+          <div className={styles.headerRight}>
+            <button className={styles.btnPrint}>
+              <i className="fa-solid fa-print"></i> In phiếu
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className={styles.modalDetailBottom}>
-        {/* ... Footer ... */}
-        <div className={styles.priceTotal}>
-          <span className={styles.thanhtien}>Tổng tiền</span>
-          <span className={styles.price} style={{ fontSize: "20px" }}>
-            {vnd(order.totalPrice)}
-          </span>
-        </div>
-        <div className={styles.modalDetailBottomRight}>
-          <button
-            className={styles.modalDetailBtn}
-            style={{ backgroundColor: "#888" }}
-            onClick={onClose}
-          >
-            Đóng
-          </button>
+        <div className={styles.adminModalBody}>
+          {viewMode === "INFO" ? (
+            <OrderInfoView
+              order={order}
+              customerInfo={customerInfo}
+              onSwitchToTracking={() => setViewMode("TRACKING")}
+            />
+          ) : (
+            <OrderTrackingView
+              order={order}
+              onBack={() => setViewMode("INFO")}
+            />
+          )}
         </div>
       </div>
     </CommonModal>
