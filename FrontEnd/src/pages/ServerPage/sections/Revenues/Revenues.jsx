@@ -1,5 +1,6 @@
 // src/pages/AdminPage/sections/Revenues/Revenues.jsx
 import React, { useState, useMemo } from "react";
+import RevenueChart from "./RevenueChart";
 import { useToast } from "../../../../context/ToastContext";
 import {
   useWithdrawRequests,
@@ -80,6 +81,8 @@ const Revenues = () => {
   return (
     <div className={styles.section}>
       {/* --- DASHBOARD STATS --- */}
+      
+      <RevenueChart chartData={chartData} />
       <div className={styles.statsGrid}>
         {/* Card 1: Tổng doanh thu hệ thống (QUAN TRỌNG NHẤT) */}
         <div className={styles.statCard}>
