@@ -117,7 +117,7 @@ export default function HeaderComponent() {
                 </Link>
               </div>
 
-              <div className={styles.storeSelectorWrapper}>
+              {/* <div className={styles.storeSelectorWrapper}>
                 <i className="fa-solid fa-location-dot location-icon"></i>
                 <select
                   value={filters.storeId || ""}
@@ -132,7 +132,7 @@ export default function HeaderComponent() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
             </div>
 
             {/* GROUP 2: SEARCH BAR (DESKTOP) */}
