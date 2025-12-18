@@ -1,18 +1,18 @@
 import axios from "axios";
 
 // --- TỰ ĐỘNG LẤY BASE URL (Giữ nguyên logic cũ) ---
-// const getBaseUrl = () => {
-//   // if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-//   const { hostname } = window.location;
-//   const BACKEND_PORT = 8080; // Cổng backend
-//   if (hostname === "localhost" || hostname === "127.0.0.1") {
-//     return `http://localhost:${BACKEND_PORT}/api/v1`;
-//   }
-//   return `http://${hostname}:${BACKEND_PORT}/api/v1`;
-// };
 const getBaseUrl = () => {
-  return "http://192.168.43.218:8080/api/v1/";
+  // if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  const { hostname } = window.location;
+  const BACKEND_PORT = 8080; // Cổng backend
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return `http://localhost:${BACKEND_PORT}/api/v1`;
+  }
+  return `http://${hostname}:${BACKEND_PORT}/api/v1`;
 };
+// const getBaseUrl = () => {
+//   return "http://192.168.43.218:8080/api/v1/";
+// };
 
 const axiosClient = axios.create({
   baseURL: getBaseUrl(),
@@ -31,7 +31,6 @@ axiosClient.interceptors.request.use(
     }
 
     // Mặc định các API khác sẽ gắn Token (như Profile, Logout...)
-
     const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

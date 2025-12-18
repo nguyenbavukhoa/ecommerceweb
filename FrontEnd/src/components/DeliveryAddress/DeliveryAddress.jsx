@@ -14,7 +14,7 @@ const DeliveryAddress = ({ onAddressChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
 
-  // [LOGIC MỚI] Khởi tạo từ LocalStorage nếu có
+  // Khởi tạo từ LocalStorage
   const [selectedAddressId, setSelectedAddressId] = useState(() => {
     const savedId = localStorage.getItem("selected_address_id");
     return savedId ? Number(savedId) : null;
@@ -22,7 +22,9 @@ const DeliveryAddress = ({ onAddressChange }) => {
 
   const [loading, setLoading] = useState(true);
 
+  // Helper map Gender <-> Type (UI)
   const mapTypeToGender = (type) => (type === "HOME" ? "MALE" : "FEMALE");
+  // Hàm map ngược để hiển thị trên UI khi load từ API về
   const mapGenderToType = (gender) => (gender === "MALE" ? "HOME" : "WORK");
 
   // --- Load Address ---
@@ -34,23 +36,20 @@ const DeliveryAddress = ({ onAddressChange }) => {
 
         const mappedAddresses = data.map((item) => ({
           id: item.id,
-          name: item.fullName,
-          phone: item.phoneNumber,
+          name: item.fullName, // UI dùng 'name' để hiển thị
+          phone: item.phoneNumber, // UI dùng 'phone' để hiển thị
           address: item.address,
-          type: mapGenderToType(item.gender),
+          type: mapGenderToType(item.gender), // Map lại type cho UI
           isDefault: false,
         }));
 
         setAddresses(mappedAddresses);
 
-        // [LOGIC MỚI] Xử lý chọn địa chỉ
+        // Logic chọn địa chỉ mặc định
         let idToSelect = selectedAddressId;
-
-        // 1. Kiểm tra xem ID đang lưu có còn tồn tại trong danh sách mới không
         const isSavedIdValid = mappedAddresses.find((a) => a.id === idToSelect);
 
         if (!isSavedIdValid) {
-          // 2. Nếu không tồn tại (hoặc chưa chọn), chọn cái đầu tiên
           if (mappedAddresses.length > 0) {
             idToSelect = mappedAddresses[0].id;
           } else {
@@ -58,7 +57,6 @@ const DeliveryAddress = ({ onAddressChange }) => {
           }
         }
 
-        // 3. Cập nhật State và Storage
         setSelectedAddressId(idToSelect);
         if (idToSelect) {
           localStorage.setItem("selected_address_id", idToSelect);
@@ -84,28 +82,31 @@ const DeliveryAddress = ({ onAddressChange }) => {
 
   useEffect(() => {
     if (onAddressChange) {
-      // Truyền cả object ra ngoài cho Checkout dùng
       onAddressChange(selectedAddress || null);
     }
   }, [selectedAddress, onAddressChange]);
 
   // --- Handlers ---
 
-  // [LOGIC MỚI] Chọn địa chỉ -> Lưu ID lại
   const handleSelectAddress = (id) => {
     setSelectedAddressId(id);
     localStorage.setItem("selected_address_id", id);
     setIsModalOpen(false);
   };
 
+  // [FIX API] Sửa logic map dữ liệu khi TẠO MỚI
   const handleSaveNewAddress = async (newAddressData) => {
     try {
+      // newAddressData từ AddressForm trả về đã có sẵn: fullName, phoneNumber
       const payload = {
-        fullName: newAddressData.name,
-        phoneNumber: newAddressData.phone,
+        fullName: newAddressData.fullName, // [SỬA] Lấy đúng trường fullName
+        phoneNumber: newAddressData.phoneNumber, // [SỬA] Lấy đúng trường phoneNumber
         address: newAddressData.address,
-        gender: mapTypeToGender(newAddressData.type),
+        gender: newAddressData.gender || "OTHER", // [SỬA] Lấy gender đã map sẵn
       };
+
+      console.log("📤 Sending Create Address:", payload); // Debug log
+
       await authService.createUserInfo(payload);
       await fetchAddresses();
       if (showToast)
@@ -116,20 +117,25 @@ const DeliveryAddress = ({ onAddressChange }) => {
         });
       return true;
     } catch (error) {
+      console.error("Create Address Error:", error);
       if (showToast)
         showToast({ title: "Lỗi", message: "Thêm thất bại", type: "error" });
       return false;
     }
   };
 
+  // [FIX API] Sửa logic map dữ liệu khi CẬP NHẬT
   const handleUpdateAddress = async (updatedAddressData) => {
     try {
       const payload = {
-        fullName: updatedAddressData.name,
-        phoneNumber: updatedAddressData.phone,
+        fullName: updatedAddressData.fullName, // [SỬA]
+        phoneNumber: updatedAddressData.phoneNumber, // [SỬA]
         address: updatedAddressData.address,
-        gender: mapTypeToGender(updatedAddressData.type),
+        gender: updatedAddressData.gender || "OTHER",
       };
+
+      console.log("📤 Sending Update Address:", payload); // Debug log
+
       await authService.updateUserInfo(updatedAddressData.id, payload);
       await fetchAddresses();
       if (showToast)
@@ -148,7 +154,6 @@ const DeliveryAddress = ({ onAddressChange }) => {
     }
   };
 
-  // [MỚI] Hàm xóa địa chỉ
   const handleDeleteAddress = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa địa chỉ này?")) {
       try {
@@ -167,7 +172,7 @@ const DeliveryAddress = ({ onAddressChange }) => {
     }
   };
 
-  // --- Render (Giữ nguyên UI) ---
+  // --- Render ---
   if (loading) return <div className={styles.loading}>Đang tải địa chỉ...</div>;
 
   if (!selectedAddress) {
@@ -233,7 +238,7 @@ const DeliveryAddress = ({ onAddressChange }) => {
   );
 };
 
-// Component con để quản lý view trong modal
+// Component con giữ nguyên logic chuyển view (Đã fix UX quay về list)
 const AddressModalContent = ({
   addresses,
   selectedAddress,
@@ -256,6 +261,13 @@ const AddressModalContent = ({
     setView("adding");
   };
 
+  const handleSaveNew = async (newData) => {
+    const success = await onSaveNewAddress(newData);
+    if (success) {
+      setView("list");
+    }
+  };
+
   const handleSaveUpdate = async (updatedData) => {
     await onUpdateAddress(updatedData);
     setView("list");
@@ -263,7 +275,7 @@ const AddressModalContent = ({
 
   if (view === "adding") {
     return (
-      <AddressForm onSave={onSaveNewAddress} onCancel={() => setView("list")} />
+      <AddressForm onSave={handleSaveNew} onCancel={() => setView("list")} />
     );
   }
 
@@ -284,7 +296,7 @@ const AddressModalContent = ({
       onSelectAddress={onSelectAddress}
       onAddNew={handleGoToAdd}
       onEditAddress={handleGoToEdit}
-      onDeleteAddress={onDeleteAddress} // Truyền hàm xóa xuống
+      onDeleteAddress={onDeleteAddress}
       onCancel={onClose}
     />
   );

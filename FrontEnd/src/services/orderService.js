@@ -319,6 +319,47 @@ const orderService = {
       throw error;
     }
   },
+
+  // [MỚI] API Lấy link thanh toán VNPAY
+  createPaymentUrl: async (amount, orderId) => {
+    try {
+      // API: GET /payments/pay?paymentType=VNPAY
+      // Mình truyền thêm amount và orderId vào params để Backend map vào vnp_Amount và vnp_TxnRef
+      return await axiosClient.get("/payments/pay", {
+        params: {
+          paymentType: "VNPAY",
+          amount: amount, // Tổng tiền
+          orderId: orderId, // Mã đơn hàng vừa tạo
+        },
+      });
+    } catch (error) {
+      console.error("❌ [OrderService] Create Payment URL Failed:", error);
+      throw error;
+    }
+  },
+
+  getOrdersByPage: async (storeId, page = 1, size = 100) => {
+    try {
+      // API: GET /orders/restaurant/{storeId}?page=1&size=100
+      const response = await axiosClient.get(`/orders/restaurant/${storeId}`, {
+        params: {
+          page: page, // Backend map page này
+          size: size,
+        },
+      });
+
+      // Response structure theo JSON bạn gửi:
+      // { success: true, data: { content: [...], totalPages: 156, ... } }
+      // Axios interceptor của bạn thường đã trả về response.data
+
+      // Trả về nguyên cục data để Component lấy content và totalPages
+      return response.data || response;
+    } catch (error) {
+      console.error("❌ Error fetching orders by page:", error);
+      // Trả về object rỗng để không crash UI
+      return { content: [], totalPages: 0 };
+    }
+  },
 };
 
 export default orderService;

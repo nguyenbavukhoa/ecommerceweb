@@ -1,0 +1,117 @@
+.container {
+  max-width: 500px;
+  margin: 80px auto; /* Canh giữa và cách top */
+  padding: 40px 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ tạo cảm giác card nổi */
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* --- ICON STYLES --- */
+.iconWrapper {
+  margin-bottom: 20px;
+}
+
+.iconSuccess {
+  font-size: 70px;
+  color: #28a745;
+  animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.iconFailed {
+  font-size: 70px;
+  color: #dc3545;
+  animation: shake 0.5s ease-in-out forwards;
+}
+
+/* --- TEXT STYLES --- */
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* --- BUTTONS --- */
+.btnGroup {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.btnPrimary {
+  background-color: #b5292f; /* Màu đỏ thương hiệu của bạn */
+  color: white;
+}
+
+.btnPrimary:hover {
+  background-color: #961e23;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 41, 47, 0.2);
+}
+
+.btnSecondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btnSecondary:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}

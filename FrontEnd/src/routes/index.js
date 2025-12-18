@@ -8,6 +8,7 @@ import ServerPage from "../pages/ServerPage/ServerPage.jsx";
 import CheckoutPage from "../pages/CheckoutPage/CheckoutPage"; // Import trang Checkout
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import NotificationPage from "../pages/NotificationPage/NotificationPage.jsx";
+import PaymentResultPage from "../pages/PaymentResultPage/PaymentResultPage.jsx";
 export const routes = [
   {
     path: "/",
@@ -37,6 +38,11 @@ export const routes = [
   {
     path: "/notifications", // For notifications
     page: NotificationPage,
+    isShowHeader: true,
+  },
+  {
+    path: "/payment-result", // For notifications
+    page: PaymentResultPage,
     isShowHeader: true,
   },
   {
